@@ -19,54 +19,44 @@
         
         #feed { display: flex; flex-direction: column; gap: 16px; }
         
-        /* АНИМАЦИЯ ПЛАВНОГО ВЫЛЕТА КАРТОЧЕК */
+        /* АНИМАЦИИ */
         .echo-card { 
             background: var(--card-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
             border-radius: 24px; position: relative; border: 1px solid rgba(255, 255, 255, 0.08); 
-            overflow: hidden; 
-            animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+            overflow: hidden; animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
         }
-        
-        @keyframes slideUp { 
-            from { opacity: 0; transform: translateY(40px); } 
-            to { opacity: 1; transform: translateY(0); } 
-        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* ИНДИКАТОР ЗАГРУЗКИ */
+        .loader { width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s linear infinite; display: none; }
 
         .card-content { padding: 16px; }
-        
-        /* ЦИТИРОВАНИЕ */
-        .reply-quote { background: rgba(255, 255, 255, 0.05); border-left: 3px solid var(--accent); padding: 8px 12px; border-radius: 8px; margin-bottom: 12px; font-size: 13px; }
-        .reply-quote-user { color: var(--accent); font-weight: 700; }
-        .reply-quote-text { color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
         .author { font-weight: 700; color: var(--accent); font-size: 14px; margin-bottom: 4px; }
         .content { font-size: 16px; line-height: 1.4; word-break: break-word; }
         
-        /* МИНИ-ОКНО ССЫЛКИ */
+        /* РЕПЛАИ И ССЫЛКИ */
+        .reply-quote { background: rgba(255, 255, 255, 0.05); border-left: 3px solid var(--accent); padding: 8px 12px; border-radius: 8px; margin-bottom: 12px; font-size: 13px; }
         .link-preview-box { margin-top: 12px; background: var(--link-box); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 12px; display: flex; align-items: center; gap: 12px; text-decoration: none; }
-        .link-url-title { color: var(--accent); font-size: 15px; font-weight: 700; display: block; }
-        .link-host { color: var(--text-dim); font-size: 12px; }
+        .link-url-title { color: var(--accent); font-size: 15px; font-weight: 700; }
 
         .post-img { width: 100%; display: block; object-fit: cover; max-height: 400px; cursor: pointer; }
         .card-actions { margin-top: 14px; display: flex; gap: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px; }
         .action-btn { color: var(--accent); font-size: 13px; font-weight: 600; cursor: pointer; }
 
         .btn-add { position: fixed; bottom: 30px; right: 24px; width: 64px; height: 64px; background: var(--accent); border-radius: 22px; font-size: 32px; color: white; border: none; box-shadow: 0 10px 30px rgba(10, 132, 255, 0.4); z-index: 100; transition: transform 0.2s; }
-        .btn-add:active { transform: scale(0.9); }
-
+        
+        /* МОДАЛКА */
         #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); z-index: 1000; justify-content: center; align-items: flex-end; }
-        .modal-content { 
-            background: #1c1c1e; width: 100%; padding: 24px; border-radius: 30px 30px 0 0; 
-            animation: sheetUp 0.4s cubic-bezier(0.1, 0.7, 0.1, 1); 
-            box-sizing: border-box; 
-        }
+        .modal-content { background: #1c1c1e; width: 100%; padding: 24px; border-radius: 30px 30px 0 0; animation: sheetUp 0.4s ease; box-sizing: border-box; }
         @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         
         input, textarea { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; color: white; font-family: inherit; outline: none; margin-bottom: 10px; box-sizing: border-box; }
-        textarea { background: transparent; border: none; font-size: 17px; padding: 0; }
-        
-        #imageOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; }
-        #fullImage { max-width: 95%; max-height: 90%; border-radius: 12px; }
+        textarea { background: transparent; border: none; font-size: 17px; padding: 0; resize: none; }
+
+        /* ПРОСМОТР ФОТО */
+        #imageOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(10px); }
     </style>
 </head>
 <body>
@@ -79,17 +69,26 @@
     <div id="modal">
         <div class="modal-content">
             <textarea id="postText" rows="3" placeholder="Что нового?"></textarea>
+            
+            <div id="mediaPreview" style="display:none; position:relative; margin-bottom:15px; width:80px; height:80px; animation: popIn 0.3s ease;">
+                <img id="previewImg" src="" style="width:100%; height:100%; object-fit:cover; border-radius:14px; border:1px solid rgba(255,255,255,0.1);">
+                <div onclick="clearMedia()" style="position:absolute; top:-8px; right:-8px; background:#ff453a; color:white; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold; cursor:pointer;">✕</div>
+            </div>
+
             <input type="text" id="targetUser" placeholder="Для кого? @username (необязательно)">
             
             <input type="file" id="fileInput" accept="image/*" onchange="updateFileName()" style="display:none">
-            <div id="fileName" style="font-size: 12px; color: var(--accent); margin-bottom: 15px; min-height: 14px;"></div>
             
-            <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
                 <div style="color: var(--accent); font-weight: 600; cursor: pointer;" onclick="document.getElementById('fileInput').click()">🖼 Фото</div>
-                <button id="submitBtn" style="background: var(--accent); color: white; padding: 12px 24px; border-radius: 16px; border: none; font-weight: 700;" onclick="sendPost()">Опубликовать</button>
+                <button id="submitBtn" style="background: var(--accent); color: white; padding: 12px 24px; border-radius: 16px; border: none; font-weight: 700; min-width: 120px;" onclick="sendPost()">Опубликовать</button>
             </div>
             <button onclick="closeModal()" style="background:none; border:none; color:var(--text-dim); width:100%; margin-top:20px;">Отмена</button>
         </div>
+    </div>
+
+    <div id="imageOverlay" onclick="this.style.display='none'">
+        <img id="fullImage" src="" style="max-width: 95%; max-height: 95%; border-radius: 12px;">
     </div>
 
     <script>
@@ -106,19 +105,18 @@
 
         function processContent(text) {
             if (!text) return { text: '', extra: '' };
-            let extraHtml = '';
             const urlRegex = /(https?:\/\/[^\s]+)/g;
             const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/;
-            
             const ytMatch = text.match(youtubeRegex);
             const allUrls = text.match(urlRegex);
 
+            let extraHtml = '';
             if (ytMatch) {
-                extraHtml += `<div style="margin-top:12px; position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:14px; background:#000;"><iframe style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" src="https://www.youtube.com/embed/${ytMatch[1]}" allowfullscreen></iframe></div>`;
+                extraHtml = `<div style="margin-top:12px; position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:14px; background:#000;"><iframe style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" src="https://www.youtube.com/embed/${ytMatch[1]}" allowfullscreen></iframe></div>`;
             } else if (allUrls) {
                 const url = allUrls[0];
                 const displayTitle = url.split('/')[2].replace('www.', '');
-                extraHtml += `<a href="${url}" target="_blank" class="link-preview-box"><div class="link-icon">🔗</div><div class="link-info"><span class="link-url-title">${displayTitle}</span><span class="link-host">Нажми, чтобы открыть</span></div></a>`;
+                extraHtml = `<a href="${url}" target="_blank" class="link-preview-box"><div class="link-icon">🔗</div><div class="link-info"><span class="link-url-title">${displayTitle}</span></div></a>`;
             }
 
             const linkedText = text.replace(urlRegex, (url) => `<a href="${url}" target="_blank" style="color:var(--accent); text-decoration:none; font-weight:600;">🔗 Ссылка</a>`);
@@ -144,6 +142,23 @@
             });
         }
 
+        function updateFileName() {
+            const file = document.getElementById('fileInput').files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('previewImg').src = e.target.result;
+                    document.getElementById('mediaPreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function clearMedia() {
+            document.getElementById('fileInput').value = "";
+            document.getElementById('mediaPreview').style.display = 'none';
+        }
+
         function openModal(replyId = null, replyUser = null) {
             currentReplyId = replyId;
             currentReplyUsername = replyUser;
@@ -156,17 +171,13 @@
             document.getElementById('modal').style.display = 'none';
             document.getElementById('targetUser').value = '';
             document.getElementById('postText').value = '';
-            document.getElementById('fileInput').value = '';
-            document.getElementById('fileName').innerText = '';
+            clearMedia();
         }
-
-        function updateFileName() { document.getElementById('fileName').innerText = document.getElementById('fileInput').files[0]?.name || ""; }
 
         async function loadEchos() {
             const { data } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
             const feed = document.getElementById('feed');
             if (!data) return;
-            
             const myUsername = tg.initDataUnsafe?.user?.username;
 
             feed.innerHTML = '';
@@ -179,41 +190,35 @@
                 card.className = 'echo-card';
                 card.style.animationDelay = `${index * 0.08}s`;
 
-                let inner = '';
+                let contentInner = '';
                 if (isPublic || isMyPost || isForMe) {
                     const processed = processContent(post.content);
-                    inner = `
+                    contentInner = `
                         ${post.image_url ? `<img src="${post.image_url}" class="post-img" onclick="openImageFull('${post.image_url}')">` : ''}
                         <div class="card-content">
                             ${post.parent_id ? renderReply(data, post.parent_id) : ''}
                             <div class="author">@${post.username} ${post.target_username ? '🔒' : ''}</div>
                             <div class="content">${processed.text}</div>
                             ${processed.extra}
-                            <div class="card-actions">
-                                <div class="action-btn" onclick="openModal('${post.id}', '${post.username}')">💬 Ответить</div>
-                            </div>
                         </div>`;
                 } else {
-                    inner = `
-                        <div class="card-content">
-                            <div class="author">@${post.username} 🔒</div>
-                            <div style="background: rgba(255,255,255,0.03); padding: 25px; border-radius: 18px; text-align: center; border: 1px dashed rgba(255,255,255,0.1);">
-                                <span style="font-size: 24px;">🔒</span>
-                                <div style="color: var(--text-dim); font-size: 13px; margin-top: 10px;">Личное сообщение для <b>@${post.target_username}</b></div>
-                            </div>
-                        </div>`;
+                    contentInner = `<div class="card-content"><div class="author">@${post.username} 🔒</div><div style="background:rgba(255,255,255,0.03);padding:20px;border-radius:15px;text-align:center;border:1px dashed rgba(255,255,255,0.1);"><span style="font-size:24px;">🔒</span><div style="color:var(--text-dim);font-size:13px;margin-top:8px;">Личное для <b>@${post.target_username}</b></div></div></div>`;
                 }
 
                 card.innerHTML = `
-                    ${isMyPost ? `<button style="position:absolute; top:12px; right:12px; background:rgba(255,69,58,0.15); border:none; border-radius:8px; width:30px; height:30px; color:#ff453a; z-index:10;" onclick="deleteEcho('${post.id}')">✕</button>` : ''}
-                    ${inner}`;
+                    ${isMyPost ? `<button style="position:absolute;top:12px;right:12px;background:rgba(255,69,58,0.15);border:none;border-radius:8px;width:30px;height:30px;color:#ff453a;z-index:10;" onclick="deleteEcho('${post.id}')">✕</button>` : ''}
+                    ${contentInner}
+                    <div class="card-content" style="padding-top:0"><div class="card-actions"><div class="action-btn" onclick="openModal('${post.id}', '${post.username}')">💬 Ответить</div></div></div>`;
                 feed.appendChild(card);
             });
         }
 
         function renderReply(all, pId) {
             const p = all.find(x => x.id === pId);
-            return p ? `<div class="reply-quote"><div class="reply-quote-user">@${p.username}</div><div class="reply-quote-text">${p.content || '🖼 Фото'}</div></div>` : '';
+            if (!p) return '';
+            const myUsername = tg.initDataUnsafe?.user?.username;
+            const canSee = !p.target_username || p.user_id === currentUserId || myUsername === p.target_username;
+            return `<div class="reply-quote"><div class="reply-quote-user">@${p.username}</div><div class="reply-quote-text">${canSee ? (p.content || '🖼 Фото') : '🔒 Секретное эхо'}</div></div>`;
         }
 
         async function sendPost() {
@@ -222,27 +227,29 @@
             let file = document.getElementById('fileInput').files[0];
             const btn = document.getElementById('submitBtn');
             if (!text && !file) return;
-            
-            btn.disabled = true; btn.innerText = "⏳";
 
-            let imageUrl = null;
-            if (file) {
-                file = await compressImage(file);
-                const name = `${Date.now()}.jpg`;
-                const { data } = await supabaseClient.storage.from('images').upload(name, file);
-                if (data) imageUrl = supabaseClient.storage.from('images').getPublicUrl(name).data.publicUrl;
-            }
+            btn.disabled = true;
+            const oldText = btn.innerText;
+            btn.innerHTML = '<div class="loader" style="display:block;margin:0 auto;"></div>';
 
-            await supabaseClient.from('posts').insert([{ 
-                username: tg.initDataUnsafe?.user?.username || "Guest", 
-                content: text, user_id: currentUserId, image_url: imageUrl,
-                parent_id: currentReplyId, reply_to_username: currentReplyUsername,
-                target_username: tUser || null
-            }]);
-
-            btn.disabled = false; btn.innerText = "Опубликовать";
-            closeModal();
-            loadEchos();
+            try {
+                let imageUrl = null;
+                if (file) {
+                    file = await compressImage(file);
+                    const name = `${Date.now()}.jpg`;
+                    const { data } = await supabaseClient.storage.from('images').upload(name, file);
+                    if (data) imageUrl = supabaseClient.storage.from('images').getPublicUrl(name).data.publicUrl;
+                }
+                await supabaseClient.from('posts').insert([{ 
+                    username: tg.initDataUnsafe?.user?.username || "Guest", 
+                    content: text, user_id: currentUserId, image_url: imageUrl,
+                    parent_id: currentReplyId, reply_to_username: currentReplyUsername,
+                    target_username: tUser || null
+                }]);
+                closeModal();
+                loadEchos();
+            } catch (e) { alert("Ошибка отправки"); }
+            finally { btn.disabled = false; btn.innerText = oldText; }
         }
 
         function openImageFull(url) { document.getElementById('fullImage').src = url; document.getElementById('imageOverlay').style.display = 'flex'; }
