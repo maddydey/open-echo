@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OpenEcho</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg: var(--tg-theme-bg-color, #1c1c1d);
+            --text: var(--tg-theme-text-color, #ffffff);
+            --button: var(--tg-theme-button-color, #0a84ff);
+            --secondary: var(--tg-theme-secondary-bg-color, #2c2c2e);
+            --hint: var(--tg-theme-hint-color, #8e8e93);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h2 { margin-bottom: 20px; font-size: 24px; }
+
+        .echo-card {
+            background: var(--secondary);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .author {
+            font-weight: bold;
+            color: var(--button);
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .content { font-size: 16px; line-height: 1.4; }
+
+        .btn-add {
+            position: fixed;
+            bottom: 30px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: var(--button);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            cursor: pointer;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>OpenEcho 🚀</h2>
+
+    <div id="feed">
+        <div class="echo-card">
+            <div class="author">@system</div>
+            <div class="content">Добро пожаловать в OpenEcho! Теперь русский язык отображается корректно. 😉</div>
+        </div>
+    </div>
+
+    <button class="btn-add" onclick="createNewEcho()">+</button>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Разворачиваем приложение
+
+        function createNewEcho() {
+            // Легкая вибрация при нажатии
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+
+            let text = prompt("О чем ты думаешь?");
+            if (text && text.trim() !== "") {
+                const feed = document.getElementById('feed');
+                const card = document.createElement('div');
+                card.className = 'echo-card';
+                
+                // Берем имя из Телеграма, если оно есть
+                const username = tg.initDataUnsafe?.user?.username || "Аноним";
+
+                card.innerHTML = `
+                    <div class="author">@${username}</div>
+                    <div class="content">${text}</div>
+                `;
+                feed.prepend(card);
+            }
+        }
+    </script>
+</body>
+</html>
