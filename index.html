@@ -9,7 +9,7 @@
 <style>
 :root {
   --bg: #f5f5f5;
-  --card-bg: rgba(255,255,255,0.7);
+  --card-bg: rgba(255, 255, 255, 0.7);
   --text: #1a1a1a;
   --text-dim: #666;
   --accent: #1b6ef3;
@@ -25,187 +25,259 @@
   --border: rgba(255,255,255,0.1);
   --shadow: rgba(0,0,0,0.5);
 }
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:-apple-system,sans-serif;background:var(--bg);color:var(--text);padding:20px;padding-bottom:100px;transition:background 0.3s,color 0.3s;}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
-h2{font-size:28px;font-weight:700;}
-.theme-btn{width:44px;height:44px;border-radius:50%;background:var(--card-bg);backdrop-filter:blur(20px);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 12px var(--shadow);}
-#feed{display:flex;flex-direction:column;gap:16px;}
-.card{background:var(--card-bg);backdrop-filter:blur(40px);border-radius:24px;padding:20px;border:1px solid var(--border);box-shadow:0 8px 32px var(--shadow);}
-.author{color:var(--accent);font-weight:600;font-size:15px;margin-bottom:10px;}
-.text{color:var(--text);line-height:1.5;margin-bottom:12px;word-wrap:break-word;font-size:15px;}
-.img{width:100%;border-radius:16px;margin-bottom:12px;cursor:pointer;}
-.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);backdrop-filter:blur(10px);z-index:200;align-items:center;justify-content:center;padding:20px;}
-.modal.show{display:flex;}
-.modal-content{background:var(--card-bg);backdrop-filter:blur(40px);border-radius:24px;padding:24px;width:100%;max-width:420px;border:1px solid var(--border);box-shadow:0 20px 60px var(--shadow);}
-textarea,input[type="text"]{width:100%;border:1px solid var(--border);border-radius:16px;padding:12px 14px;font-size:15px;font-family:inherit;background:var(--card-bg);backdrop-filter:blur(20px);color:var(--text);margin-bottom:12px;}
-textarea:focus,input[type="text"]:focus{outline:none;border-color:var(--accent);}
-.add-btn{position:fixed;bottom:24px;right:24px;width:60px;height:60px;background:linear-gradient(135deg,var(--accent) 0%,#9055ff 100%);color:white;border:none;border-radius:50%;font-size:28px;cursor:pointer;box-shadow:0 8px 24px rgba(27,110,243,0.4);z-index:100;}
-.send-btn{background:linear-gradient(135deg,var(--accent) 0%,#9055ff 100%);color:white;border:none;padding:12px 28px;border-radius:16px;font-weight:600;font-size:15px;cursor:pointer;}
-.send-btn:disabled{opacity:0.5;}
-.file-btn{background:var(--card-bg);backdrop-filter:blur(20px);border:1px solid var(--border);color:var(--text);font-size:14px;cursor:pointer;padding:12px 20px;border-radius:16px;font-weight:500;}
-.overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);backdrop-filter:blur(20px);z-index:300;align-items:center;justify-content:center;}
-.overlay.show{display:flex;}
-.overlay img{max-width:90%;max-height:90%;border-radius:16px;}
-.actions{display:flex;gap:20px;font-size:14px;margin-top:12px;}
-.btn{cursor:pointer;color:var(--accent);font-weight:500;}
-.btn-del{color:#ff3b30;}
-.reply-box{display:none;background:var(--card-bg);backdrop-filter:blur(20px);padding:10px 12px;border-radius:12px;margin-bottom:12px;border:1px solid var(--border);}
-.reply-author{font-weight:600;color:var(--accent);margin-bottom:4px;}
-.reply-text{color:var(--text-dim);font-size:13px;}
-.link-preview{background:var(--card-bg);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-top:12px;cursor:pointer;box-shadow:0 4px 16px var(--shadow);}
-.link-preview-img{width:100%;height:180px;object-fit:cover;}
-.link-preview-content{padding:14px;}
-.link-preview-title{font-weight:600;font-size:15px;color:var(--text);margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.link-preview-desc{font-size:13px;color:var(--text-dim);line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;margin-bottom:8px;}
-.link-preview-url{font-size:12px;color:var(--accent);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.discord-video{width:100%;max-height:400px;border-radius:16px;background:#000;margin-top:12px;}
-.discord-audio{width:100%;margin-top:12px;border-radius:12px;}
-.discord-file{background:var(--card-bg);backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:12px;display:flex;align-items:center;gap:12px;cursor:pointer;}
-.discord-file-icon{width:40px;height:40px;background:linear-gradient(135deg,#5865F2 0%,#7289da 100%);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;}
-.discord-file-info{flex:1;min-width:0;}
-.discord-file-name{font-weight:600;font-size:14px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.discord-file-size{font-size:12px;color:var(--text-dim);margin-top:2px;}
+* { box-sizing: border-box; margin:0; padding:0; }
+body {
+  font-family: -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  padding:20px; padding-bottom:100px;
+  transition: background 0.3s, color 0.3s;
+}
+
+.header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+h2 { font-size:28px; font-weight:700; }
+.theme-btn {
+  width:44px;height:44px;border-radius:50%;
+  background: var(--card-bg); backdrop-filter: blur(20px);
+  border:1px solid var(--border);
+  cursor:pointer; display:flex; justify-content:center; align-items:center;
+  font-size:20px; box-shadow: 0 4px 12px var(--shadow);
+}
+
+#gallery { display:flex; gap:8px; overflow-x:auto; padding:12px 0; }
+.gallery-card { flex:0 0 auto; width:100px; height:100px; border-radius:12px; overflow:hidden; cursor:pointer; }
+.gallery-card img { width:100%; height:100%; object-fit:cover; }
+
+#feed { display:flex; flex-direction:column; gap:16px; }
+.card { background: var(--card-bg); backdrop-filter: blur(40px); border-radius:24px; padding:20px; border:1px solid var(--border); box-shadow:0 8px 32px var(--shadow); }
+.author { color: var(--accent); font-weight:600; font-size:15px; margin-bottom:10px; }
+.text { color: var(--text); line-height:1.5; margin-bottom:12px; word-wrap:break-word; font-size:15px; }
+.img { width:100%; border-radius:16px; margin-bottom:12px; cursor:pointer; }
+.reply-box { background: var(--card-bg); backdrop-filter: blur(20px); border-left:3px solid var(--accent); padding:10px 12px; border-radius:12px; margin-bottom:12px; font-size:13px; border:1px solid var(--border);}
+.reply-author { font-weight:600; color: var(--accent); margin-bottom:4px; }
+.reply-text { color: var(--text-dim); font-size:13px; }
+.add-btn { position:fixed; bottom:24px; right:24px; width:60px;height:60px; background: linear-gradient(135deg, var(--accent) 0%, #9055ff 100%); color:white; border:none; border-radius:50%; font-size:28px; cursor:pointer; box-shadow:0 8px 24px rgba(27,110,243,0.4); z-index:100; }
+.modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); backdrop-filter:blur(10px); z-index:200; align-items:center; justify-content:center; padding:20px; }
+.modal.show { display:flex; }
+.modal-content { background: var(--card-bg); backdrop-filter: blur(40px); border-radius:24px; padding:24px; width:100%; max-width:420px; border:1px solid var(--border); box-shadow:0 20px 60px var(--shadow); }
+textarea { width:100%; border:1px solid var(--border); border-radius:16px; padding:14px; font-size:15px; font-family:inherit; resize:none; margin-bottom:12px; background:var(--card-bg); backdrop-filter:blur(20px); color:var(--text); }
+textarea:focus { outline:none; border-color:var(--accent); }
+input[type="text"] { width:100%; border:1px solid var(--border); border-radius:16px; padding:12px 14px; font-size:14px; margin-bottom:16px; background: var(--card-bg); backdrop-filter:blur(20px); color:var(--text);}
+input[type="text"]:focus { outline:none; border-color:var(--accent); }
+.modal-btns { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.send-btn { background: linear-gradient(135deg, var(--accent) 0%, #9055ff 100%); color:white; border:none; padding:12px 28px; border-radius:16px; font-weight:600; font-size:15px; cursor:pointer; }
+.send-btn:disabled { opacity:0.5; }
+.file-btn { background:var(--card-bg); backdrop-filter:blur(20px); border:1px solid var(--border); color:var(--text); font-size:14px; cursor:pointer; padding:12px 20px; border-radius:16px; font-weight:500; }
+.preview { width:80px; height:80px; position:relative; margin-bottom:12px; border-radius:12px; overflow:hidden; display:none;}
+.preview img { width:100%; height:100%; object-fit:cover; }
+.preview-close { position:absolute; top:-8px; right:-8px; background:#ff3b30; color:white; border-radius:50%; width:24px; height:24px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; }
+.overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); backdrop-filter:blur(20px); z-index:300; align-items:center; justify-content:center; }
+.overlay.show { display:flex; }
+.overlay img { max-width:90%; max-height:90%; border-radius:16px; }
 </style>
 </head>
 <body data-theme="light">
 
 <div class="header">
-<h2>OpenEcho 🔥</h2>
-<button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+  <h2>OpenEcho 🔥</h2>
+  <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
 </div>
 
-<div id="feed"><div class="loading">Загрузка...</div></div>
+<!-- Галерея случайных постов -->
+<div id="gallery"></div>
 
+<!-- Основной фид -->
+<div id="feed">
+  <div class="loading">Загрузка...</div>
+</div>
+
+<!-- Кнопка публикации -->
 <button class="add-btn" onclick="openModal()">+</button>
 
+<!-- Модалка -->
 <div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
-<div class="modal-content">
-<div id="replyBox" class="reply-box">
-<div class="reply-author" id="replyAuthor"></div>
-<div class="reply-text" id="replyText"></div>
-</div>
-<textarea id="txt" rows="4" placeholder="Что нового?"></textarea>
-<div id="preview" style="display:none">
-<img id="previewImg" style="width:100%; border-radius:12px; margin-bottom:12px;">
-<div style="cursor:pointer;color:red;" onclick="clearFile()">×</div>
-</div>
-<input type="text" id="target" placeholder="Приватно для @username">
-<div style="display:flex; gap:10px;">
-<button class="file-btn" onclick="document.getElementById('file').click()">📷 Фото</button>
-<input type="file" id="file" hidden accept="image/*" onchange="showPreview()">
-<button class="send-btn" id="sendBtn" onclick="send()">Отправить</button>
-</div>
-</div>
+  <div class="modal-content">
+    <div id="replyBox" style="display:none" class="reply-box">
+      <div class="reply-author" id="replyAuthor"></div>
+      <div class="reply-text" id="replyText"></div>
+    </div>
+
+    <textarea id="txt" rows="4" placeholder="Что нового?"></textarea>
+
+    <div id="preview" class="preview">
+      <img id="previewImg">
+      <div class="preview-close" onclick="clearFile()">×</div>
+    </div>
+
+    <input type="text" id="target" placeholder="Приватно для @username">
+
+    <div class="modal-btns">
+      <button class="file-btn" onclick="document.getElementById('file').click()">📷 Фото</button>
+      <input type="file" id="file" hidden accept="image/*" onchange="showPreview()">
+      <button class="send-btn" id="sendBtn" onclick="send()">Отправить</button>
+    </div>
+  </div>
 </div>
 
+<!-- Оверлей просмотра фото -->
 <div id="overlay" class="overlay" onclick="closeOverlay()">
-<img id="overlayImg">
+  <img id="overlayImg">
 </div>
 
 <script>
-const tg=window.Telegram.WebApp; tg.expand();
+const tg = window.Telegram.WebApp;
+tg.expand();
 
-const SUPABASE_URL='https://xddulhzvzemmrhrsjfhb.supabase.co';
-const SUPABASE_KEY='sb_publishable_2FIKYuEHEQrYseRnwY58Qg__UIFN59j';
+// ⚠️ ЗАМЕНИТЕ НА СВОИ ДАННЫЕ
+const SUPABASE_URL = 'https://xddulhzvzemmrhrsjfhb.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_2FIKYuEHEQrYseRnwY58Qg__UIFN59j';
+let db = null, userId = null, username = null, replyId = null;
 
-let db=null,userId=null,username=null,replyId=null;
+// Тема
+function toggleTheme(){
+  const body=document.body, btn=document.getElementById('themeBtn'), current=body.getAttribute('data-theme');
+  if(current==='light'){body.setAttribute('data-theme','dark'); btn.textContent='☀️'; localStorage.setItem('theme','dark');}
+  else{body.setAttribute('data-theme','light'); btn.textContent='🌙'; localStorage.setItem('theme','light');}
+}
+const savedTheme = localStorage.getItem('theme') || 'light';
+document.body.setAttribute('data-theme', savedTheme);
+if(savedTheme==='dark') document.getElementById('themeBtn').textContent='☀️';
 
-function esc(str){const d=document.createElement('div');d.textContent=str||'';return d.innerHTML;}
-
-function toggleTheme(){const b=document.body,btn=document.getElementById('themeBtn');if(b.dataset.theme==='light'){b.dataset.theme='dark';btn.textContent='☀️';localStorage.setItem('theme','dark');}else{b.dataset.theme='light';btn.textContent='🌙';localStorage.setItem('theme','light');}}
-document.body.dataset.theme=localStorage.getItem('theme')||'light'; if(localStorage.getItem('theme')==='dark')document.getElementById('themeBtn').textContent='☀️';
-
+// Инициализация
 async function init(){
   try{
-    const user=tg.initDataUnsafe?.user;
-    if(!user){userId='test123';username='TestUser';} else{userId=user.id.toString();username=user.username||('User'+user.id);}
+    const user = tg.initDataUnsafe?.user;
+    if(!user){ userId='test123'; username='TestUser'; }
+    else{ userId=user.id.toString(); username=user.username || 'User'+user.id; }
+
     if(SUPABASE_URL.includes('your-project')) throw new Error('Укажите SUPABASE_URL и SUPABASE_KEY');
-    db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-    await loadPosts();
-    db.channel('posts-channel').on('postgres_changes',{event:'*',schema:'public',table:'posts'},()=>loadPosts()).subscribe();
+
+    db = supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+    await load();
+
+    db.channel('posts-channel')
+      .on('postgres_changes',{event:'*', schema:'public', table:'posts'},()=>load())
+      .subscribe();
   }catch(e){console.error(e); document.getElementById('feed').innerHTML='<div class="error">Ошибка: '+e.message+'</div>';}
 }
 
-function parseContent(text){
-  const urlRegex=/(https?:\/\/[^\s]+)/g; const urls=text.match(urlRegex)||[];
-  const discordLinks=urls.filter(u=>u.includes('cdn.discordapp.com')||u.includes('media.discordapp.net')||u.includes('discord.com/attachments/'));
-  const regularLinks=urls.filter(u=>!discordLinks.includes(u));
-  let clean=text; discordLinks.forEach(l=>{clean=clean.replace(l,'');});
-  return {text:clean.trim(),discordLinks,regularLinks};
-}
+// Загрузка постов
+async function load(){
+  try{
+    const { data, error } = await db.from('posts').select('*').order('created_at',{ascending:false}).limit(50);
+    if(error) throw error;
 
-function renderDiscordMedia(url){
-  const ext=url.split('.').pop().split('?')[0].toLowerCase();
-  const fileName=decodeURIComponent(url.split('/').pop().split('?')[0]);
-  if(['mp4','webm','mov'].includes(ext))return`<video class="discord-video" controls preload="metadata"><source src="${url}"></video>`;
-  if(['mp3','wav','ogg'].includes(ext))return`<audio class="discord-audio" controls preload="metadata"><source src="${url}"></audio>`;
-  if(['jpg','jpeg','png','gif','webp'].includes(ext))return`<img class="img" src="${url}" onclick="showImage('${url}')" loading="lazy">`;
-  return `<div class="discord-file" onclick="window.open('${url}','_blank')"><div class="discord-file-icon">📄</div><div class="discord-file-info"><div class="discord-file-name">${esc(fileName)}</div><div class="discord-file-size">Discord файл</div></div></div>`;
-}
+    renderGallery(data); // галерея случайных постов
 
-async function fetchLinkPreview(url){try{const res=await fetch('https://api.microlink.io/?url='+encodeURIComponent(url)); const d=await res.json(); if(d.status==='success') return {url,title:d.data.title||'',description:d.data.description||'',image:d.data.image?.url||'',domain:new URL(url).hostname}; return null;}catch(e){return null;}}
-
-async function loadPosts(){
-  if(!db) return; const {data,error}=await db.from('posts').select('*').order('created_at',{ascending:false}).limit(30);
-  const feed=document.getElementById('feed'); if(error){feed.innerHTML='<div class="error">Ошибка загрузки</div>';return;}
-  if(!data||data.length===0){feed.innerHTML='<div class="empty">📝<br><br>Пока нет постов</div>';return;}
-  feed.innerHTML='';
-  for(const post of data){
-    const isMy=post.user_id===userId;
-    const isForMe=post.target_username===username;
-    if(post.target_username && !isMy && !isForMe) continue;
-    const card=document.createElement('div'); card.className='card';
-    let html='';
-    if(post.parent_id){
-      const parent=data.find(p=>p.id===post.parent_id);
-      if(parent) html+=`<div class="reply-box"><div class="reply-author">@${esc(parent.username)}</div><div class="reply-text">${esc((parent.content||'📷').substring(0,40))}</div></div>`;
-    }
-    html+=`<div class="author">@${esc(post.username)}${post.target_username?' 🔒':''}</div>`;
-    if(post.content){
-      const {text,discordLinks,regularLinks}=parseContent(post.content);
-      if(text) html+=`<div class="text">${esc(text)}</div>`;
-      discordLinks.forEach(d=>{html+=renderDiscordMedia(d);});
-      if(regularLinks.length>0 && post.link_preview){
-        try{const preview=JSON.parse(post.link_preview); html+=`<div class="link-preview" onclick="window.open('${preview.url}','_blank')">${preview.image?`<img class="link-preview-img" src="${preview.image}" onerror="this.style.display='none'" loading="lazy">`:''}<div class="link-preview-content"><div class="link-preview-title">${esc(preview.title||'Ссылка')}</div>${preview.description?`<div class="link-preview-desc">${esc(preview.description)}</div>`:''}<div class="link-preview-url">${esc(preview.domain||preview.url)}</div></div></div>`;}catch(e){}
+    const feed = document.getElementById('feed'); feed.innerHTML='';
+    data.forEach(post=>{
+      const card=document.createElement('div'); card.className='card';
+      let html='';
+      if(post.parent_id){
+        const parent = data.find(p=>p.id===post.parent_id);
+        if(parent) html+=`<div class="reply-box"><div class="reply-author">@${esc(parent.username)}</div><div class="reply-text">${esc(parent.content||'📷')}</div></div>`;
       }
-    }
-    if(post.image_url) html+=`<img class="img" src="${post.image_url}" onclick="showImage('${post.image_url}')" loading="lazy">`;
-    html+=`<div class="actions"><span class="btn" onclick="reply('${post.id}','${esc(post.username)}','${esc((post.content||'').substring(0,40))}')">💬 Ответить</span>`;
-    if(isMy) html+=`<span class="btn btn-del" onclick="del('${post.id}')">🗑 Удалить</span>`;
-    html+='</div>'; card.innerHTML=html; feed.appendChild(card);
-  }
+      const lock = post.target_username?' 🔒':'';
+      html+=`<div class="author">@${esc(post.username)}${lock}</div>`;
+      if(post.image_url) html+=`<img class="img" src="${post.image_url}" onclick="showImage('${post.image_url}')" loading="lazy">`;
+      if(post.content) html+=`<div class="text">${esc(post.content)}</div>`;
+      html+=`<div class="actions"><span class="btn" onclick="reply('${post.id}','${esc(post.username)}','${esc((post.content||'').substring(0,40))}')">💬 Ответить</span>`;
+      if(post.user_id===userId) html+=`<span class="btn btn-del" onclick="del('${post.id}')">🗑 Удалить</span>`;
+      html+='</div>';
+      card.innerHTML=html;
+      feed.appendChild(card);
+    });
+  }catch(e){console.error(e); document.getElementById('feed').innerHTML='<div class="error">Ошибка загрузки</div>';}
 }
 
-function openModal(){document.getElementById('modal').classList.add('show');}
-function closeModal(){document.getElementById('modal').classList.remove('show');replyId=null;document.getElementById('txt').value='';document.getElementById('target').value='';clearFile();document.getElementById('replyBox').style.display='none';}
-function reply(id,user,text){replyId=id;document.getElementById('replyBox').style.display='block';document.getElementById('replyAuthor').textContent='@'+user;document.getElementById('replyText').textContent=text+'...';openModal();}
-function showPreview(){const file=document.getElementById('file').files[0];if(!file)return;if(file.size>5*1024*1024){tg.showAlert('Файл слишком большой');document.getElementById('file').value='';return;}const r=new FileReader();r.onload=e=>{document.getElementById('previewImg').src=e.target.result;document.getElementById('preview').style.display='block';};r.readAsDataURL(file);}
-function clearFile(){document.getElementById('file').value='';document.getElementById('preview').style.display='none';}
+function esc(str){ const div=document.createElement('div'); div.textContent=str||''; return div.innerHTML; }
 
+// Галерея случайных постов
+function renderGallery(posts,count=12){
+  const gallery=document.getElementById('gallery'); gallery.innerHTML='';
+  const shuffled=posts.slice().sort(()=>Math.random()-0.5).slice(0,count);
+  shuffled.forEach(p=>{
+    const card=document.createElement('div'); card.className='gallery-card'; card.onclick=()=>showImage(p.image_url||'');
+    card.innerHTML=`<img src="${p.image_url||''}" loading="lazy">`;
+    gallery.appendChild(card);
+  });
+}
+
+// Модалка
+function openModal(){ document.getElementById('modal').classList.add('show'); }
+function closeModal(){
+  document.getElementById('modal').classList.remove('show');
+  setTimeout(()=>{
+    document.getElementById('txt').value='';
+    document.getElementById('target').value='';
+    document.getElementById('replyBox').style.display='none';
+    clearFile();
+    replyId=null;
+  },300);
+}
+function reply(id,user,text){
+  replyId=id;
+  document.getElementById('replyAuthor').textContent='@'+user;
+  document.getElementById('replyText').textContent=text+'...';
+  document.getElementById('replyBox').style.display='block';
+  openModal();
+}
+
+// Файлы
+function showPreview(){
+  const file=document.getElementById('file').files[0];
+  if(!file) return;
+  if(file.size>5*1024*1024){ tg.showAlert('Файл слишком большой (макс 5МБ)'); document.getElementById('file').value=''; return;}
+  const reader=new FileReader();
+  reader.onload=e=>{ document.getElementById('previewImg').src=e.target.result; document.getElementById('preview').style.display='block'; }
+  reader.readAsDataURL(file);
+}
+function clearFile(){ document.getElementById('file').value=''; document.getElementById('preview').style.display='none'; }
+
+// Отправка
 async function send(){
-  const btn=document.getElementById('sendBtn'); const text=document.getElementById('txt').value.trim();
-  const target=document.getElementById('target').value.replace('@','').trim(); const file=document.getElementById('file').files[0];
-  if(!text&&!file){tg.showAlert('Напишите текст или добавьте фото');return;}
+  const btn=document.getElementById('sendBtn');
+  const text=document.getElementById('txt').value.trim();
+  const targetUser=document.getElementById('target').value.replace('@','').trim();
+  const file=document.getElementById('file').files[0];
+  if(!text && !file){ tg.showAlert('Напишите текст или добавьте фото'); return;}
   btn.disabled=true; btn.textContent='Отправка...';
   try{
     let imageUrl=null;
-    if(file){const fileName=Date.now()+'.jpg'; const {error:upError}=await db.storage.from('images').upload(fileName,file); if(upError) throw upError; const {data:{publicUrl}}=db.storage.from('images').getPublicUrl(fileName); imageUrl=publicUrl;}
-    let linkPreview=null;
-    const {regularLinks}=parseContent(text);
-    if(regularLinks.length>0){btn.textContent='Загрузка превью...'; linkPreview=await fetchLinkPreview(regularLinks[0]);}
-    const postData={username,content:text,user_id:userId,target_username:target||null,parent_id:replyId,image_url:imageUrl,link_preview:linkPreview?JSON.stringify(linkPreview):null};
-    const {error}=await db.from('posts').insert([postData]); if(error) throw error;
-    closeModal(); await loadPosts();
-  }catch(e){tg.showAlert('Ошибка: '+e.message); console.error(e);}
-  finally{btn.disabled=false;btn.textContent='Отправить';}
+    if(file){
+      const fileName=Date.now()+'.jpg';
+      const { error: upError } = await db.storage.from('images').upload(fileName,file);
+      if(upError) throw upError;
+      const { data:{ publicUrl } } = db.storage.from('images').getPublicUrl(fileName);
+      imageUrl=publicUrl;
+    }
+    const postData={ username, content:text, user_id:userId, image_url:imageUrl, target_username:targetUser||null, parent_id:replyId };
+    const { error } = await db.from('posts').insert([postData]);
+    if(error) throw error;
+    closeModal(); await load();
+  }catch(e){ console.error(e); tg.showAlert('Ошибка: '+e.message);}
+  finally{ btn.disabled=false; btn.textContent='Отправить'; }
 }
 
-function del(id){tg.showConfirm('Удалить пост?',async ok=>{if(!ok)return;try{await db.from('posts').delete().eq('id',id).eq('user_id',userId);await loadPosts();}catch(e){tg.showAlert('Ошибка удаления');}});}
-function showImage(url){const o=document.getElementById('overlay');document.getElementById('overlayImg').src=url;o.classList.add('show');}
-function closeOverlay(){document.getElementById('overlay').classList.remove('show');}
+// Удаление
+async function del(id){
+  tg.showConfirm('Удалить пост?', async (ok)=>{
+    if(!ok) return;
+    try{
+      const { error } = await db.from('posts').delete().eq('id',id).eq('user_id',userId);
+      if(error) throw error;
+      await load();
+    }catch(e){ console.error(e); tg.showAlert('Ошибка удаления');}
+  });
+}
 
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+// Просмотр фото
+function showImage(url){ document.getElementById('overlayImg').src=url; document.getElementById('overlay').classList.add('show'); }
+function closeOverlay(){ document.getElementById('overlay').classList.remove('show'); }
+
+// Старт
+if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', init);}
+else{ init(); }
 </script>
 
 </body>
