@@ -67,26 +67,27 @@ a.linkify { color:var(--accent); text-decoration:underline; }
 
 <script>
 const tg=window.Telegram.WebApp; tg.expand();
-const SUPABASE_URL='https://xddulhzvzemmrhrsjfhb.supabase.co'; // заменяешь своим
-const SUPABASE_KEY='sb_publishable_2FIKYuEHEQrYseRnwY58Qg__UIFN59j'; // заменяешь своим
+const SUPABASE_URL='https://xddulhzvzemmrhrsjfhb.supabase.co'; // замени на свой
+const SUPABASE_KEY='sb_publishable_2FIKYuEHEQrYseRnwY58Qg__UIFN59j'; // замени на свой
 const supabaseClient = supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-let currentUserId=null, myUsername=null, currentReplyId=null, lastCount=0;
-let SECRET_KEY='';
+let currentUserId=null,myUsername=null,currentReplyId=null,lastCount=0;
+let SECRET_KEY='test_key'; // временный ключ для проверки
 
 tg.ready.then(()=>{
   currentUserId = tg.initDataUnsafe?.user?.id?.toString()||'guest';
   myUsername = tg.initDataUnsafe?.user?.username||'Guest';
-  SECRET_KEY = 'key_'+currentUserId;
+  SECRET_KEY = 'key_'+currentUserId; // уникальный ключ для каждого
   loadEchos(true);
+  
+  // Реал-тайм подписка после инициализации
   supabaseClient.channel('any')
     .on('postgres_changes',{event:'*',schema:'public',table:'posts'},()=>loadEchos(false))
     .subscribe();
 });
 
 function encrypt(text){ return CryptoJS.AES.encrypt(text, SECRET_KEY).toString(); }
-function decrypt(cipher){ try{return CryptoJS.AES.decrypt(cipher, SECRET_KEY).toString(CryptoJS.enc.Utf8)}catch(e){return 'Ошибка'; }
-}
+function decrypt(cipher){ try{return CryptoJS.AES.decrypt(cipher, SECRET_KEY).toString(CryptoJS.enc.Utf8)}catch(e){return 'Ошибка'; }}
 function linkify(text){ const escaped=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); return escaped.replace(/(https?:\/\/[^\s]+)/g, url=>`<a class="linkify" href="${url}" target="_blank">${url}</a>`); }
 
 async function loadEchos(isInitial=false){
