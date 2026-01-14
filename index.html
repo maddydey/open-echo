@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OpenEcho Pro</title>
+    <title>OpenEcho Turbo</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -14,115 +14,47 @@
             --text-main: #ffffff;
             --text-dim: #8e8e93;
             --danger: #ff453a;
-            --anim-speed: 0.4s;
         }
-
-        body { 
-            background: var(--bg); 
-            color: var(--text-main); 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            margin: 0; padding: 20px; padding-bottom: 110px;
-            overflow-x: hidden;
-        }
-
+        body { background: var(--bg); color: var(--text-main); font-family: -apple-system, sans-serif; margin: 0; padding: 20px; padding-bottom: 110px; overflow-x: hidden; }
         #feed { display: flex; flex-direction: column; gap: 16px; }
-        
-        /* Анимация карточек */
-        .echo-card { 
-            background: var(--card-bg); backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border-radius: 24px; position: relative; border: 1px solid rgba(255, 255, 255, 0.08);
-            overflow: hidden; 
-            animation: slideUp var(--anim-speed) cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-        
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        
+        .echo-card { background: var(--card-bg); backdrop-filter: blur(15px); border-radius: 24px; position: relative; border: 1px solid rgba(255, 255, 255, 0.08); overflow: hidden; animation: slideUp 0.4s ease; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .card-content { padding: 16px; }
         .author { font-weight: 700; color: var(--accent); font-size: 14px; margin-bottom: 4px; }
-        .post-img { width: 100%; display: block; object-fit: cover; max-height: 450px; cursor: pointer; transition: transform 0.3s ease; }
-        .post-img:active { transform: scale(0.98); }
-        
-        /* Кнопка Плюс с пульсацией */
-        .btn-add { 
-            position: fixed; bottom: 30px; right: 24px; 
-            width: 64px; height: 64px; background: var(--accent); 
-            border-radius: 22px; font-size: 32px; color: white; border: none; 
-            box-shadow: 0 10px 30px rgba(10, 132, 255, 0.4); z-index: 100;
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .btn-add:active { transform: scale(0.85); }
-
-        /* Просмотр фото (Lightbox) с анимацией */
-        #imageOverlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center;
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            animation: fadeIn 0.3s ease;
-        }
-        #fullImage { 
-            max-width: 95%; max-height: 90%; border-radius: 12px; 
-            animation: zoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-        /* Модалка создания */
-        #modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); z-index: 1000;
-            justify-content: center; align-items: flex-end; /* Выезжает снизу как в iOS */
-        }
-        .modal-content {
-            background: #1c1c1e; width: 100%; padding: 24px; 
-            border-radius: 30px 30px 0 0;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            animation: sheetUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-
-        @keyframes sheetUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-
-        textarea {
-            width: 100%; background: transparent; border: none; color: white;
-            font-size: 18px; resize: none; outline: none; margin-bottom: 15px; font-family: inherit;
-        }
-        .modal-btns { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; }
-        .attach-btn { color: var(--accent); font-weight: 600; cursor: pointer; }
-        .send-btn { background: var(--accent); color: white; border: none; padding: 12px 24px; border-radius: 16px; font-weight: 700; transition: opacity 0.2s; }
+        .post-img { width: 100%; display: block; object-fit: cover; max-height: 450px; cursor: pointer; }
+        .btn-add { position: fixed; bottom: 30px; right: 24px; width: 64px; height: 64px; background: var(--accent); border-radius: 22px; font-size: 32px; color: white; border: none; box-shadow: 0 10px 30px rgba(10, 132, 255, 0.4); z-index: 100; }
+        #imageOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(10px); }
+        #fullImage { max-width: 95%; max-height: 90%; border-radius: 12px; }
+        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); z-index: 1000; justify-content: center; align-items: flex-end; }
+        .modal-content { background: #1c1c1e; width: 100%; padding: 24px; border-radius: 30px 30px 0 0; animation: sheetUp 0.3s ease; }
+        @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        textarea { width: 100%; background: transparent; border: none; color: white; font-size: 18px; resize: none; outline: none; margin-bottom: 15px; }
+        .send-btn { background: var(--accent); color: white; border: none; padding: 12px 24px; border-radius: 16px; font-weight: 700; }
         .send-btn:disabled { opacity: 0.5; }
-        .preview-name { font-size: 13px; color: var(--text-dim); margin-bottom: 15px; display: block; }
-        .delete-btn { position: absolute; top: 12px; right: 12px; background: rgba(255, 69, 58, 0.15); border: none; border-radius: 10px; width: 32px; height: 32px; color: var(--danger); z-index: 5; transition: transform 0.2s; }
-        .delete-btn:active { transform: scale(0.9); }
+        .delete-btn { position: absolute; top: 12px; right: 12px; background: rgba(255, 69, 58, 0.2); border: none; border-radius: 10px; width: 32px; height: 32px; color: var(--danger); }
     </style>
 </head>
 <body>
 
-    <h2 style="font-weight: 800; letter-spacing: -1px; margin-left: 5px;">OpenEcho</h2>
+    <h2 style="font-weight: 800; letter-spacing: -1px;">OpenEcho</h2>
     <div id="feed"></div>
 
     <button class="btn-add" onclick="openModal()">+</button>
 
-    <div id="imageOverlay" onclick="closeImageFull()">
+    <div id="imageOverlay" onclick="this.style.display='none'">
         <img id="fullImage" src="">
     </div>
 
-    <div id="modal" onclick="if(event.target == this) closeModal()">
+    <div id="modal">
         <div class="modal-content">
-            <textarea id="postText" rows="4" placeholder="Что у вас нового?"></textarea>
+            <textarea id="postText" rows="4" placeholder="Что нового?"></textarea>
             <input type="file" id="fileInput" accept="image/*" onchange="updateFileName()" style="display:none">
-            <span id="fileName" class="preview-name"></span>
-            <div class="modal-btns">
-                <div class="attach-btn" onclick="document.getElementById('fileInput').click()">🖼 Прикрепить фото</div>
+            <div id="fileName" style="font-size: 13px; color: var(--text-dim); margin-bottom: 15px;"></div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="color: var(--accent); font-weight: 600; cursor: pointer;" onclick="document.getElementById('fileInput').click()">🖼 Фото</div>
                 <button class="send-btn" id="submitBtn" onclick="sendPost()">Опубликовать</button>
             </div>
-            <button onclick="closeModal()" style="background:none; border:none; color:var(--text-dim); width:100%; margin-bottom: 20px; font-size: 15px;">Скрыть</button>
+            <button onclick="closeModal()" style="background:none; border:none; color:var(--text-dim); width:100%; margin-top:20px;">Отмена</button>
         </div>
     </div>
 
@@ -132,39 +64,49 @@
 
         const SUPABASE_URL = 'https://xddulhzvzemmrhrsjfhb.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_2FIKYuEHEQrYseRnwY58Qg__UIFN59j';
-
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         const currentUserId = tg.initDataUnsafe?.user?.id?.toString();
 
+        // --- ФУНКЦИЯ СЖАТИЯ (70% качества) ---
+        async function compressImage(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        // Если фото слишком огромное (больше 1200px), чуть уменьшим размер
+                        const maxSide = 1200;
+                        if (width > maxSide || height > maxSide) {
+                            if (width > height) { height *= maxSide / width; width = maxSide; }
+                            else { width *= maxSide / height; height = maxSide; }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        canvas.toBlob((blob) => {
+                            resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+                        }, 'image/jpeg', 0.7); // 0.7 = 70% качества
+                    };
+                };
+            });
+        }
+
         function openImageFull(url) {
-            const overlay = document.getElementById('imageOverlay');
             document.getElementById('fullImage').src = url;
-            overlay.style.display = 'flex';
-        }
-        
-        function closeImageFull() {
-            document.getElementById('imageOverlay').style.display = 'none';
+            document.getElementById('imageOverlay').style.display = 'flex';
         }
 
-        function openModal() { document.getElementById('modal').style.display = 'flex'; document.getElementById('postText').focus(); }
-        function closeModal() { 
-            const modal = document.getElementById('modal');
-            const content = modal.querySelector('.modal-content');
-            content.style.animation = 'sheetDown 0.3s forwards';
-            setTimeout(() => {
-                modal.style.display = 'none';
-                content.style.animation = '';
-                document.getElementById('postText').value = '';
-                document.getElementById('fileInput').value = '';
-                document.getElementById('fileName').innerText = '';
-            }, 300);
-        }
-
-        // Добавляем стиль для закрытия модалки
-        const style = document.createElement('style');
-        style.innerHTML = `@keyframes sheetDown { from { transform: translateY(0); } to { transform: translateY(100%); } }`;
-        document.head.appendChild(style);
-
+        function openModal() { document.getElementById('modal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('modal').style.display = 'none'; }
         function updateFileName() {
             const file = document.getElementById('fileInput').files[0];
             document.getElementById('fileName').innerText = file ? "📎 " + file.name : "";
@@ -175,11 +117,10 @@
             const feed = document.getElementById('feed');
             if (data) {
                 feed.innerHTML = '';
-                data.forEach((post, index) => {
+                data.forEach(post => {
                     const isMyPost = post.user_id === currentUserId;
                     const card = document.createElement('div');
                     card.className = 'echo-card';
-                    card.style.animationDelay = (index * 0.05) + 's'; // Поочередное появление
                     card.innerHTML = `
                         ${isMyPost ? `<button class="delete-btn" onclick="deleteEcho('${post.id}')">✕</button>` : ''}
                         ${post.image_url ? `<img src="${post.image_url}" class="post-img" onclick="openImageFull('${post.image_url}')">` : ''}
@@ -194,17 +135,19 @@
 
         async function sendPost() {
             const text = document.getElementById('postText').value;
-            const file = document.getElementById('fileInput').files[0];
-            const username = tg.initDataUnsafe?.user?.username || "Guest";
+            let file = document.getElementById('fileInput').files[0];
             const btn = document.getElementById('submitBtn');
 
             if (!text && !file) return;
             btn.disabled = true;
-            btn.innerText = "Минутку...";
+            btn.innerText = "Сжимаем...";
 
             let imageUrl = null;
             if (file) {
-                const fileName = `${Date.now()}_${file.name}`;
+                // Сжимаем перед загрузкой
+                file = await compressImage(file);
+                btn.innerText = "Загружаем...";
+                const fileName = `${Date.now()}_post.jpg`;
                 const { data } = await supabaseClient.storage.from('images').upload(fileName, file);
                 if (data) {
                     const { data: urlData } = supabaseClient.storage.from('images').getPublicUrl(fileName);
@@ -213,7 +156,10 @@
             }
 
             await supabaseClient.from('posts').insert([{ 
-                username: username, content: text, user_id: currentUserId, image_url: imageUrl 
+                username: tg.initDataUnsafe?.user?.username || "Guest", 
+                content: text, 
+                user_id: currentUserId, 
+                image_url: imageUrl 
             }]);
 
             btn.disabled = false;
@@ -222,13 +168,7 @@
         }
 
         supabaseClient.channel('any').on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, loadEchos).subscribe();
-
-        async function deleteEcho(id) {
-            if (confirm("Удалить этот пост?")) {
-                await supabaseClient.from('posts').delete().eq('id', id);
-            }
-        }
-
+        async function deleteEcho(id) { if (confirm("Удалить?")) await supabaseClient.from('posts').delete().eq('id', id); }
         loadEchos();
     </script>
 </body>
