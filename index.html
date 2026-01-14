@@ -15,16 +15,14 @@
             --hint: var(--tg-theme-hint-color, #8e8e93);
         }
         body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; padding: 15px; padding-bottom: 100px; }
-        h2 { margin-bottom: 20px; border-bottom: 1px solid var(--secondary); padding-bottom: 10px; }
-        .echo-card { background: var(--secondary); padding: 16px; border-radius: 16px; margin-bottom: 12px; position: relative; }
+        .echo-card { background: var(--secondary); padding: 16px; border-radius: 16px; margin-bottom: 12px; position: relative; border: 1px solid rgba(255,255,255,0.05); }
         .author { font-weight: bold; color: var(--button); margin-bottom: 4px; font-size: 14px; }
         .content { font-size: 16px; line-height: 1.4; }
-        .delete-btn { position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 18px; cursor: pointer; opacity: 0.6; padding: 5px; }
+        .delete-btn { position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 18px; cursor: pointer; padding: 5px; }
         .btn-add { position: fixed; bottom: 30px; right: 20px; width: 60px; height: 60px; background: var(--button); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; color: white; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
     </style>
 </head>
 <body>
-
     <h2>OpenEcho 🚀</h2>
     <div id="feed"></div>
     <button class="btn-add" onclick="createNewEcho()">+</button>
@@ -33,21 +31,28 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // НЕ ЗАБУДЬ ВСТАВИТЬ СВОИ КЛЮЧИ!
         const SUPABASE_URL = 'https://xddulhzvzemmrhrsjfhb.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_2FIKYuEHEQrYseRnwY58Qg__UIFN59j';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // Получаем ID текущего пользователя из Telegram
+        const currentUserId = tg.initDataUnsafe?.user?.id?.toString();
+
         async function loadEchos() {
-            const { data, error } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
+            const { data } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
             const feed = document.getElementById('feed');
             if (data) {
                 feed.innerHTML = '';
                 data.forEach(post => {
                     const card = document.createElement('div');
                     card.className = 'echo-card';
+                    
+                    // Кнопка удаления появится ТОЛЬКО если пост создал текущий пользователь
+                    const isMyPost = post.user_id === currentUserId;
+                    const deleteBtn = isMyPost ? `<button class="delete-btn" onclick="deleteEcho('${post.id}')">🗑️</button>` : '';
+
                     card.innerHTML = `
-                        <button class="delete-btn" onclick="deleteEcho('${post.id}')">🗑️</button>
+                        ${deleteBtn}
                         <div class="author">@${post.username || 'anon'}</div>
                         <div class="content">${post.content}</div>
                     `;
@@ -59,20 +64,21 @@
         async function createNewEcho() {
             let text = prompt("Что на уме?");
             if (text && text.trim()) {
-                const user = tg.initDataUnsafe?.user?.username || "Юля";
-                await supabaseClient.from('posts').insert([{ username: user, content: text }]);
+                const user = tg.initDataUnsafe?.user?.username || "Guest";
+                // Сохраняем пост ВМЕСТЕ с ID пользователя
+                await supabaseClient.from('posts').insert([{ 
+                    username: user, 
+                    content: text, 
+                    user_id: currentUserId 
+                }]);
                 loadEchos();
             }
         }
 
         async function deleteEcho(id) {
-            if (confirm("Удалить этот пост?")) {
-                const { error } = await supabaseClient.from('posts').delete().eq('id', id);
-                if (!error) {
-                    loadEchos(); // Обновляем ленту после удаления
-                } else {
-                    alert("Ошибка удаления: " + error.message);
-                }
+            if (confirm("Удалить свой пост?")) {
+                await supabaseClient.from('posts').delete().eq('id', id);
+                loadEchos();
             }
         }
 
