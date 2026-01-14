@@ -14,130 +14,71 @@
             --secondary: var(--tg-theme-secondary-bg-color, #2c2c2e);
             --hint: var(--tg-theme-hint-color, #8e8e93);
         }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            margin: 0;
-            padding: 20px;
-            padding-bottom: 100px; /* Место под кнопку */
-        }
-
-        h2 { margin-bottom: 20px; font-size: 24px; border-bottom: 1px solid var(--secondary); padding-bottom: 10px; }
-
-        .echo-card {
-            background: var(--secondary);
-            padding: 15px;
-            border-radius: 15px;
-            margin-bottom: 12px;
-            border: 1px solid rgba(255,255,255,0.05);
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .author { font-weight: bold; color: var(--button); margin-bottom: 6px; font-size: 14px; }
-        .content { font-size: 16px; line-height: 1.4; word-wrap: break-word; }
-        .time { font-size: 10px; color: var(--hint); margin-top: 8px; text-align: right; }
-
-        .btn-add {
-            position: fixed;
-            bottom: 30px;
-            right: 20px;
-            width: 65px;
-            height: 65px;
-            background: var(--button);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 35px;
-            color: white;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-            cursor: pointer;
-            border: none;
-            z-index: 100;
-        }
+        body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; padding: 15px; padding-bottom: 100px; }
+        h2 { font-size: 22px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .echo-card { background: var(--secondary); padding: 16px; border-radius: 16px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        .author { font-weight: bold; color: var(--button); margin-bottom: 4px; font-size: 14px; }
+        .content { font-size: 16px; line-height: 1.4; margin-bottom: 10px; }
+        .footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px; }
+        .time { font-size: 11px; color: var(--hint); }
+        .like-btn { display: flex; align-items: center; gap: 5px; color: var(--hint); cursor: pointer; font-size: 14px; background: none; border: none; padding: 0; }
+        .like-btn.active { color: #ff3b30; }
+        .btn-add { position: fixed; bottom: 30px; right: 20px; width: 60px; height: 60px; background: var(--button); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; color: white; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
     </style>
 </head>
 <body>
 
     <h2>OpenEcho 🚀</h2>
-
-    <div id="feed">
-        <div class="echo-card">
-            <div class="content" style="text-align: center; color: var(--hint);">Загрузка ленты...</div>
-        </div>
-    </div>
-
+    <div id="feed"></div>
     <button class="btn-add" onclick="createNewEcho()">+</button>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.ready();
 
-        // --- НАСТРОЙКИ SUPABASE ---
-        // Замени эти данные на свои из Project Settings -> API
-        const SUPABASE_URL = 'https://xddulhzvzemmrhrsjfhb.supabase.co'; 
+        // ВСТАВЬ СВОИ ДАННЫЕ СЮДА
+        const SUPABASE_URL = 'https://xddulhzvzemmrhrsjfhb.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_2FIKYuEHEQrYseRnwY58Qg__UIFN59j';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // --- ЛОГИКА ПРИЛОЖЕНИЯ ---
-
-        // 1. Загрузка постов
         async function loadEchos() {
-            const { data, error } = await supabaseClient
-                .from('posts')
-                .select('*')
-                .order('created_at', { ascending: false });
-
+            const { data } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
             const feed = document.getElementById('feed');
+            feed.innerHTML = '';
             
-            if (error) {
-                feed.innerHTML = `<div class="echo-card">Ошибка загрузки: ${error.message}</div>`;
-                return;
-            }
-
-            if (data) {
-                feed.innerHTML = ''; 
-                data.forEach(post => {
-                    const date = new Date(post.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                    const card = document.createElement('div');
-                    card.className = 'echo-card';
-                    card.innerHTML = `
-                        <div class="author">@${post.username || 'anon'}</div>
-                        <div class="content">${post.content}</div>
+            data.forEach(post => {
+                const date = new Date(post.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const card = document.createElement('div');
+                card.className = 'echo-card';
+                card.innerHTML = `
+                    <div class="author">@${post.username || 'guest'}</div>
+                    <div class="content">${post.content}</div>
+                    <div class="footer">
+                        <button class="like-btn" onclick="likePost('${post.id}', ${post.likes || 0})">
+                            ❤️ <span>${post.likes || 0}</span>
+                        </button>
                         <div class="time">${date}</div>
-                    `;
-                    feed.appendChild(card);
-                });
-            }
+                    </div>
+                `;
+                feed.appendChild(card);
+            });
         }
 
-        // 2. Создание нового поста
         async function createNewEcho() {
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-            
-            let text = prompt("Что нового?");
-            
-            if (text && text.trim() !== "") {
-                const username = tg.initDataUnsafe?.user?.username || "Guest";
-
-                const { error } = await supabaseClient
-                    .from('posts')
-                    .insert([{ username: username, content: text }]);
-
-                if (!error) {
-                    loadEchos(); // Обновляем список сразу
-                } else {
-                    alert("Не удалось отправить: " + error.message);
-                }
+            let text = prompt("О чем ты думаешь?");
+            if (text && text.trim()) {
+                const user = tg.initDataUnsafe?.user?.username || "Юля";
+                await supabaseClient.from('posts').insert([{ username: user, content: text, likes: 0 }]);
+                loadEchos();
             }
         }
 
-        // Запуск при открытии
+        async function likePost(id, currentLikes) {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            await supabaseClient.from('posts').update({ likes: currentLikes + 1 }).eq('id', id);
+            loadEchos();
+        }
+
         loadEchos();
     </script>
 </body>
