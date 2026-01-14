@@ -25,52 +25,73 @@
   --border: rgba(255,255,255,0.1);
   --shadow: rgba(0,0,0,0.5);
 }
-* { box-sizing: border-box; margin:0; padding:0; }
+* { box-sizing:border-box; margin:0; padding:0; }
 body {
   font-family: -apple-system, sans-serif;
   background: var(--bg);
   color: var(--text);
-  padding:20px; padding-bottom:100px;
+  padding: 20px 20px 100px;
   transition: background 0.3s, color 0.3s;
 }
-
-.header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; }
 h2 { font-size:28px; font-weight:700; }
 .theme-btn {
-  width:44px;height:44px;border-radius:50%;
-  background: var(--card-bg); backdrop-filter: blur(20px);
-  border:1px solid var(--border);
-  cursor:pointer; display:flex; justify-content:center; align-items:center;
-  font-size:20px; box-shadow: 0 4px 12px var(--shadow);
+  width:44px; height:44px; border-radius:50%; background:var(--card-bg);
+  backdrop-filter: blur(20px); border:1px solid var(--border);
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  font-size:20px; box-shadow:0 4px 12px var(--shadow);
 }
-
-#gallery { display:flex; gap:8px; overflow-x:auto; padding:12px 0; }
-.gallery-card { flex:0 0 auto; width:100px; height:100px; border-radius:12px; overflow:hidden; cursor:pointer; }
-.gallery-card img { width:100%; height:100%; object-fit:cover; }
-
 #feed { display:flex; flex-direction:column; gap:16px; }
-.card { background: var(--card-bg); backdrop-filter: blur(40px); border-radius:24px; padding:20px; border:1px solid var(--border); box-shadow:0 8px 32px var(--shadow); }
+.card {
+  background: var(--card-bg); backdrop-filter: blur(40px); border-radius:24px;
+  padding:20px; border:1px solid var(--border); box-shadow:0 8px 32px var(--shadow);
+}
 .author { color: var(--accent); font-weight:600; font-size:15px; margin-bottom:10px; }
 .text { color: var(--text); line-height:1.5; margin-bottom:12px; word-wrap:break-word; font-size:15px; }
 .img { width:100%; border-radius:16px; margin-bottom:12px; cursor:pointer; }
-.reply-box { background: var(--card-bg); backdrop-filter: blur(20px); border-left:3px solid var(--accent); padding:10px 12px; border-radius:12px; margin-bottom:12px; font-size:13px; border:1px solid var(--border);}
-.reply-author { font-weight:600; color: var(--accent); margin-bottom:4px; }
+.reply-box {
+  background: var(--card-bg); backdrop-filter: blur(20px);
+  border-left:3px solid var(--accent); padding:10px 12px; border-radius:12px;
+  margin-bottom:12px; font-size:13px; border:1px solid var(--border);
+}
+.reply-author { font-weight:600; color:var(--accent); margin-bottom:4px; }
 .reply-text { color: var(--text-dim); font-size:13px; }
-.add-btn { position:fixed; bottom:24px; right:24px; width:60px;height:60px; background: linear-gradient(135deg, var(--accent) 0%, #9055ff 100%); color:white; border:none; border-radius:50%; font-size:28px; cursor:pointer; box-shadow:0 8px 24px rgba(27,110,243,0.4); z-index:100; }
+.actions { display:flex; gap:12px; font-size:14px; margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
+.btn { color: var(--accent); cursor:pointer; font-weight:500; }
+.btn-del { color:#ff3b30; }
+.btn-share { color:#ff9500; }
+.add-btn {
+  position: fixed; bottom:24px; right:24px; width:60px; height:60px;
+  background: linear-gradient(135deg, var(--accent) 0%, #9055ff 100%);
+  color:white; border:none; border-radius:50%; font-size:28px; cursor:pointer;
+  box-shadow:0 8px 24px rgba(27,110,243,0.4); z-index:100;
+}
 .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); backdrop-filter:blur(10px); z-index:200; align-items:center; justify-content:center; padding:20px; }
 .modal.show { display:flex; }
-.modal-content { background: var(--card-bg); backdrop-filter: blur(40px); border-radius:24px; padding:24px; width:100%; max-width:420px; border:1px solid var(--border); box-shadow:0 20px 60px var(--shadow); }
-textarea { width:100%; border:1px solid var(--border); border-radius:16px; padding:14px; font-size:15px; font-family:inherit; resize:none; margin-bottom:12px; background:var(--card-bg); backdrop-filter:blur(20px); color:var(--text); }
-textarea:focus { outline:none; border-color:var(--accent); }
-input[type="text"] { width:100%; border:1px solid var(--border); border-radius:16px; padding:12px 14px; font-size:14px; margin-bottom:16px; background: var(--card-bg); backdrop-filter:blur(20px); color:var(--text);}
-input[type="text"]:focus { outline:none; border-color:var(--accent); }
+.modal-content {
+  background: var(--card-bg); backdrop-filter:blur(40px); border-radius:24px;
+  padding:24px; width:100%; max-width:420px; border:1px solid var(--border); box-shadow:0 20px 60px var(--shadow);
+}
+textarea { width:100%; border:1px solid var(--border); border-radius:16px; padding:14px; font-size:15px; font-family:inherit; resize:none; margin-bottom:12px; background: var(--card-bg); backdrop-filter:blur(20px); color:var(--text);}
+textarea:focus { outline:none; border-color:var(--accent);}
+input[type=text] { width:100%; border:1px solid var(--border); border-radius:16px; padding:12px 14px; font-size:14px; margin-bottom:16px; background: var(--card-bg); backdrop-filter:blur(20px); color:var(--text);}
+input[type=text]:focus { outline:none; border-color:var(--accent);}
 .modal-btns { display:flex; justify-content:space-between; align-items:center; gap:12px; }
-.send-btn { background: linear-gradient(135deg, var(--accent) 0%, #9055ff 100%); color:white; border:none; padding:12px 28px; border-radius:16px; font-weight:600; font-size:15px; cursor:pointer; }
+.send-btn {
+  background: linear-gradient(135deg, var(--accent) 0%, #9055ff 100%);
+  color:white; border:none; padding:12px 28px; border-radius:16px;
+  font-weight:600; font-size:15px; cursor:pointer;
+}
 .send-btn:disabled { opacity:0.5; }
-.file-btn { background:var(--card-bg); backdrop-filter:blur(20px); border:1px solid var(--border); color:var(--text); font-size:14px; cursor:pointer; padding:12px 20px; border-radius:16px; font-weight:500; }
-.preview { width:80px; height:80px; position:relative; margin-bottom:12px; border-radius:12px; overflow:hidden; display:none;}
+.file-btn {
+  background: var(--card-bg); backdrop-filter:blur(20px); border:1px solid var(--border);
+  color: var(--text); font-size:14px; cursor:pointer; padding:12px 20px; border-radius:16px; font-weight:500;
+}
+.preview { width:80px; height:80px; position:relative; margin-bottom:12px; border-radius:12px; overflow:hidden; }
 .preview img { width:100%; height:100%; object-fit:cover; }
 .preview-close { position:absolute; top:-8px; right:-8px; background:#ff3b30; color:white; border-radius:50%; width:24px; height:24px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; }
+.loading, .empty { text-align:center; padding:40px 20px; color:var(--text-dim);}
+.error { background: linear-gradient(135deg,#ff3b30 0%,#ff6b6b 100%); color:white; padding:16px; border-radius:16px; margin:20px 0; text-align:center; }
 .overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); backdrop-filter:blur(20px); z-index:300; align-items:center; justify-content:center; }
 .overlay.show { display:flex; }
 .overlay img { max-width:90%; max-height:90%; border-radius:16px; }
@@ -83,18 +104,10 @@ input[type="text"]:focus { outline:none; border-color:var(--accent); }
   <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
 </div>
 
-<!-- Галерея случайных постов -->
-<div id="gallery"></div>
+<div id="feed"><div class="loading">Загрузка...</div></div>
 
-<!-- Основной фид -->
-<div id="feed">
-  <div class="loading">Загрузка...</div>
-</div>
-
-<!-- Кнопка публикации -->
 <button class="add-btn" onclick="openModal()">+</button>
 
-<!-- Модалка -->
 <div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
   <div class="modal-content">
     <div id="replyBox" style="display:none" class="reply-box">
@@ -104,7 +117,7 @@ input[type="text"]:focus { outline:none; border-color:var(--accent); }
 
     <textarea id="txt" rows="4" placeholder="Что нового?"></textarea>
 
-    <div id="preview" class="preview">
+    <div id="preview" class="preview" style="display:none">
       <img id="previewImg">
       <div class="preview-close" onclick="clearFile()">×</div>
     </div>
@@ -119,7 +132,6 @@ input[type="text"]:focus { outline:none; border-color:var(--accent); }
   </div>
 </div>
 
-<!-- Оверлей просмотра фото -->
 <div id="overlay" class="overlay" onclick="closeOverlay()">
   <img id="overlayImg">
 </div>
@@ -131,13 +143,19 @@ tg.expand();
 // ⚠️ ЗАМЕНИТЕ НА СВОИ ДАННЫЕ
 const SUPABASE_URL = 'https://xddulhzvzemmrhrsjfhb.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_2FIKYuEHEQrYseRnwY58Qg__UIFN59j';
-let db = null, userId = null, username = null, replyId = null;
+
+let db = null;
+let userId = null;
+let username = null;
+let replyId = null;
 
 // Тема
-function toggleTheme(){
-  const body=document.body, btn=document.getElementById('themeBtn'), current=body.getAttribute('data-theme');
-  if(current==='light'){body.setAttribute('data-theme','dark'); btn.textContent='☀️'; localStorage.setItem('theme','dark');}
-  else{body.setAttribute('data-theme','light'); btn.textContent='🌙'; localStorage.setItem('theme','light');}
+function toggleTheme() {
+  const body = document.body;
+  const btn = document.getElementById('themeBtn');
+  const current = body.getAttribute('data-theme');
+  if(current==='light'){ body.setAttribute('data-theme','dark'); btn.textContent='☀️'; localStorage.setItem('theme','dark'); }
+  else{ body.setAttribute('data-theme','light'); btn.textContent='🌙'; localStorage.setItem('theme','light'); }
 }
 const savedTheme = localStorage.getItem('theme') || 'light';
 document.body.setAttribute('data-theme', savedTheme);
@@ -148,90 +166,88 @@ async function init(){
   try{
     const user = tg.initDataUnsafe?.user;
     if(!user){ userId='test123'; username='TestUser'; }
-    else{ userId=user.id.toString(); username=user.username || 'User'+user.id; }
-
+    else{ userId=user.id.toString(); username=user.username||'User'+user.id; }
     if(SUPABASE_URL.includes('your-project')) throw new Error('Укажите SUPABASE_URL и SUPABASE_KEY');
-
     db = supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
     await load();
-
     db.channel('posts-channel')
-      .on('postgres_changes',{event:'*', schema:'public', table:'posts'},()=>load())
+      .on('postgres_changes',{event:'*',schema:'public',table:'posts'},()=>load())
       .subscribe();
-  }catch(e){console.error(e); document.getElementById('feed').innerHTML='<div class="error">Ошибка: '+e.message+'</div>';}
+  }catch(e){ console.error('Ошибка:',e); document.getElementById('feed').innerHTML='<div class="error">Ошибка: '+e.message+'</div>'; }
 }
 
-// Загрузка постов
+// Загрузка постов с галереей случайных постов
 async function load(){
   try{
-    const { data, error } = await db.from('posts').select('*').order('created_at',{ascending:false}).limit(50);
+    const { data, error } = await db.from('posts')
+      .select('*')
+      .or(`target_username.is.null,target_username.eq.${username}`)
+      .order('created_at',{ascending:false})
+      .limit(50);
+
+    const feed = document.getElementById('feed');
+    feed.innerHTML='';
+
     if(error) throw error;
+    if(!data || data.length===0){ feed.innerHTML='<div class="empty">📝<br>Пока нет постов</div>'; return; }
 
-    renderGallery(data); // галерея случайных постов
+    // --- Случайная галерея (5 постов) ---
+    const randomPosts = [...data].sort(()=>0.5-Math.random()).slice(0,5);
+    if(randomPosts.length>0){
+      const gallery = document.createElement('div');
+      gallery.style.display='flex'; gallery.style.gap='8px'; gallery.style.marginBottom='16px'; gallery.style.flexWrap='wrap';
+      randomPosts.forEach(post=>{
+        const div=document.createElement('div');
+        div.style.width='calc(20% - 8px)'; div.style.cursor='pointer';
+        if(post.image_url){ div.innerHTML=`<img src="${post.image_url}" style="width:100%;border-radius:12px;" onclick="showImage('${post.image_url}')">`; }
+        else{ div.innerHTML=`<div style="background:var(--card-bg);height:80px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text);padding:4px;text-align:center;">${esc(post.content||'📄')}</div>`; }
+        gallery.appendChild(div);
+      });
+      feed.appendChild(gallery);
+    }
 
-    const feed = document.getElementById('feed'); feed.innerHTML='';
-    data.forEach(post=>{
+    // --- Остальные посты ---
+    const normalPosts = data.filter(p=>!randomPosts.includes(p));
+    normalPosts.forEach(post=>{
       const card=document.createElement('div'); card.className='card';
       let html='';
       if(post.parent_id){
-        const parent = data.find(p=>p.id===post.parent_id);
-        if(parent) html+=`<div class="reply-box"><div class="reply-author">@${esc(parent.username)}</div><div class="reply-text">${esc(parent.content||'📷')}</div></div>`;
+        const parent=data.find(p=>p.id===post.parent_id);
+        if(parent){ html+=`<div class="reply-box"><div class="reply-author">@${esc(parent.username)}</div><div class="reply-text">${esc(parent.content||'📷')}</div></div>`; }
       }
-      const lock = post.target_username?' 🔒':'';
-      html+=`<div class="author">@${esc(post.username)}${lock}</div>`;
-      if(post.image_url) html+=`<img class="img" src="${post.image_url}" onclick="showImage('${post.image_url}')" loading="lazy">`;
-      if(post.content) html+=`<div class="text">${esc(post.content)}</div>`;
-      html+=`<div class="actions"><span class="btn" onclick="reply('${post.id}','${esc(post.username)}','${esc((post.content||'').substring(0,40))}')">💬 Ответить</span>`;
-      if(post.user_id===userId) html+=`<span class="btn btn-del" onclick="del('${post.id}')">🗑 Удалить</span>`;
-      html+='</div>';
+      html+=`<div class="author">@${esc(post.username)}${post.target_username?' 🔒':''}</div>`;
+      if(post.image_url){ html+=`<img class="img" src="${post.image_url}" onclick="showImage('${post.image_url}')" loading="lazy">`; }
+      if(post.content){ html+=`<div class="text">${esc(post.content)}</div>`; }
+
+      // Действия + поделиться
+      html+=`<div class="actions">
+        <span class="btn" onclick="reply('${post.id}','${esc(post.username)}','${esc((post.content||'').substring(0,40))}')">💬 Ответить</span>
+        <span class="btn btn-share" onclick="sharePost('${post.id}','${esc(post.content||'')}','${post.image_url||''}')">📤 Поделиться</span>
+        ${post.user_id===userId?`<span class="btn btn-del" onclick="del('${post.id}')">🗑 Удалить</span>`:''}
+      </div>`;
+
       card.innerHTML=html;
       feed.appendChild(card);
     });
-  }catch(e){console.error(e); document.getElementById('feed').innerHTML='<div class="error">Ошибка загрузки</div>';}
+
+  }catch(e){ console.error('Ошибка:',e); feed.innerHTML='<div class="error">Ошибка загрузки</div>'; }
 }
 
 function esc(str){ const div=document.createElement('div'); div.textContent=str||''; return div.innerHTML; }
 
-// Галерея случайных постов
-function renderGallery(posts,count=12){
-  const gallery=document.getElementById('gallery'); gallery.innerHTML='';
-  const shuffled=posts.slice().sort(()=>Math.random()-0.5).slice(0,count);
-  shuffled.forEach(p=>{
-    const card=document.createElement('div'); card.className='gallery-card'; card.onclick=()=>showImage(p.image_url||'');
-    card.innerHTML=`<img src="${p.image_url||''}" loading="lazy">`;
-    gallery.appendChild(card);
-  });
-}
-
-// Модалка
+// Модалки
 function openModal(){ document.getElementById('modal').classList.add('show'); }
 function closeModal(){
   document.getElementById('modal').classList.remove('show');
   setTimeout(()=>{
-    document.getElementById('txt').value='';
-    document.getElementById('target').value='';
-    document.getElementById('replyBox').style.display='none';
-    clearFile();
-    replyId=null;
+    document.getElementById('txt').value=''; document.getElementById('target').value='';
+    document.getElementById('replyBox').style.display='none'; clearFile(); replyId=null;
   },300);
 }
-function reply(id,user,text){
-  replyId=id;
-  document.getElementById('replyAuthor').textContent='@'+user;
-  document.getElementById('replyText').textContent=text+'...';
-  document.getElementById('replyBox').style.display='block';
-  openModal();
-}
+function reply(id,user,text){ replyId=id; document.getElementById('replyAuthor').textContent='@'+user; document.getElementById('replyText').textContent=text+'...'; document.getElementById('replyBox').style.display='block'; openModal(); }
 
 // Файлы
-function showPreview(){
-  const file=document.getElementById('file').files[0];
-  if(!file) return;
-  if(file.size>5*1024*1024){ tg.showAlert('Файл слишком большой (макс 5МБ)'); document.getElementById('file').value=''; return;}
-  const reader=new FileReader();
-  reader.onload=e=>{ document.getElementById('previewImg').src=e.target.result; document.getElementById('preview').style.display='block'; }
-  reader.readAsDataURL(file);
-}
+function showPreview(){ const file=document.getElementById('file').files[0]; if(!file) return; if(file.size>5*1024*1024){ tg.showAlert('Файл слишком большой (макс 5МБ)'); document.getElementById('file').value=''; return; } const reader=new FileReader(); reader.onload=e=>{ document.getElementById('previewImg').src=e.target.result; document.getElementById('preview').style.display='block'; }; reader.readAsDataURL(file); }
 function clearFile(){ document.getElementById('file').value=''; document.getElementById('preview').style.display='none'; }
 
 // Отправка
@@ -240,7 +256,7 @@ async function send(){
   const text=document.getElementById('txt').value.trim();
   const targetUser=document.getElementById('target').value.replace('@','').trim();
   const file=document.getElementById('file').files[0];
-  if(!text && !file){ tg.showAlert('Напишите текст или добавьте фото'); return;}
+  if(!text && !file){ tg.showAlert('Напишите текст или добавьте фото'); return; }
   btn.disabled=true; btn.textContent='Отправка...';
   try{
     let imageUrl=null;
@@ -251,23 +267,27 @@ async function send(){
       const { data:{ publicUrl } } = db.storage.from('images').getPublicUrl(fileName);
       imageUrl=publicUrl;
     }
-    const postData={ username, content:text, user_id:userId, image_url:imageUrl, target_username:targetUser||null, parent_id:replyId };
+
+    const postData={
+      username, content:text, user_id:userId,
+      image_url:imageUrl, target_username:targetUser||null,
+      parent_id:replyId, link_preview:null
+    };
+
     const { error } = await db.from('posts').insert([postData]);
     if(error) throw error;
     closeModal(); await load();
-  }catch(e){ console.error(e); tg.showAlert('Ошибка: '+e.message);}
+
+  }catch(e){ console.error('Ошибка:',e); tg.showAlert('Ошибка: '+e.message); }
   finally{ btn.disabled=false; btn.textContent='Отправить'; }
 }
 
 // Удаление
 async function del(id){
-  tg.showConfirm('Удалить пост?', async (ok)=>{
+  tg.showConfirm('Удалить пост?', async ok=>{
     if(!ok) return;
-    try{
-      const { error } = await db.from('posts').delete().eq('id',id).eq('user_id',userId);
-      if(error) throw error;
-      await load();
-    }catch(e){ console.error(e); tg.showAlert('Ошибка удаления');}
+    try{ const { error }=await db.from('posts').delete().eq('id',id).eq('user_id',userId); if(error) throw error; await load(); }
+    catch(e){ console.error('Ошибка:',e); tg.showAlert('Ошибка удаления'); }
   });
 }
 
@@ -275,10 +295,20 @@ async function del(id){
 function showImage(url){ document.getElementById('overlayImg').src=url; document.getElementById('overlay').classList.add('show'); }
 function closeOverlay(){ document.getElementById('overlay').classList.remove('show'); }
 
+// Поделиться постом
+function sharePost(id,text,image){
+  const msg=encodeURIComponent(text); const img=encodeURIComponent(image||'');
+  const tgUrl=`https://t.me/share/url?url=&text=${msg}`;
+  const menu=`Выберите куда поделиться:\n1. Telegram\n2. Discord\n3. Instagram`;
+  const choice=prompt(menu,'1');
+  if(choice==='1'){ window.open(tgUrl,'_blank'); }
+  else if(choice==='2'){ alert('Скопируйте текст и вставьте в Discord:\n'+text); }
+  else if(choice==='3'){ alert('Скопируйте текст и вставьте в Instagram:\n'+text); }
+}
+
 // Старт
-if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', init);}
+if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',init); }
 else{ init(); }
 </script>
-
 </body>
 </html>
