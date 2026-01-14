@@ -3,237 +3,281 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OpenEcho</title>
-
+<title>OpenEcho One UI</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
 :root {
-  --bg:#f5f5f5;
-  --card:#fff;
-  --text:#111;
-  --muted:#777;
-  --accent:#1b6ef3;
+  --bg: #f5f5f5;
+  --card-bg: rgba(255, 255, 255, 0.7);
+  --text: #1a1a1a;
+  --text-dim: #666;
+  --accent: #1b6ef3;
+  --border: rgba(0,0,0,0.08);
+  --shadow: rgba(0,0,0,0.1);
 }
-
+[data-theme="dark"] {
+  --bg: #0a0a0a;
+  --card-bg: rgba(30,30,30,0.7);
+  --text: #e5e5e5;
+  --text-dim: #999;
+  --accent: #5093ff;
+  --border: rgba(255,255,255,0.1);
+  --shadow: rgba(0,0,0,0.5);
+}
+* { box-sizing: border-box; margin:0; padding:0; }
 body {
-  margin:0;
-  padding:16px;
-  background:var(--bg);
-  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
-  color:var(--text);
+  font-family: -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  padding:20px; padding-bottom:100px;
+  transition: background 0.3s, color 0.3s;
 }
 
-.header {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:16px;
+.header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+h2 { font-size:28px; font-weight:700; }
+.theme-btn {
+  width:44px;height:44px;border-radius:50%;
+  background: var(--card-bg); backdrop-filter: blur(20px);
+  border:1px solid var(--border);
+  cursor:pointer; display:flex; justify-content:center; align-items:center;
+  font-size:20px; box-shadow: 0 4px 12px var(--shadow);
 }
 
-h2 { margin:0 }
+#gallery { display:flex; gap:8px; overflow-x:auto; padding:12px 0; }
+.gallery-card { flex:0 0 auto; width:100px; height:100px; border-radius:12px; overflow:hidden; cursor:pointer; }
+.gallery-card img { width:100%; height:100%; object-fit:cover; }
 
-.card {
-  background:var(--card);
-  border-radius:16px;
-  padding:14px;
-  margin-bottom:12px;
-  box-shadow:0 4px 16px rgba(0,0,0,.08);
-}
-
-.author {
-  font-weight:600;
-  color:var(--accent);
-  margin-bottom:6px;
-}
-
-.text {
-  font-size:14px;
-  line-height:1.4;
-}
-
-.img {
-  width:100%;
-  border-radius:12px;
-  margin-top:8px;
-}
-
-.actions {
-  display:flex;
-  gap:16px;
-  margin-top:8px;
-  font-size:13px;
-}
-
-.btn { color:var(--accent); cursor:pointer }
-.btn-del { color:#ff3b30 }
-
-.add-btn {
-  position:fixed;
-  bottom:24px;
-  right:24px;
-  width:56px;
-  height:56px;
-  border-radius:50%;
-  background:var(--accent);
-  color:#fff;
-  border:none;
-  font-size:26px;
-}
-
-.modal {
-  position:fixed;
-  inset:0;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  background:rgba(0,0,0,.6);
-}
-
-.modal.show { display:flex }
-
-.modal-content {
-  background:#fff;
-  border-radius:16px;
-  padding:16px;
-  width:100%;
-  max-width:400px;
-}
-
-textarea,input {
-  width:100%;
-  border-radius:12px;
-  border:1px solid #ddd;
-  padding:10px;
-  margin-bottom:10px;
-  font-size:14px;
-}
-
-.send-btn {
-  width:100%;
-  background:var(--accent);
-  color:#fff;
-  border:none;
-  padding:12px;
-  border-radius:12px;
-  font-weight:600;
-}
+#feed { display:flex; flex-direction:column; gap:16px; }
+.card { background: var(--card-bg); backdrop-filter: blur(40px); border-radius:24px; padding:20px; border:1px solid var(--border); box-shadow:0 8px 32px var(--shadow); }
+.author { color: var(--accent); font-weight:600; font-size:15px; margin-bottom:10px; }
+.text { color: var(--text); line-height:1.5; margin-bottom:12px; word-wrap:break-word; font-size:15px; }
+.img { width:100%; border-radius:16px; margin-bottom:12px; cursor:pointer; }
+.reply-box { background: var(--card-bg); backdrop-filter: blur(20px); border-left:3px solid var(--accent); padding:10px 12px; border-radius:12px; margin-bottom:12px; font-size:13px; border:1px solid var(--border);}
+.reply-author { font-weight:600; color: var(--accent); margin-bottom:4px; }
+.reply-text { color: var(--text-dim); font-size:13px; }
+.add-btn { position:fixed; bottom:24px; right:24px; width:60px;height:60px; background: linear-gradient(135deg, var(--accent) 0%, #9055ff 100%); color:white; border:none; border-radius:50%; font-size:28px; cursor:pointer; box-shadow:0 8px 24px rgba(27,110,243,0.4); z-index:100; }
+.modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); backdrop-filter:blur(10px); z-index:200; align-items:center; justify-content:center; padding:20px; }
+.modal.show { display:flex; }
+.modal-content { background: var(--card-bg); backdrop-filter: blur(40px); border-radius:24px; padding:24px; width:100%; max-width:420px; border:1px solid var(--border); box-shadow:0 20px 60px var(--shadow); }
+textarea { width:100%; border:1px solid var(--border); border-radius:16px; padding:14px; font-size:15px; font-family:inherit; resize:none; margin-bottom:12px; background:var(--card-bg); backdrop-filter:blur(20px); color:var(--text); }
+textarea:focus { outline:none; border-color:var(--accent); }
+input[type="text"] { width:100%; border:1px solid var(--border); border-radius:16px; padding:12px 14px; font-size:14px; margin-bottom:16px; background: var(--card-bg); backdrop-filter:blur(20px); color:var(--text);}
+input[type="text"]:focus { outline:none; border-color:var(--accent); }
+.modal-btns { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.send-btn { background: linear-gradient(135deg, var(--accent) 0%, #9055ff 100%); color:white; border:none; padding:12px 28px; border-radius:16px; font-weight:600; font-size:15px; cursor:pointer; }
+.send-btn:disabled { opacity:0.5; }
+.file-btn { background:var(--card-bg); backdrop-filter:blur(20px); border:1px solid var(--border); color:var(--text); font-size:14px; cursor:pointer; padding:12px 20px; border-radius:16px; font-weight:500; }
+.preview { width:80px; height:80px; position:relative; margin-bottom:12px; border-radius:12px; overflow:hidden; display:none;}
+.preview img { width:100%; height:100%; object-fit:cover; }
+.preview-close { position:absolute; top:-8px; right:-8px; background:#ff3b30; color:white; border-radius:50%; width:24px; height:24px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; }
+.overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); backdrop-filter:blur(20px); z-index:300; align-items:center; justify-content:center; }
+.overlay.show { display:flex; }
+.overlay img { max-width:90%; max-height:90%; border-radius:16px; }
 </style>
 </head>
-
-<body>
+<body data-theme="light">
 
 <div class="header">
-  <h2>OpenEcho</h2>
+  <h2>OpenEcho 🔥</h2>
+  <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
 </div>
 
-<div id="feed">Загрузка…</div>
+<!-- Галерея случайных постов -->
+<div id="gallery"></div>
 
+<!-- Основной фид -->
+<div id="feed">
+  <div class="loading">Загрузка...</div>
+</div>
+
+<!-- Кнопка публикации -->
 <button class="add-btn" onclick="openModal()">+</button>
 
-<div id="modal" class="modal" onclick="if(event.target===this)closeModal()">
+<!-- Модалка -->
+<div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
   <div class="modal-content">
+    <div id="replyBox" style="display:none" class="reply-box">
+      <div class="reply-author" id="replyAuthor"></div>
+      <div class="reply-text" id="replyText"></div>
+    </div>
+
     <textarea id="txt" rows="4" placeholder="Что нового?"></textarea>
-    <input id="target" placeholder="Приватно для @username">
-    <button class="send-btn" onclick="send()">Отправить</button>
+
+    <div id="preview" class="preview">
+      <img id="previewImg">
+      <div class="preview-close" onclick="clearFile()">×</div>
+    </div>
+
+    <input type="text" id="target" placeholder="Приватно для @username">
+
+    <div class="modal-btns">
+      <button class="file-btn" onclick="document.getElementById('file').click()">📷 Фото</button>
+      <input type="file" id="file" hidden accept="image/*" onchange="showPreview()">
+      <button class="send-btn" id="sendBtn" onclick="send()">Отправить</button>
+    </div>
   </div>
+</div>
+
+<!-- Оверлей просмотра фото -->
+<div id="overlay" class="overlay" onclick="closeOverlay()">
+  <img id="overlayImg">
 </div>
 
 <script>
 const tg = window.Telegram.WebApp;
 tg.expand();
 
+// ⚠️ ЗАМЕНИТЕ НА СВОИ ДАННЫЕ
 const SUPABASE_URL = 'https://xddulhzvzemmrhrsjfhb.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_2FIKYuEHEQrYseRnwY58Qg__UIFN59j';
+let db = null, userId = null, username = null, replyId = null;
 
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// Тема
+function toggleTheme(){
+  const body=document.body, btn=document.getElementById('themeBtn'), current=body.getAttribute('data-theme');
+  if(current==='light'){body.setAttribute('data-theme','dark'); btn.textContent='☀️'; localStorage.setItem('theme','dark');}
+  else{body.setAttribute('data-theme','light'); btn.textContent='🌙'; localStorage.setItem('theme','light');}
+}
+const savedTheme = localStorage.getItem('theme') || 'light';
+document.body.setAttribute('data-theme', savedTheme);
+if(savedTheme==='dark') document.getElementById('themeBtn').textContent='☀️';
 
-let userId = 'test';
-let username = 'test';
+// Инициализация
+async function init(){
+  try{
+    const user = tg.initDataUnsafe?.user;
+    if(!user){ userId='test123'; username='TestUser'; }
+    else{ userId=user.id.toString(); username=user.username || 'User'+user.id; }
 
-if (tg.initDataUnsafe?.user) {
-  userId = String(tg.initDataUnsafe.user.id);
-  username = tg.initDataUnsafe.user.username || userId;
+    if(SUPABASE_URL.includes('your-project')) throw new Error('Укажите SUPABASE_URL и SUPABASE_KEY');
+
+    db = supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+    await load();
+
+    db.channel('posts-channel')
+      .on('postgres_changes',{event:'*', schema:'public', table:'posts'},()=>load())
+      .subscribe();
+  }catch(e){console.error(e); document.getElementById('feed').innerHTML='<div class="error">Ошибка: '+e.message+'</div>';}
 }
 
-function esc(t){
-  const d=document.createElement('div');
-  d.textContent=t||'';
-  return d.innerHTML;
-}
-
+// Загрузка постов
 async function load(){
-  const { data, error } = await db
-    .from('posts')
-    .select('*')
-    .or(`target_username.is.null,target_username.eq.${username}`)
-    .order('created_at',{ascending:false})
-    .limit(50);
+  try{
+    const { data, error } = await db.from('posts').select('*').order('created_at',{ascending:false}).limit(50);
+    if(error) throw error;
 
-  const feed=document.getElementById('feed');
-  feed.innerHTML='';
+    renderGallery(data); // галерея случайных постов
 
-  if(error){
-    feed.innerHTML='Ошибка загрузки';
-    console.error(error);
-    return;
-  }
+    const feed = document.getElementById('feed'); feed.innerHTML='';
+    data.forEach(post=>{
+      const card=document.createElement('div'); card.className='card';
+      let html='';
+      if(post.parent_id){
+        const parent = data.find(p=>p.id===post.parent_id);
+        if(parent) html+=`<div class="reply-box"><div class="reply-author">@${esc(parent.username)}</div><div class="reply-text">${esc(parent.content||'📷')}</div></div>`;
+      }
+      const lock = post.target_username?' 🔒':'';
+      html+=`<div class="author">@${esc(post.username)}${lock}</div>`;
+      if(post.image_url) html+=`<img class="img" src="${post.image_url}" onclick="showImage('${post.image_url}')" loading="lazy">`;
+      if(post.content) html+=`<div class="text">${esc(post.content)}</div>`;
+      html+=`<div class="actions"><span class="btn" onclick="reply('${post.id}','${esc(post.username)}','${esc((post.content||'').substring(0,40))}')">💬 Ответить</span>`;
+      if(post.user_id===userId) html+=`<span class="btn btn-del" onclick="del('${post.id}')">🗑 Удалить</span>`;
+      html+='</div>';
+      card.innerHTML=html;
+      feed.appendChild(card);
+    });
+  }catch(e){console.error(e); document.getElementById('feed').innerHTML='<div class="error">Ошибка загрузки</div>';}
+}
 
-  if(!data.length){
-    feed.innerHTML='Пока нет постов';
-    return;
-  }
+function esc(str){ const div=document.createElement('div'); div.textContent=str||''; return div.innerHTML; }
 
-  data.forEach(p=>{
-    const card=document.createElement('div');
-    card.className='card';
-
-    card.innerHTML=`
-      <div class="author">@${esc(p.username)} ${p.target_username?'🔒':''}</div>
-      ${p.content?`<div class="text">${esc(p.content)}</div>`:''}
-      ${p.image_url?`<img class="img" src="${p.image_url}">`:''}
-      <div class="actions">
-        ${p.user_id===userId?`<span class="btn btn-del" onclick="del('${p.id}')">Удалить</span>`:''}
-      </div>
-    `;
-    feed.appendChild(card);
+// Галерея случайных постов
+function renderGallery(posts,count=12){
+  const gallery=document.getElementById('gallery'); gallery.innerHTML='';
+  const shuffled=posts.slice().sort(()=>Math.random()-0.5).slice(0,count);
+  shuffled.forEach(p=>{
+    const card=document.createElement('div'); card.className='gallery-card'; card.onclick=()=>showImage(p.image_url||'');
+    card.innerHTML=`<img src="${p.image_url||''}" loading="lazy">`;
+    gallery.appendChild(card);
   });
 }
 
-function openModal(){
-  document.getElementById('modal').classList.add('show');
-}
-
+// Модалка
+function openModal(){ document.getElementById('modal').classList.add('show'); }
 function closeModal(){
   document.getElementById('modal').classList.remove('show');
-  document.getElementById('txt').value='';
-  document.getElementById('target').value='';
+  setTimeout(()=>{
+    document.getElementById('txt').value='';
+    document.getElementById('target').value='';
+    document.getElementById('replyBox').style.display='none';
+    clearFile();
+    replyId=null;
+  },300);
+}
+function reply(id,user,text){
+  replyId=id;
+  document.getElementById('replyAuthor').textContent='@'+user;
+  document.getElementById('replyText').textContent=text+'...';
+  document.getElementById('replyBox').style.display='block';
+  openModal();
 }
 
+// Файлы
+function showPreview(){
+  const file=document.getElementById('file').files[0];
+  if(!file) return;
+  if(file.size>5*1024*1024){ tg.showAlert('Файл слишком большой (макс 5МБ)'); document.getElementById('file').value=''; return;}
+  const reader=new FileReader();
+  reader.onload=e=>{ document.getElementById('previewImg').src=e.target.result; document.getElementById('preview').style.display='block'; }
+  reader.readAsDataURL(file);
+}
+function clearFile(){ document.getElementById('file').value=''; document.getElementById('preview').style.display='none'; }
+
+// Отправка
 async function send(){
+  const btn=document.getElementById('sendBtn');
   const text=document.getElementById('txt').value.trim();
-  const target=document.getElementById('target').value.replace('@','').trim();
-
-  if(!text) return;
-
-  await db.from('posts').insert([{
-    username,
-    user_id:userId,
-    content:text,
-    target_username:target||null
-  }]);
-
-  closeModal();
-  load();
+  const targetUser=document.getElementById('target').value.replace('@','').trim();
+  const file=document.getElementById('file').files[0];
+  if(!text && !file){ tg.showAlert('Напишите текст или добавьте фото'); return;}
+  btn.disabled=true; btn.textContent='Отправка...';
+  try{
+    let imageUrl=null;
+    if(file){
+      const fileName=Date.now()+'.jpg';
+      const { error: upError } = await db.storage.from('images').upload(fileName,file);
+      if(upError) throw upError;
+      const { data:{ publicUrl } } = db.storage.from('images').getPublicUrl(fileName);
+      imageUrl=publicUrl;
+    }
+    const postData={ username, content:text, user_id:userId, image_url:imageUrl, target_username:targetUser||null, parent_id:replyId };
+    const { error } = await db.from('posts').insert([postData]);
+    if(error) throw error;
+    closeModal(); await load();
+  }catch(e){ console.error(e); tg.showAlert('Ошибка: '+e.message);}
+  finally{ btn.disabled=false; btn.textContent='Отправить'; }
 }
 
+// Удаление
 async function del(id){
-  await db.from('posts').delete().eq('id',id).eq('user_id',userId);
-  load();
+  tg.showConfirm('Удалить пост?', async (ok)=>{
+    if(!ok) return;
+    try{
+      const { error } = await db.from('posts').delete().eq('id',id).eq('user_id',userId);
+      if(error) throw error;
+      await load();
+    }catch(e){ console.error(e); tg.showAlert('Ошибка удаления');}
+  });
 }
 
-load();
+// Просмотр фото
+function showImage(url){ document.getElementById('overlayImg').src=url; document.getElementById('overlay').classList.add('show'); }
+function closeOverlay(){ document.getElementById('overlay').classList.remove('show'); }
+
+// Старт
+if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', init);}
+else{ init(); }
 </script>
 
 </body>
