@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OpenEcho Pro</title>
+    <title>OpenEcho Elite</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -23,205 +23,169 @@
             margin: 0; 
             padding: 20px; 
             padding-bottom: 110px;
-            line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
         }
 
-        h2 {
-            font-weight: 800;
-            font-size: 28px;
-            margin: 10px 0 24px 0;
-            letter-spacing: -0.5px;
-        }
-
-        #feed {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
+        /* Лента */
+        #feed { display: flex; flex-direction: column; gap: 16px; }
         .echo-card { 
             background: var(--card-bg); 
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
-            padding: 0; 
             border-radius: 24px; 
             position: relative; 
             border: 1px solid rgba(255, 255, 255, 0.08);
             overflow: hidden;
-            animation: fadeIn 0.4s ease-out;
+            animation: fadeIn 0.3s ease;
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .card-content { padding: 16px 20px 20px 20px; }
-
-        .author { 
-            font-weight: 700; 
-            color: var(--accent); 
-            margin-bottom: 8px; 
-            font-size: 14px;
-        }
-
-        .post-img { 
-            width: 100%;
-            display: block;
-            object-fit: cover;
-            max-height: 450px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .content { 
-            font-size: 16px; 
-            color: rgba(255, 255, 255, 0.95);
-            word-wrap: break-word;
-        }
-
-        .delete-btn { 
-            position: absolute; 
-            top: 12px; 
-            right: 12px; 
-            background: rgba(255, 69, 58, 0.2); 
-            border: none; 
-            font-size: 14px; 
-            cursor: pointer; 
-            border-radius: 10px; 
-            width: 30px; 
-            height: 30px; 
-            color: var(--danger);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(5px);
-            z-index: 10;
-        }
-
-        .btn-add { 
-            position: fixed; 
-            bottom: 30px; 
-            right: 24px; 
-            width: 60px; 
-            height: 60px; 
-            background: var(--accent); 
-            border-radius: 20px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 30px; 
-            color: white; 
-            border: none; 
-            box-shadow: 0 8px 25px rgba(10, 132, 255, 0.4); 
-            z-index: 100;
-            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .btn-add:active { transform: scale(0.9) rotate(5deg); }
-
-        #fileInput { display: none; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .loader { text-align: center; color: var(--text-dim); margin-top: 20px; font-size: 14px; }
+        .card-content { padding: 16px; }
+        .author { font-weight: 700; color: var(--accent); font-size: 14px; margin-bottom: 4px; }
+        .post-img { width: 100%; display: block; object-fit: cover; max-height: 400px; }
+        .delete-btn { position: absolute; top: 10px; right: 10px; background: rgba(255, 69, 58, 0.2); border: none; border-radius: 10px; width: 28px; height: 28px; color: var(--danger); z-index: 5; }
+
+        /* Модальное окно создания поста */
+        #modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: #1c1c1e;
+            width: 90%;
+            padding: 24px;
+            border-radius: 28px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        textarea {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 18px;
+            resize: none;
+            outline: none;
+            margin-bottom: 20px;
+            font-family: inherit;
+        }
+        .modal-btns { display: flex; justify-content: space-between; align-items: center; }
+        .attach-btn { color: var(--accent); font-weight: 600; cursor: pointer; }
+        .send-btn { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 14px; font-weight: 700; }
+        
+        /* Кнопка Плюс */
+        .btn-add { 
+            position: fixed; bottom: 30px; right: 24px; 
+            width: 60px; height: 60px; background: var(--accent); 
+            border-radius: 20px; font-size: 30px; color: white; border: none; 
+            box-shadow: 0 8px 25px rgba(10, 132, 255, 0.4); z-index: 100;
+        }
+        
+        #fileInput { display: none; }
+        .preview-name { font-size: 12px; color: var(--text-dim); margin-top: 5px; display: block; }
     </style>
 </head>
 <body>
 
-    <h2>OpenEcho 🚀</h2>
-    <div id="feed"><div class="loader">Загрузка постов...</div></div>
-    
-    <input type="file" id="fileInput" accept="image/*">
-    <button class="btn-add" onclick="document.getElementById('fileInput').click()">+</button>
+    <h2 style="font-weight: 800; letter-spacing: -1px;">OpenEcho</h2>
+    <div id="feed"></div>
+
+    <button class="btn-add" onclick="openModal()">+</button>
+
+    <div id="modal">
+        <div class="modal-content">
+            <textarea id="postText" rows="4" placeholder="Что нового?"></textarea>
+            <input type="file" id="fileInput" accept="image/*" onchange="updateFileName()">
+            <div id="fileName" class="preview-name"></div>
+            <div class="modal-btns">
+                <div class="attach-btn" onclick="document.getElementById('fileInput').click()">🖼 Фото</div>
+                <button class="send-btn" onclick="sendPost()">Опубликовать</button>
+            </div>
+            <button onclick="closeModal()" style="background:none; border:none; color:#8e8e93; width:100%; margin-top:20px;">Отмена</button>
+        </div>
+    </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        tg.backgroundColor = '#0f0f10';
-        tg.headerColor = '#0f0f10';
 
-        // --- КОНФИГУРАЦИЯ ---
+        // --- ВСТАВЬ СВОИ ДАННЫЕ ТУТ ---
         const SUPABASE_URL = 'https://xddulhzvzemmrhrsjfhb.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_2FIKYuEHEQrYseRnwY58Qg__UIFN59j';
-        // --------------------
+        // ------------------------------
 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         const currentUserId = tg.initDataUnsafe?.user?.id?.toString();
 
-        async function loadEchos() {
-            const { data, error } = await supabaseClient
-                .from('posts')
-                .select('*')
-                .order('created_at', { ascending: false });
-            
-            const feed = document.getElementById('feed');
-            if (error) {
-                feed.innerHTML = `<div class="loader">Ошибка: ${error.message}</div>`;
-                return;
-            }
+        function openModal() { document.getElementById('modal').style.display = 'flex'; }
+        function closeModal() { 
+            document.getElementById('modal').style.display = 'none';
+            document.getElementById('postText').value = '';
+            document.getElementById('fileInput').value = '';
+            document.getElementById('fileName').innerText = '';
+        }
 
+        function updateFileName() {
+            const file = document.getElementById('fileInput').files[0];
+            document.getElementById('fileName').innerText = file ? "Прикреплено: " + file.name : "";
+        }
+
+        async function loadEchos() {
+            const { data, error } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
+            const feed = document.getElementById('feed');
             if (data) {
                 feed.innerHTML = '';
                 data.forEach(post => {
                     const isMyPost = post.user_id === currentUserId;
-                    const imgHtml = post.image_url ? `<img src="${post.image_url}" class="post-img" loading="lazy">` : '';
-                    const deleteHtml = isMyPost ? `<button class="delete-btn" onclick="deleteEcho('${post.id}')">✕</button>` : '';
-
-                    const card = document.createElement('div');
-                    card.className = 'echo-card';
-                    card.innerHTML = `
-                        ${deleteHtml}
-                        ${imgHtml}
-                        <div class="card-content">
-                            <div class="author">@${post.username || 'anon'}</div>
-                            <div class="content">${post.content}</div>
-                        </div>
-                    `;
-                    feed.appendChild(card);
+                    feed.innerHTML += `
+                        <div class="echo-card">
+                            ${isMyPost ? `<button class="delete-btn" onclick="deleteEcho('${post.id}')">✕</button>` : ''}
+                            ${post.image_url ? `<img src="${post.image_url}" class="post-img">` : ''}
+                            <div class="card-content">
+                                <div class="author">@${post.username || 'anon'}</div>
+                                <div class="content">${post.content}</div>
+                            </div>
+                        </div>`;
                 });
             }
         }
 
-        document.getElementById('fileInput').onchange = async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const text = prompt("Напишите что-нибудь...");
+        async function sendPost() {
+            const text = document.getElementById('postText').value;
+            const file = document.getElementById('fileInput').files[0];
             const username = tg.initDataUnsafe?.user?.username || "Guest";
-            
+
+            if (!text && !file) return;
+
             tg.MainButton.setText("Публикация...").show();
-
             let imageUrl = null;
-            const fileName = `${Date.now()}_${file.name}`;
 
-            // 1. Загрузка фото
-            const { data: uploadData, error: uploadError } = await supabaseClient.storage
-                .from('images')
-                .upload(fileName, file);
-
-            if (uploadData) {
-                const { data: urlData } = supabaseClient.storage.from('images').getPublicUrl(fileName);
-                imageUrl = urlData.publicUrl;
+            if (file) {
+                const fileName = `${Date.now()}_${file.name}`;
+                const { data } = await supabaseClient.storage.from('images').upload(fileName, file);
+                if (data) {
+                    const { data: urlData } = supabaseClient.storage.from('images').getPublicUrl(fileName);
+                    imageUrl = urlData.publicUrl;
+                }
             }
 
-            // 2. Создание поста
-            const { error: insertError } = await supabaseClient.from('posts').insert([{ 
-                username: username, 
-                content: text || "", 
-                user_id: currentUserId,
-                image_url: imageUrl
+            await supabaseClient.from('posts').insert([{ 
+                username: username, content: text, user_id: currentUserId, image_url: imageUrl 
             }]);
 
-            if (insertError) alert("Ошибка: " + insertError.message);
-            
             tg.MainButton.hide();
-            e.target.value = ''; // сброс выбора файла
+            closeModal();
             loadEchos();
-        };
+        }
 
         async function deleteEcho(id) {
-            if (confirm("Удалить этот пост?")) {
-                const { error } = await supabaseClient.from('posts').delete().eq('id', id);
-                if (!error) loadEchos();
+            if (confirm("Удалить?")) {
+                await supabaseClient.from('posts').delete().eq('id', id);
+                loadEchos();
             }
         }
 
