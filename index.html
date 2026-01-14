@@ -8,90 +8,237 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-* {
+:root {
+  --bg: #f5f5f5;
+  --card-bg: rgba(255, 255, 255, 0.7);
+  --text: #1a1a1a;
+  --text-dim: #666;
+  --accent: #1b6ef3;
+  --border: rgba(0, 0, 0, 0.08);
+  --shadow: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme=“dark”] {
+–bg: #0a0a0a;
+–card-bg: rgba(30, 30, 30, 0.7);
+–text: #e5e5e5;
+–text-dim: #999;
+–accent: #5093ff;
+–border: rgba(255, 255, 255, 0.1);
+–shadow: rgba(0, 0, 0, 0.5);
+}
+
+- {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-}
+  }
 
 body {
-font-family: -apple-system, sans-serif;
-background: #f5f5f5;
-padding: 16px;
-padding-bottom: 80px;
+font-family: ‘SF Pro Display’, -apple-system, sans-serif;
+background: var(–bg);
+color: var(–text);
+padding: 20px;
+padding-bottom: 100px;
+transition: background 0.4s ease, color 0.4s ease;
+}
+
+.header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 24px;
 }
 
 h2 {
-font-size: 24px;
-margin-bottom: 20px;
+font-size: 28px;
+font-weight: 700;
+letter-spacing: -0.5px;
 }
 
-.debug {
-background: #333;
-color: #0f0;
-padding: 10px;
-border-radius: 8px;
-margin-bottom: 16px;
-font-size: 11px;
-font-family: monospace;
-white-space: pre-wrap;
-word-wrap: break-word;
+.theme-toggle {
+width: 44px;
+height: 44px;
+border-radius: 50%;
+background: var(–card-bg);
+backdrop-filter: blur(20px);
+-webkit-backdrop-filter: blur(20px);
+border: 1px solid var(–border);
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 20px;
+transition: all 0.3s ease;
+box-shadow: 0 4px 12px var(–shadow);
+}
+
+.theme-toggle:active {
+transform: scale(0.9);
 }
 
 #feed {
 display: flex;
 flex-direction: column;
-gap: 12px;
+gap: 16px;
 }
 
 .card {
-background: white;
-border-radius: 16px;
-padding: 16px;
-box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+background: var(–card-bg);
+backdrop-filter: blur(40px);
+-webkit-backdrop-filter: blur(40px);
+border-radius: 24px;
+padding: 20px;
+border: 1px solid var(–border);
+box-shadow: 0 8px 32px var(–shadow);
+opacity: 0;
+transform: translateY(20px);
+animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+@keyframes slideUp {
+to {
+opacity: 1;
+transform: translateY(0);
+}
+}
+
+.card:nth-child(2) { animation-delay: 0.05s; }
+.card:nth-child(3) { animation-delay: 0.1s; }
+.card:nth-child(4) { animation-delay: 0.15s; }
+
 .author {
-color: #007aff;
+color: var(–accent);
 font-weight: 600;
-font-size: 14px;
-margin-bottom: 8px;
+font-size: 15px;
+margin-bottom: 10px;
+display: flex;
+align-items: center;
+gap: 6px;
 }
 
 .text {
-color: #333;
-line-height: 1.4;
-margin-bottom: 8px;
+color: var(–text);
+line-height: 1.5;
+margin-bottom: 12px;
 word-wrap: break-word;
+font-size: 15px;
 }
 
 .img {
 width: 100%;
-border-radius: 12px;
-margin-bottom: 8px;
+border-radius: 16px;
+margin-bottom: 12px;
 cursor: pointer;
+transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.img:active {
+transform: scale(0.98);
+filter: brightness(0.9);
 }
 
 .reply-box {
-background: #f0f0f0;
-border-left: 3px solid #007aff;
-padding: 8px;
-border-radius: 8px;
-margin-bottom: 8px;
+background: var(–card-bg);
+backdrop-filter: blur(20px);
+border-left: 3px solid var(–accent);
+padding: 10px 12px;
+border-radius: 12px;
+margin-bottom: 12px;
 font-size: 13px;
+border: 1px solid var(–border);
+}
+
+.reply-author {
+font-weight: 600;
+color: var(–accent);
+margin-bottom: 4px;
+}
+
+.reply-text {
+color: var(–text-dim);
+font-size: 13px;
+}
+
+.link-preview {
+background: var(–card-bg);
+backdrop-filter: blur(20px);
+border: 1px solid var(–border);
+border-radius: 16px;
+overflow: hidden;
+margin-top: 12px;
+cursor: pointer;
+transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+box-shadow: 0 4px 16px var(–shadow);
+}
+
+.link-preview:active {
+transform: scale(0.98);
+box-shadow: 0 2px 8px var(–shadow);
+}
+
+.link-preview-img {
+width: 100%;
+height: 180px;
+object-fit: cover;
+background: linear-gradient(135deg, var(–accent) 0%, #9055ff 100%);
+}
+
+.link-preview-content {
+padding: 14px;
+}
+
+.link-preview-title {
+font-weight: 600;
+font-size: 15px;
+color: var(–text);
+margin-bottom: 6px;
+overflow: hidden;
+text-overflow: ellipsis;
+white-space: nowrap;
+}
+
+.link-preview-desc {
+font-size: 13px;
+color: var(–text-dim);
+line-height: 1.4;
+overflow: hidden;
+display: -webkit-box;
+-webkit-line-clamp: 2;
+-webkit-box-orient: vertical;
+margin-bottom: 8px;
+}
+
+.link-preview-url {
+font-size: 12px;
+color: var(–accent);
+overflow: hidden;
+text-overflow: ellipsis;
+white-space: nowrap;
 }
 
 .actions {
 display: flex;
-gap: 16px;
-font-size: 13px;
-margin-top: 8px;
+gap: 20px;
+font-size: 14px;
+margin-top: 12px;
+padding-top: 12px;
+border-top: 1px solid var(–border);
 }
 
 .btn {
-color: #007aff;
+color: var(–accent);
 cursor: pointer;
 font-weight: 500;
+transition: all 0.2s ease;
+display: flex;
+align-items: center;
+gap: 4px;
+}
+
+.btn:active {
+transform: scale(0.95);
+opacity: 0.7;
 }
 
 .btn-del {
@@ -100,17 +247,24 @@ color: #ff3b30;
 
 .add-btn {
 position: fixed;
-bottom: 20px;
-right: 20px;
-width: 56px;
-height: 56px;
-background: #007aff;
+bottom: 24px;
+right: 24px;
+width: 60px;
+height: 60px;
+background: linear-gradient(135deg, var(–accent) 0%, #9055ff 100%);
 color: white;
 border: none;
 border-radius: 50%;
 font-size: 28px;
 cursor: pointer;
-box-shadow: 0 4px 12px rgba(0,122,255,0.4);
+box-shadow: 0 8px 24px rgba(27, 110, 243, 0.4);
+z-index: 100;
+transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+backdrop-filter: blur(20px);
+}
+
+.add-btn:active {
+transform: scale(0.9) rotate(90deg);
 }
 
 .modal {
@@ -120,8 +274,12 @@ top: 0;
 left: 0;
 width: 100%;
 height: 100%;
-background: rgba(0,0,0,0.5);
-z-index: 100;
+background: rgba(0, 0, 0, 0.6);
+backdrop-filter: blur(10px);
+-webkit-backdrop-filter: blur(10px);
+z-index: 200;
+opacity: 0;
+transition: opacity 0.3s ease;
 }
 
 .modal.show {
@@ -129,75 +287,126 @@ display: flex;
 align-items: center;
 justify-content: center;
 padding: 20px;
+opacity: 1;
 }
 
 .modal-content {
-background: white;
-border-radius: 16px;
-padding: 20px;
+background: var(–card-bg);
+backdrop-filter: blur(40px);
+-webkit-backdrop-filter: blur(40px);
+border-radius: 24px;
+padding: 24px;
 width: 100%;
-max-width: 400px;
+max-width: 420px;
+border: 1px solid var(–border);
+box-shadow: 0 20px 60px var(–shadow);
+transform: scale(0.9) translateY(20px);
+transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal.show .modal-content {
+transform: scale(1) translateY(0);
 }
 
 textarea {
 width: 100%;
-border: 1px solid #ddd;
-border-radius: 8px;
-padding: 12px;
+border: 1px solid var(–border);
+border-radius: 16px;
+padding: 14px;
 font-size: 15px;
 font-family: inherit;
 resize: none;
 margin-bottom: 12px;
+background: var(–card-bg);
+backdrop-filter: blur(20px);
+color: var(–text);
+transition: all 0.2s ease;
+}
+
+textarea:focus {
+outline: none;
+border-color: var(–accent);
+box-shadow: 0 0 0 3px rgba(27, 110, 243, 0.1);
 }
 
 input[type=“text”] {
 width: 100%;
-border: 1px solid #ddd;
-border-radius: 8px;
-padding: 10px;
+border: 1px solid var(–border);
+border-radius: 16px;
+padding: 12px 14px;
 font-size: 14px;
-margin-bottom: 12px;
+margin-bottom: 16px;
+background: var(–card-bg);
+backdrop-filter: blur(20px);
+color: var(–text);
+transition: all 0.2s ease;
+}
+
+input[type=“text”]:focus {
+outline: none;
+border-color: var(–accent);
+box-shadow: 0 0 0 3px rgba(27, 110, 243, 0.1);
 }
 
 .modal-btns {
 display: flex;
 justify-content: space-between;
 align-items: center;
+gap: 12px;
 }
 
 .send-btn {
-background: #007aff;
+background: linear-gradient(135deg, var(–accent) 0%, #9055ff 100%);
 color: white;
 border: none;
-padding: 10px 20px;
-border-radius: 8px;
+padding: 12px 28px;
+border-radius: 16px;
 font-weight: 600;
+font-size: 15px;
 cursor: pointer;
+transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+box-shadow: 0 4px 16px rgba(27, 110, 243, 0.3);
+}
+
+.send-btn:active {
+transform: scale(0.95);
+box-shadow: 0 2px 8px rgba(27, 110, 243, 0.3);
 }
 
 .send-btn:disabled {
 opacity: 0.5;
+cursor: not-allowed;
 }
 
 .file-btn {
-background: none;
-border: none;
-color: #007aff;
+background: var(–card-bg);
+backdrop-filter: blur(20px);
+border: 1px solid var(–border);
+color: var(–text);
 font-size: 14px;
 cursor: pointer;
+padding: 12px 20px;
+border-radius: 16px;
+font-weight: 500;
+transition: all 0.2s ease;
+}
+
+.file-btn:active {
+transform: scale(0.95);
 }
 
 .preview {
-width: 60px;
-height: 60px;
+width: 80px;
+height: 80px;
 position: relative;
 margin-bottom: 12px;
+border-radius: 12px;
+overflow: hidden;
 }
 
 .preview img {
 width: 100%;
 height: 100%;
-border-radius: 8px;
 object-fit: cover;
 }
 
@@ -208,34 +417,49 @@ right: -8px;
 background: #ff3b30;
 color: white;
 border-radius: 50%;
-width: 20px;
-height: 20px;
+width: 24px;
+height: 24px;
 display: flex;
 align-items: center;
 justify-content: center;
 cursor: pointer;
-font-size: 12px;
+font-size: 14px;
+font-weight: 600;
+box-shadow: 0 2px 8px rgba(255, 59, 48, 0.4);
+transition: transform 0.2s ease;
+}
+
+.preview-close:active {
+transform: scale(0.9);
 }
 
 .loading {
 text-align: center;
-padding: 20px;
-color: #999;
+padding: 40px 20px;
+color: var(–text-dim);
+font-size: 15px;
 }
 
 .empty {
 text-align: center;
-padding: 60px 20px;
-color: #999;
+padding: 80px 20px;
+color: var(–text-dim);
+}
+
+.empty-icon {
+font-size: 64px;
+margin-bottom: 16px;
+opacity: 0.5;
 }
 
 .error {
-background: #ff3b30;
+background: linear-gradient(135deg, #ff3b30 0%, #ff6b6b 100%);
 color: white;
-padding: 12px;
-border-radius: 8px;
+padding: 16px;
+border-radius: 16px;
 margin: 20px 0;
 text-align: center;
+box-shadow: 0 8px 24px rgba(255, 59, 48, 0.3);
 }
 
 .overlay {
@@ -245,28 +469,50 @@ top: 0;
 left: 0;
 width: 100%;
 height: 100%;
-background: rgba(0,0,0,0.9);
-z-index: 200;
+background: rgba(0, 0, 0, 0.95);
+backdrop-filter: blur(20px);
+-webkit-backdrop-filter: blur(20px);
+z-index: 300;
 align-items: center;
 justify-content: center;
+opacity: 0;
+transition: opacity 0.3s ease;
 }
 
 .overlay.show {
 display: flex;
+opacity: 1;
 }
 
 .overlay img {
 max-width: 90%;
 max-height: 90%;
-border-radius: 8px;
+border-radius: 16px;
+box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+transform: scale(0.9);
+transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+.overlay.show img {
+transform: scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+- {
+  animation: none !important;
+  transition: none !important;
+  }
+  }
+
 </style>
-
 </head>
-<body>
-<h2>OpenEcho 🔥</h2>
+<body data-theme="light">
 
-<div id="debug" class="debug">Инициализация...</div>
+<div class="header">
+  <h2>OpenEcho 🔥</h2>
+  <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+</div>
 
 <div id="feed">
   <div class="loading">Загрузка...</div>
@@ -277,8 +523,8 @@ border-radius: 8px;
 <div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
   <div class="modal-content">
     <div id="replyBox" style="display:none" class="reply-box">
-      <div style="font-weight:600;color:#007aff;" id="replyAuthor"></div>
-      <div style="color:#666;font-size:13px;" id="replyText"></div>
+      <div class="reply-author" id="replyAuthor"></div>
+      <div class="reply-text" id="replyText"></div>
     </div>
 
 ```
@@ -308,40 +554,48 @@ border-radius: 8px;
 </div>
 
 <script>
-// Логирование
-function log(msg) {
-  console.log(msg);
-  const debug = document.getElementById('debug');
-  debug.textContent += '\n' + msg;
-}
-
 const tg = window.Telegram.WebApp;
-log('✓ Telegram WebApp загружен');
 tg.expand();
 
 // ⚠️ ЗАМЕНИТЕ НА СВОИ ДАННЫЕ ИЗ SUPABASE
 const SUPABASE_URL = 'https://xddulhzvzemmrhrsjfhb.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_2FIKYuEHEQrYseRnwY58Qg__UIFN59j';
 
-log('Проверка Supabase URL: ' + SUPABASE_URL);
-
 let db = null;
 let userId = null;
 let username = null;
 let replyId = null;
 
+// Тема
+function toggleTheme() {
+  const body = document.body;
+  const btn = document.querySelector('.theme-toggle');
+  const currentTheme = body.getAttribute('data-theme');
+  
+  if (currentTheme === 'light') {
+    body.setAttribute('data-theme', 'dark');
+    btn.textContent = '☀️';
+    localStorage.setItem('theme', 'dark');
+  } else {
+    body.setAttribute('data-theme', 'light');
+    btn.textContent = '🌙';
+    localStorage.setItem('theme', 'light');
+  }
+}
+
+// Загрузка сохраненной темы
+const savedTheme = localStorage.getItem('theme') || 'light';
+document.body.setAttribute('data-theme', savedTheme);
+if (savedTheme === 'dark') {
+  document.querySelector('.theme-toggle').textContent = '☀️';
+}
+
 // Инициализация
 async function init() {
   try {
-    log('Начало инициализации...');
-    
-    // Проверка Telegram
     const user = tg.initDataUnsafe?.user;
-    log('Telegram user: ' + JSON.stringify(user));
     
     if (!user) {
-      log('❌ Пользователь не найден. Используем тестового');
-      // Для теста в браузере
       userId = 'test123';
       username = 'TestUser';
     } else {
@@ -349,55 +603,24 @@ async function init() {
       username = user.username || 'User' + user.id;
     }
     
-    log('✓ User ID: ' + userId);
-    log('✓ Username: ' + username);
-    
-    // Проверка Supabase
     if (SUPABASE_URL.includes('your-project') || SUPABASE_KEY.includes('your-anon')) {
-      throw new Error('⚠️ Не указаны SUPABASE_URL и SUPABASE_KEY!');
+      throw new Error('Не указаны SUPABASE_URL и SUPABASE_KEY');
     }
     
-    log('Подключение к Supabase...');
     db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    log('✓ Supabase клиент создан');
     
-    // Проверка подключения
-    log('Проверка подключения к БД...');
-    const { data: testData, error: testError } = await db
-      .from('posts')
-      .select('count')
-      .limit(1);
-    
-    if (testError) {
-      log('❌ Ошибка подключения: ' + testError.message);
-      throw testError;
-    }
-    
-    log('✓ Подключение к БД успешно');
-    
-    // Загрузка постов
     await load();
     
-    // Realtime подписка
-    log('Подписка на realtime обновления...');
     db.channel('posts-channel')
       .on('postgres_changes', { 
         event: '*', 
         schema: 'public', 
         table: 'posts' 
-      }, (payload) => {
-        log('📡 Realtime: ' + payload.eventType);
-        load();
-      })
-      .subscribe((status) => {
-        log('Realtime status: ' + status);
-      });
-    
-    log('✓ Инициализация завершена!');
+      }, () => load())
+      .subscribe();
     
   } catch (e) {
-    log('❌ ОШИБКА: ' + e.message);
-    console.error('Полная ошибка:', e);
+    console.error('Ошибка:', e);
     document.getElementById('feed').innerHTML = 
       '<div class="error">Ошибка инициализации: ' + e.message + '</div>';
   }
@@ -406,25 +629,22 @@ async function init() {
 // Загрузка постов
 async function load() {
   try {
-    log('Загрузка постов...');
-    
     const { data, error } = await db
       .from('posts')
       .select('*')
       .order('created_at', { ascending: false })
       .limit(30);
     
-    if (error) {
-      log('❌ Ошибка загрузки: ' + error.message);
-      throw error;
-    }
-    
-    log('✓ Загружено постов: ' + (data ? data.length : 0));
+    if (error) throw error;
     
     const feed = document.getElementById('feed');
     
     if (!data || data.length === 0) {
-      feed.innerHTML = '<div class="empty">Пока нет постов<br>Будьте первым! 📝</div>';
+      feed.innerHTML = `
+        <div class="empty">
+          <div class="empty-icon">📝</div>
+          <div>Пока нет постов<br>Будьте первым!</div>
+        </div>`;
       return;
     }
     
@@ -434,7 +654,6 @@ async function load() {
       const isMy = post.user_id === userId;
       const isForMe = post.target_username === username;
       
-      // Пропускаем чужие приватные
       if (post.target_username && !isMy && !isForMe) return;
       
       const card = document.createElement('div');
@@ -447,8 +666,8 @@ async function load() {
         const parent = data.find(p => p.id === post.parent_id);
         if (parent) {
           html += `<div class="reply-box">
-            <div style="font-weight:600;color:#007aff;">@${esc(parent.username)}</div>
-            <div style="color:#666;">${esc(parent.content || '📷 Фото')}</div>
+            <div class="reply-author">@${esc(parent.username)}</div>
+            <div class="reply-text">${esc(parent.content || '📷 Фото')}</div>
           </div>`;
         }
       }
@@ -459,22 +678,39 @@ async function load() {
       
       // Изображение
       if (post.image_url) {
-        html += `<img class="img" src="${post.image_url}" onclick="showImage('${post.image_url}')">`;
+        html += `<img class="img" src="${post.image_url}" onclick="showImage('${post.image_url}')" loading="lazy">`;
       }
       
-      // Текст
+      // Текст с ссылками
       if (post.content) {
-        html += `<div class="text">${esc(post.content)}</div>`;
+        const { text, links } = extractLinks(post.content);
+        html += `<div class="text">${esc(text)}</div>`;
+        
+        // Превью ссылок
+        if (links.length > 0 && post.link_preview) {
+          try {
+            const preview = JSON.parse(post.link_preview);
+            html += `
+              <div class="link-preview" onclick="window.open('${preview.url}', '_blank')">
+                ${preview.image ? `<img class="link-preview-img" src="${preview.image}" onerror="this.style.display='none'" loading="lazy">` : ''}
+                <div class="link-preview-content">
+                  <div class="link-preview-title">${esc(preview.title || 'Ссылка')}</div>
+                  ${preview.description ? `<div class="link-preview-desc">${esc(preview.description)}</div>` : ''}
+                  <div class="link-preview-url">${esc(preview.domain || preview.url)}</div>
+                </div>
+              </div>`;
+          } catch (e) {}
+        }
       }
       
       // Действия
       html += `<div class="actions">
         <span class="btn" onclick="reply('${post.id}', '${esc(post.username)}', '${esc((post.content || '').substring(0, 40))}')">
-          Ответить
+          💬 Ответить
         </span>`;
       
       if (isMy) {
-        html += `<span class="btn btn-del" onclick="del('${post.id}')">Удалить</span>`;
+        html += `<span class="btn btn-del" onclick="del('${post.id}')">🗑 Удалить</span>`;
       }
       
       html += '</div>';
@@ -484,10 +720,9 @@ async function load() {
     });
     
   } catch (e) {
-    log('❌ Ошибка load(): ' + e.message);
-    console.error('Полная ошибка:', e);
+    console.error('Ошибка:', e);
     document.getElementById('feed').innerHTML = 
-      '<div class="error">Ошибка загрузки: ' + e.message + '</div>';
+      '<div class="error">Ошибка загрузки постов</div>';
   }
 }
 
@@ -497,18 +732,46 @@ function esc(str) {
   return div.innerHTML;
 }
 
-// Модалка
+function extractLinks(text) {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const links = text.match(urlRegex) || [];
+  return { text, links };
+}
+
+async function fetchLinkPreview(url) {
+  try {
+    const apiUrl = `https://api.microlink.io/?url=${encodeURIComponent(url)}`;
+    const response = await fetch(apiUrl);
+    const data = await response.json();
+    
+    if (data.status === 'success') {
+      return {
+        url: url,
+        title: data.data.title || '',
+        description: data.data.description || '',
+        image: data.data.image?.url || data.data.logo?.url || '',
+        domain: new URL(url).hostname
+      };
+    }
+    return null;
+  } catch (e) {
+    return null;
+  }
+}
+
 function openModal() {
   document.getElementById('modal').classList.add('show');
 }
 
 function closeModal() {
   document.getElementById('modal').classList.remove('show');
-  document.getElementById('txt').value = '';
-  document.getElementById('target').value = '';
-  document.getElementById('replyBox').style.display = 'none';
-  clearFile();
-  replyId = null;
+  setTimeout(() => {
+    document.getElementById('txt').value = '';
+    document.getElementById('target').value = '';
+    document.getElementById('replyBox').style.display = 'none';
+    clearFile();
+    replyId = null;
+  }, 300);
 }
 
 function reply(id, user, text) {
@@ -519,13 +782,12 @@ function reply(id, user, text) {
   openModal();
 }
 
-// Превью фото
 function showPreview() {
   const file = document.getElementById('file').files[0];
   if (!file) return;
   
   if (file.size > 5 * 1024 * 1024) {
-    alert('Файл слишком большой (макс 5МБ)');
+    tg.showAlert('Файл слишком большой (макс 5МБ)');
     document.getElementById('file').value = '';
     return;
   }
@@ -543,7 +805,6 @@ function clearFile() {
   document.getElementById('preview').style.display = 'none';
 }
 
-// Отправка
 async function send() {
   const btn = document.getElementById('sendBtn');
   const text = document.getElementById('txt').value.trim();
@@ -551,105 +812,88 @@ async function send() {
   const file = document.getElementById('file').files[0];
   
   if (!text && !file) {
-    alert('Напишите текст или добавьте фото');
+    tg.showAlert('Напишите текст или добавьте фото');
     return;
   }
   
   btn.disabled = true;
   btn.textContent = 'Отправка...';
-  log('Отправка поста...');
   
   try {
     let imageUrl = null;
     
-    // Загрузка фото
     if (file) {
-      log('Загрузка изображения...');
       const fileName = Date.now() + '.jpg';
       const { data: upData, error: upError } = await db.storage
         .from('images')
         .upload(fileName, file);
       
-      if (upError) {
-        log('❌ Ошибка загрузки фото: ' + upError.message);
-        throw upError;
-      }
+      if (upError) throw upError;
       
       const { data: { publicUrl } } = db.storage
         .from('images')
         .getPublicUrl(fileName);
       
       imageUrl = publicUrl;
-      log('✓ Фото загружено: ' + imageUrl);
     }
     
-    // Создание поста
-    log('Создание поста в БД...');
+    let linkPreview = null;
+    const { links } = extractLinks(text);
+    if (links.length > 0) {
+      btn.textContent = 'Загрузка превью...';
+      linkPreview = await fetchLinkPreview(links[0]);
+    }
+    
     const postData = {
       username: username,
       content: text,
       user_id: userId,
       image_url: imageUrl,
       target_username: targetUser || null,
-      parent_id: replyId
+      parent_id: replyId,
+      link_preview: linkPreview ? JSON.stringify(linkPreview) : null
     };
     
-    log('Данные поста: ' + JSON.stringify(postData));
-    
-    const { data: insertData, error } = await db
+    const { error } = await db
       .from('posts')
       .insert([postData])
       .select();
     
-    if (error) {
-      log('❌ Ошибка создания поста: ' + error.message);
-      throw error;
-    }
-    
-    log('✓ Пост создан: ' + JSON.stringify(insertData));
+    if (error) throw error;
     
     closeModal();
     await load();
     
   } catch (e) {
-    log('❌ Ошибка send(): ' + e.message);
-    console.error('Полная ошибка:', e);
-    alert('Ошибка отправки: ' + e.message);
+    console.error('Ошибка:', e);
+    tg.showAlert('Ошибка отправки: ' + e.message);
   } finally {
     btn.disabled = false;
     btn.textContent = 'Отправить';
   }
 }
 
-// Удаление
 async function del(id) {
-  if (!confirm('Удалить пост?')) return;
-  
-  log('Удаление поста ' + id);
-  
-  try {
-    const { error } = await db
-      .from('posts')
-      .delete()
-      .eq('id', id)
-      .eq('user_id', userId);
+  tg.showConfirm('Удалить пост?', async (ok) => {
+    if (!ok) return;
     
-    if (error) {
-      log('❌ Ошибка удаления: ' + error.message);
-      throw error;
+    try {
+      const { error } = await db
+        .from('posts')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', userId);
+      
+      if (error) throw error;
+      
+      await load();
+    } catch (e) {
+      console.error('Ошибка:', e);
+      tg.showAlert('Ошибка удаления');
     }
-    
-    log('✓ Пост удалён');
-    await load();
-    
-  } catch (e) {
-    log('❌ Ошибка del(): ' + e.message);
-    console.error('Полная ошибка:', e);
-    alert('Ошибка удаления: ' + e.message);
-  }
+  });
 }
 
-// Просмотр фото
 function showImage(url) {
   document.getElementById('overlayImg').src = url;
   document.getElementById('overlay').classList.add('show');
@@ -659,7 +903,6 @@ function closeOverlay() {
   document.getElementById('overlay').classList.remove('show');
 }
 
-// Старт
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
 } else {
