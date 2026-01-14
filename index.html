@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>OpenEcho</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --bg: var(--tg-theme-bg-color, #1c1c1d);
@@ -20,45 +21,43 @@
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             margin: 0;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
+            padding-bottom: 100px; /* Место под кнопку */
         }
 
-        h2 { margin-bottom: 20px; font-size: 24px; }
+        h2 { margin-bottom: 20px; font-size: 24px; border-bottom: 1px solid var(--secondary); padding-bottom: 10px; }
 
         .echo-card {
             background: var(--secondary);
             padding: 15px;
             border-radius: 15px;
             margin-bottom: 12px;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.05);
+            animation: fadeIn 0.3s ease;
         }
 
-        .author {
-            font-weight: bold;
-            color: var(--button);
-            margin-bottom: 6px;
-            font-size: 14px;
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .content { font-size: 16px; line-height: 1.4; }
+        .author { font-weight: bold; color: var(--button); margin-bottom: 6px; font-size: 14px; }
+        .content { font-size: 16px; line-height: 1.4; word-wrap: break-word; }
+        .time { font-size: 10px; color: var(--hint); margin-top: 8px; text-align: right; }
 
         .btn-add {
             position: fixed;
             bottom: 30px;
             right: 20px;
-            width: 60px;
-            height: 60px;
+            width: 65px;
+            height: 65px;
             background: var(--button);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 30px;
+            font-size: 35px;
             color: white;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
             cursor: pointer;
             border: none;
+            z-index: 100;
         }
     </style>
 </head>
@@ -68,8 +67,7 @@
 
     <div id="feed">
         <div class="echo-card">
-            <div class="author">@system</div>
-            <div class="content">Добро пожаловать в OpenEcho! Теперь русский язык отображается корректно. 😉</div>
+            <div class="content" style="text-align: center; color: var(--hint);">Загрузка ленты...</div>
         </div>
     </div>
 
@@ -77,28 +75,70 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Разворачиваем приложение
+        tg.expand();
+        tg.ready();
 
-        function createNewEcho() {
-            // Легкая вибрация при нажатии
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+        // --- НАСТРОЙКИ SUPABASE ---
+        // Замени эти данные на свои из Project Settings -> API
+        const SUPABASE_URL = 'https://xddulhzvzemmrhrsjfhb.supabase.co'; 
+        const SUPABASE_KEY = 'https://xddulhzvzemmrhrsjfhb.supabase.co';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-            let text = prompt("О чем ты думаешь?");
-            if (text && text.trim() !== "") {
-                const feed = document.getElementById('feed');
-                const card = document.createElement('div');
-                card.className = 'echo-card';
-                
-                // Берем имя из Телеграма, если оно есть
-                const username = tg.initDataUnsafe?.user?.username || "Аноним";
+        // --- ЛОГИКА ПРИЛОЖЕНИЯ ---
 
-                card.innerHTML = `
-                    <div class="author">@${username}</div>
-                    <div class="content">${text}</div>
-                `;
-                feed.prepend(card);
+        // 1. Загрузка постов
+        async function loadEchos() {
+            const { data, error } = await supabaseClient
+                .from('posts')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            const feed = document.getElementById('feed');
+            
+            if (error) {
+                feed.innerHTML = `<div class="echo-card">Ошибка загрузки: ${error.message}</div>`;
+                return;
+            }
+
+            if (data) {
+                feed.innerHTML = ''; 
+                data.forEach(post => {
+                    const date = new Date(post.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    const card = document.createElement('div');
+                    card.className = 'echo-card';
+                    card.innerHTML = `
+                        <div class="author">@${post.username || 'anon'}</div>
+                        <div class="content">${post.content}</div>
+                        <div class="time">${date}</div>
+                    `;
+                    feed.appendChild(card);
+                });
             }
         }
+
+        // 2. Создание нового поста
+        async function createNewEcho() {
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            
+            let text = prompt("Что нового?");
+            
+            if (text && text.trim() !== "") {
+                const username = tg.initDataUnsafe?.user?.username || "Guest";
+
+                const { error } = await supabaseClient
+                    .from('posts')
+                    .insert([{ username: username, content: text }]);
+
+                if (!error) {
+                    loadEchos(); // Обновляем список сразу
+                } else {
+                    alert("Не удалось отправить: " + error.message);
+                }
+            }
+        }
+
+        // Запуск при открытии
+        loadEchos();
     </script>
 </body>
 </html>
