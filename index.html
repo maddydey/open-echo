@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OpenEcho Turbo</title>
+    <title>OpenEcho Pro</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -16,27 +16,44 @@
             --danger: #ff453a;
         }
         body { background: var(--bg); color: var(--text-main); font-family: -apple-system, sans-serif; margin: 0; padding: 20px; padding-bottom: 110px; overflow-x: hidden; }
+        
         #feed { display: flex; flex-direction: column; gap: 16px; }
-        .echo-card { background: var(--card-bg); backdrop-filter: blur(15px); border-radius: 24px; position: relative; border: 1px solid rgba(255, 255, 255, 0.08); overflow: hidden; animation: slideUp 0.4s ease; }
+        
+        .echo-card { 
+            background: var(--card-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border-radius: 24px; position: relative; border: 1px solid rgba(255, 255, 255, 0.08); 
+            overflow: hidden; animation: slideUp 0.4s ease;
+        }
+        
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
         .card-content { padding: 16px; }
+        .reply-info { color: var(--text-dim); font-size: 12px; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
         .author { font-weight: 700; color: var(--accent); font-size: 14px; margin-bottom: 4px; }
-        .post-img { width: 100%; display: block; object-fit: cover; max-height: 450px; cursor: pointer; }
+        .content { font-size: 16px; line-height: 1.4; }
+        
+        .post-img { width: 100%; display: block; object-fit: cover; max-height: 400px; cursor: pointer; }
+        
+        .card-actions { margin-top: 14px; display: flex; gap: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px; }
+        .action-btn { color: var(--accent); font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+
         .btn-add { position: fixed; bottom: 30px; right: 24px; width: 64px; height: 64px; background: var(--accent); border-radius: 22px; font-size: 32px; color: white; border: none; box-shadow: 0 10px 30px rgba(10, 132, 255, 0.4); z-index: 100; }
-        #imageOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(10px); }
-        #fullImage { max-width: 95%; max-height: 90%; border-radius: 12px; }
+
         #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); z-index: 1000; justify-content: center; align-items: flex-end; }
         .modal-content { background: #1c1c1e; width: 100%; padding: 24px; border-radius: 30px 30px 0 0; animation: sheetUp 0.3s ease; }
         @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        textarea { width: 100%; background: transparent; border: none; color: white; font-size: 18px; resize: none; outline: none; margin-bottom: 15px; }
-        .send-btn { background: var(--accent); color: white; border: none; padding: 12px 24px; border-radius: 16px; font-weight: 700; }
-        .send-btn:disabled { opacity: 0.5; }
-        .delete-btn { position: absolute; top: 12px; right: 12px; background: rgba(255, 69, 58, 0.2); border: none; border-radius: 10px; width: 32px; height: 32px; color: var(--danger); }
+        
+        textarea { width: 100%; background: transparent; border: none; color: white; font-size: 18px; resize: none; outline: none; margin-bottom: 15px; font-family: inherit; }
+        
+        #imageOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(10px); }
+        #fullImage { max-width: 95%; max-height: 90%; border-radius: 12px; }
+        
+        .delete-btn { position: absolute; top: 12px; right: 12px; background: rgba(255, 69, 58, 0.15); border: none; border-radius: 10px; width: 32px; height: 32px; color: var(--danger); font-size: 12px; }
     </style>
 </head>
 <body>
 
-    <h2 style="font-weight: 800; letter-spacing: -1px;">OpenEcho</h2>
+    <h2 style="font-weight: 800; letter-spacing: -1px; margin-bottom: 20px;">OpenEcho</h2>
     <div id="feed"></div>
 
     <button class="btn-add" onclick="openModal()">+</button>
@@ -52,7 +69,7 @@
             <div id="fileName" style="font-size: 13px; color: var(--text-dim); margin-bottom: 15px;"></div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div style="color: var(--accent); font-weight: 600; cursor: pointer;" onclick="document.getElementById('fileInput').click()">🖼 Фото</div>
-                <button class="send-btn" id="submitBtn" onclick="sendPost()">Опубликовать</button>
+                <button id="submitBtn" class="action-btn" style="background: var(--accent); color: white; padding: 10px 20px; border-radius: 14px; border: none;" onclick="sendPost()">Опубликовать</button>
             </div>
             <button onclick="closeModal()" style="background:none; border:none; color:var(--text-dim); width:100%; margin-top:20px;">Отмена</button>
         </div>
@@ -67,46 +84,49 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         const currentUserId = tg.initDataUnsafe?.user?.id?.toString();
 
-        // --- ФУНКЦИЯ СЖАТИЯ (70% качества) ---
+        let currentReplyId = null;
+        let currentReplyUsername = null;
+
+        // Сжатие фото
         async function compressImage(file) {
             return new Promise((resolve) => {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
-                reader.onload = (event) => {
+                reader.onload = (e) => {
                     const img = new Image();
-                    img.src = event.target.result;
+                    img.src = e.target.result;
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
-                        let width = img.width;
-                        let height = img.height;
-                        
-                        // Если фото слишком огромное (больше 1200px), чуть уменьшим размер
-                        const maxSide = 1200;
-                        if (width > maxSide || height > maxSide) {
-                            if (width > height) { height *= maxSide / width; width = maxSide; }
-                            else { width *= maxSide / height; height = maxSide; }
+                        let w = img.width, h = img.height;
+                        const max = 1200;
+                        if (w > max || h > max) {
+                            if (w > h) { h *= max/w; w = max; } else { w *= max/h; h = max; }
                         }
-
-                        canvas.width = width;
-                        canvas.height = height;
+                        canvas.width = w; canvas.height = h;
                         const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-                        
-                        canvas.toBlob((blob) => {
-                            resolve(new File([blob], file.name, { type: 'image/jpeg' }));
-                        }, 'image/jpeg', 0.7); // 0.7 = 70% качества
+                        ctx.drawImage(img, 0, 0, w, h);
+                        canvas.toBlob((b) => resolve(new File([b], file.name, {type:'image/jpeg'})), 'image/jpeg', 0.7);
                     };
                 };
             });
         }
 
-        function openImageFull(url) {
-            document.getElementById('fullImage').src = url;
-            document.getElementById('imageOverlay').style.display = 'flex';
+        function openModal(replyId = null, replyUser = null) {
+            currentReplyId = replyId;
+            currentReplyUsername = replyUser;
+            const area = document.getElementById('postText');
+            area.placeholder = replyUser ? `Ответить @${replyUser}...` : "Что нового?";
+            document.getElementById('modal').style.display = 'flex';
+            area.focus();
         }
 
-        function openModal() { document.getElementById('modal').style.display = 'flex'; }
-        function closeModal() { document.getElementById('modal').style.display = 'none'; }
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+            document.getElementById('postText').value = '';
+            document.getElementById('fileInput').value = '';
+            document.getElementById('fileName').innerText = '';
+        }
+
         function updateFileName() {
             const file = document.getElementById('fileInput').files[0];
             document.getElementById('fileName').innerText = file ? "📎 " + file.name : "";
@@ -115,22 +135,25 @@
         async function loadEchos() {
             const { data } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
             const feed = document.getElementById('feed');
-            if (data) {
-                feed.innerHTML = '';
-                data.forEach(post => {
-                    const isMyPost = post.user_id === currentUserId;
-                    const card = document.createElement('div');
-                    card.className = 'echo-card';
-                    card.innerHTML = `
-                        ${isMyPost ? `<button class="delete-btn" onclick="deleteEcho('${post.id}')">✕</button>` : ''}
-                        ${post.image_url ? `<img src="${post.image_url}" class="post-img" onclick="openImageFull('${post.image_url}')">` : ''}
-                        <div class="card-content">
-                            <div class="author">@${post.username || 'anon'}</div>
-                            <div class="content">${post.content || ''}</div>
-                        </div>`;
-                    feed.appendChild(card);
-                });
-            }
+            if (!data) return;
+            feed.innerHTML = '';
+            data.forEach(post => {
+                const isMyPost = post.user_id === currentUserId;
+                const card = document.createElement('div');
+                card.className = 'echo-card';
+                card.innerHTML = `
+                    ${isMyPost ? `<button class="delete-btn" onclick="deleteEcho('${post.id}')">✕</button>` : ''}
+                    ${post.image_url ? `<img src="${post.image_url}" class="post-img" onclick="openImageFull('${post.image_url}')">` : ''}
+                    <div class="card-content">
+                        ${post.reply_to_username ? `<div class="reply-info">↩️ в ответ @${post.reply_to_username}</div>` : ''}
+                        <div class="author">@${post.username || 'anon'}</div>
+                        <div class="content">${post.content || ''}</div>
+                        <div class="card-actions">
+                            <div class="action-btn" onclick="openModal('${post.id}', '${post.username}')">💬 Ответить</div>
+                        </div>
+                    </div>`;
+                feed.appendChild(card);
+            });
         }
 
         async function sendPost() {
@@ -140,18 +163,15 @@
 
             if (!text && !file) return;
             btn.disabled = true;
-            btn.innerText = "Сжимаем...";
 
             let imageUrl = null;
             if (file) {
-                // Сжимаем перед загрузкой
                 file = await compressImage(file);
-                btn.innerText = "Загружаем...";
-                const fileName = `${Date.now()}_post.jpg`;
-                const { data } = await supabaseClient.storage.from('images').upload(fileName, file);
+                const name = `${Date.now()}_p.jpg`;
+                const { data } = await supabaseClient.storage.from('images').upload(name, file);
                 if (data) {
-                    const { data: urlData } = supabaseClient.storage.from('images').getPublicUrl(fileName);
-                    imageUrl = urlData.publicUrl;
+                    const { data: u } = supabaseClient.storage.from('images').getPublicUrl(name);
+                    imageUrl = u.publicUrl;
                 }
             }
 
@@ -159,16 +179,23 @@
                 username: tg.initDataUnsafe?.user?.username || "Guest", 
                 content: text, 
                 user_id: currentUserId, 
-                image_url: imageUrl 
+                image_url: imageUrl,
+                parent_id: currentReplyId,
+                reply_to_username: currentReplyUsername
             }]);
 
             btn.disabled = false;
-            btn.innerText = "Опубликовать";
             closeModal();
         }
 
+        function openImageFull(url) {
+            document.getElementById('fullImage').src = url;
+            document.getElementById('imageOverlay').style.display = 'flex';
+        }
+
         supabaseClient.channel('any').on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, loadEchos).subscribe();
-        async function deleteEcho(id) { if (confirm("Удалить?")) await supabaseClient.from('posts').delete().eq('id', id); }
+        async function deleteEcho(id) { if (confirm("Удалить этот пост?")) await supabaseClient.from('posts').delete().eq('id', id); }
+        
         loadEchos();
     </script>
 </body>
