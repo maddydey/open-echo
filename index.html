@@ -3,30 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OpenEcho Media</title>
+    <title>OpenEcho Pro</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --bg: var(--tg-theme-bg-color, #1c1c1d);
-            --text: var(--tg-theme-text-color, #ffffff);
-            --button: var(--tg-theme-button-color, #0a84ff);
-            --secondary: var(--tg-theme-secondary-bg-color, #2c2c2e);
-            --hint: var(--tg-theme-hint-color, #8e8e93);
+            --bg: #0f0f10;
+            --card-bg: rgba(28, 28, 30, 0.7);
+            --accent: #0a84ff;
+            --text-main: #ffffff;
+            --text-dim: #8e8e93;
+            --danger: #ff453a;
         }
-        body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; padding: 15px; padding-bottom: 100px; }
-        .echo-card { background: var(--secondary); padding: 16px; border-radius: 16px; margin-bottom: 12px; position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
-        .author { font-weight: bold; color: var(--button); margin-bottom: 8px; font-size: 14px; }
-        .post-img { width: 100%; border-radius: 10px; margin-top: 10px; display: block; }
-        .content { font-size: 16px; line-height: 1.4; margin-top: 8px; }
-        .delete-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.5); border: none; font-size: 16px; cursor: pointer; border-radius: 50%; width: 30px; height: 30px; color: white; }
-        .btn-add { position: fixed; bottom: 30px; right: 20px; width: 60px; height: 60px; background: var(--button); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; color: white; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 100; }
+
+        body { 
+            background: var(--bg); 
+            color: var(--text-main); 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            padding-bottom: 110px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h2 {
+            font-weight: 800;
+            font-size: 28px;
+            margin: 10px 0 24px 0;
+            letter-spacing: -0.5px;
+        }
+
+        #feed {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .echo-card { 
+            background: var(--card-bg); 
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 0; 
+            border-radius: 24px; 
+            position: relative; 
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-content { padding: 16px 20px 20px 20px; }
+
+        .author { 
+            font-weight: 700; 
+            color: var(--accent); 
+            margin-bottom: 8px; 
+            font-size: 14px;
+        }
+
+        .post-img { 
+            width: 100%;
+            display: block;
+            object-fit: cover;
+            max-height: 450px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .content { 
+            font-size: 16px; 
+            color: rgba(255, 255, 255, 0.95);
+            word-wrap: break-word;
+        }
+
+        .delete-btn { 
+            position: absolute; 
+            top: 12px; 
+            right: 12px; 
+            background: rgba(255, 69, 58, 0.2); 
+            border: none; 
+            font-size: 14px; 
+            cursor: pointer; 
+            border-radius: 10px; 
+            width: 30px; 
+            height: 30px; 
+            color: var(--danger);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            z-index: 10;
+        }
+
+        .btn-add { 
+            position: fixed; 
+            bottom: 30px; 
+            right: 24px; 
+            width: 60px; 
+            height: 60px; 
+            background: var(--accent); 
+            border-radius: 20px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 30px; 
+            color: white; 
+            border: none; 
+            box-shadow: 0 8px 25px rgba(10, 132, 255, 0.4); 
+            z-index: 100;
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-add:active { transform: scale(0.9) rotate(5deg); }
+
         #fileInput { display: none; }
+        
+        .loader { text-align: center; color: var(--text-dim); margin-top: 20px; font-size: 14px; }
     </style>
 </head>
 <body>
-    <h2>OpenEcho Media 🚀</h2>
-    <div id="feed"></div>
+
+    <h2>OpenEcho 🚀</h2>
+    <div id="feed"><div class="loader">Загрузка постов...</div></div>
     
     <input type="file" id="fileInput" accept="image/*">
     <button class="btn-add" onclick="document.getElementById('fileInput').click()">+</button>
@@ -34,73 +136,92 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
+        tg.backgroundColor = '#0f0f10';
+        tg.headerColor = '#0f0f10';
 
+        // --- КОНФИГУРАЦИЯ ---
         const SUPABASE_URL = 'https://xddulhzvzemmrhrsjfhb.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_2FIKYuEHEQrYseRnwY58Qg__UIFN59j';
+        // --------------------
+
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         const currentUserId = tg.initDataUnsafe?.user?.id?.toString();
 
-        // Функция загрузки ленты
         async function loadEchos() {
-            const { data } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
+            const { data, error } = await supabaseClient
+                .from('posts')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
             const feed = document.getElementById('feed');
+            if (error) {
+                feed.innerHTML = `<div class="loader">Ошибка: ${error.message}</div>`;
+                return;
+            }
+
             if (data) {
                 feed.innerHTML = '';
                 data.forEach(post => {
                     const isMyPost = post.user_id === currentUserId;
-                    const imgTag = post.image_url ? `<img src="${post.image_url}" class="post-img">` : '';
-                    const deleteBtn = isMyPost ? `<button class="delete-btn" onclick="deleteEcho('${post.id}')">🗑️</button>` : '';
+                    const imgHtml = post.image_url ? `<img src="${post.image_url}" class="post-img" loading="lazy">` : '';
+                    const deleteHtml = isMyPost ? `<button class="delete-btn" onclick="deleteEcho('${post.id}')">✕</button>` : '';
 
                     const card = document.createElement('div');
                     card.className = 'echo-card';
                     card.innerHTML = `
-                        ${deleteBtn}
-                        <div class="author">@${post.username || 'anon'}</div>
-                        ${imgTag}
-                        <div class="content">${post.content}</div>
+                        ${deleteHtml}
+                        ${imgHtml}
+                        <div class="card-content">
+                            <div class="author">@${post.username || 'anon'}</div>
+                            <div class="content">${post.content}</div>
+                        </div>
                     `;
                     feed.appendChild(card);
                 });
             }
         }
 
-        // Логика выбора файла и создания поста
         document.getElementById('fileInput').onchange = async (e) => {
             const file = e.target.files[0];
             if (!file) return;
 
-            const text = prompt("Описание к фото:");
-            const user = tg.initDataUnsafe?.user?.username || "Guest";
+            const text = prompt("Напишите что-нибудь...");
+            const username = tg.initDataUnsafe?.user?.username || "Guest";
             
-            let imageUrl = null;
+            tg.MainButton.setText("Публикация...").show();
 
-            // 1. Загружаем файл в Storage
+            let imageUrl = null;
             const fileName = `${Date.now()}_${file.name}`;
-            const { data, error } = await supabaseClient.storage
+
+            // 1. Загрузка фото
+            const { data: uploadData, error: uploadError } = await supabaseClient.storage
                 .from('images')
                 .upload(fileName, file);
 
-            if (data) {
-                // Получаем публичную ссылку на фото
+            if (uploadData) {
                 const { data: urlData } = supabaseClient.storage.from('images').getPublicUrl(fileName);
                 imageUrl = urlData.publicUrl;
             }
 
-            // 2. Создаем пост в таблице
-            await supabaseClient.from('posts').insert([{ 
-                username: user, 
+            // 2. Создание поста
+            const { error: insertError } = await supabaseClient.from('posts').insert([{ 
+                username: username, 
                 content: text || "", 
                 user_id: currentUserId,
                 image_url: imageUrl
             }]);
 
+            if (insertError) alert("Ошибка: " + insertError.message);
+            
+            tg.MainButton.hide();
+            e.target.value = ''; // сброс выбора файла
             loadEchos();
         };
 
         async function deleteEcho(id) {
-            if (confirm("Удалить?")) {
-                await supabaseClient.from('posts').delete().eq('id', id);
-                loadEchos();
+            if (confirm("Удалить этот пост?")) {
+                const { error } = await supabaseClient.from('posts').delete().eq('id', id);
+                if (!error) loadEchos();
             }
         }
 
