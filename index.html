@@ -2,38 +2,39 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>OpenEcho Notify</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenEcho Secure TG</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <style>
 :root {--bg:#000;--card-bg:rgba(28,28,30,0.7);--accent:#0a84ff;--text-main:#fff;--text-dim:#8e8e93;}
-body {background:var(--bg); color:var(--text-main); font-family:-apple-system,system-ui,sans-serif; margin:0; padding:20px 20px 120px 20px; overflow-x:hidden; -webkit-font-smoothing:antialiased;}
-#feed { display:flex; flex-direction:column; gap:14px; }
-.echo-card { background:var(--card-bg); backdrop-filter:blur(25px); -webkit-backdrop-filter:blur(25px); border-radius:28px; border:1px solid rgba(255,255,255,0.1); position:relative; overflow:hidden; opacity:0; transform:translateY(30px) scale(0.95); transition:all 0.5s cubic-bezier(0.175,0.885,0.32,1.275);}
-.echo-card.visible { opacity:1; transform:translateY(0) scale(1);}
-.reply-box { background:rgba(255,255,255,0.05); border-left:3px solid var(--accent); padding:8px 12px; border-radius:12px; margin-bottom:10px; font-size:13px; }
-.reply-author { font-weight:700; color:var(--accent); margin-bottom:2px; }
-.reply-text { color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.post-img { width:100%; display:block; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.05); }
-.card-content { padding:18px; }
-.author { color: var(--accent); font-weight:700; font-size:14px; margin-bottom:6px; }
-.btn-add { position:fixed; bottom:30px; right:24px; width:64px; height:64px; background:var(--accent); border-radius:50%; border:none; color:white; font-size:32px; box-shadow:0 12px 30px rgba(10,132,255,0.4); z-index:100; display:flex; align-items:center; justify-content:center; transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1); }
-.btn-add:active { transform: scale(0.85) rotate(15deg); }
-#modal,#imageOverlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index:1000; justify-content:center; align-items:center; padding:20px; box-sizing:border-box;}
-.modal-window,.image-window { background:#1c1c1e; width:100%; max-width:400px; border-radius:32px; border:1px solid rgba(255,255,255,0.15); padding:24px; box-sizing:border-box; opacity:0; transform: scale(0.8) translateY(40px); transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);}
-.show-win { opacity:1 !important; transform: scale(1) translateY(0) !important; }
-.image-window { background:transparent; border:none; padding:0; }
-.image-window img { width:100%; border-radius:28px; box-shadow:0 20px 50px #000; }
-textarea { width:100%; background:transparent; border:none; color:white; font-size:18px; outline:none; resize:none; }
-.loader { width:20px; height:20px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; animation:spin 0.6s linear infinite; }
+body {background:var(--bg);color:var(--text-main);font-family:-apple-system,system-ui,sans-serif;margin:0;padding:20px 20px 120px;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+#feed {display:flex;flex-direction:column;gap:14px;}
+.echo-card {background:var(--card-bg);backdrop-filter:blur(25px);-webkit-backdrop-filter:blur(25px);border-radius:28px;border:1px solid rgba(255,255,255,0.1);position:relative;overflow:hidden;opacity:0;transform:translateY(30px) scale(0.95);transition:all 0.5s cubic-bezier(0.175,0.885,0.32,1.275);}
+.echo-card.visible {opacity:1;transform:translateY(0) scale(1);}
+.reply-box {background:rgba(255,255,255,0.05);border-left:3px solid var(--accent);padding:8px 12px;border-radius:12px;margin-bottom:10px;font-size:13px;}
+.reply-author {font-weight:700;color:var(--accent);margin-bottom:2px;}
+.reply-text {color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.post-img {width:100%;display:block;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.05);}
+.card-content {padding:18px;}
+.author {color: var(--accent);font-weight:700;font-size:14px;margin-bottom:6px;}
+.btn-add {position:fixed;bottom:30px;right:24px;width:64px;height:64px;background:var(--accent);border-radius:50%;border:none;color:white;font-size:32px;box-shadow:0 12px 30px rgba(10,132,255,0.4);z-index:100;display:flex;align-items:center;justify-content:center;transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1);}
+.btn-add:active {transform: scale(0.85) rotate(15deg);}
+#modal,#imageOverlay {display:none;position:fixed;top:0;left:0;width:100%;height:100%;background: rgba(0,0,0,0.8);backdrop-filter: blur(20px);-webkit-backdrop-filter: blur(20px);z-index:1000;justify-content:center;align-items:center;padding:20px;box-sizing:border-box;}
+.modal-window,.image-window {background:#1c1c1e;width:100%;max-width:400px;border-radius:32px;border:1px solid rgba(255,255,255,0.15);padding:24px;box-sizing:border-box;opacity:0;transform: scale(0.8) translateY(40px);transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);}
+.show-win {opacity:1 !important;transform: scale(1) translateY(0) !important;}
+.image-window {background:transparent;border:none;padding:0;}
+.image-window img {width:100%;border-radius:28px;box-shadow:0 20px 50px #000;}
+textarea {width:100%;background:transparent;border:none;color:white;font-size:18px;outline:none;resize:none;}
+.loader {width:20px;height:20px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin 0.6s linear infinite;}
 @keyframes spin { to{ transform: rotate(360deg); } }
 a.linkify { color:var(--accent); text-decoration:underline; }
 </style>
 </head>
 <body>
-<h2 style="font-weight:800; font-size:28px; margin-bottom:25px; letter-spacing:-1.5px;">OpenEcho</h2>
+
+<h2 style="font-weight:800;font-size:28px;margin-bottom:25px;letter-spacing:-1.5px;">OpenEcho Secure</h2>
 <div id="feed"></div>
 <button class="btn-add" onclick="openModal()">+</button>
 
@@ -44,15 +45,15 @@ a.linkify { color:var(--accent); text-decoration:underline; }
     <div class="reply-text" id="replyTextContent"></div>
   </div>
   <textarea id="postText" rows="4" placeholder="Напиши эхо..."></textarea>
-  <div id="mediaPreview" style="display:none; margin-bottom:10px; position:relative; width:60px; height:60px;">
-    <img id="previewImg" style="width:100%; height:100%; object-fit:cover; border-radius:10px;">
-    <div onclick="clearMedia()" style="position:absolute; top:-5px; right:-5px; background:red; color:white; border-radius:50%; width:18px; height:18px; font-size:12px; text-align:center;">✕</div>
+  <div id="mediaPreview" style="display:none;margin-bottom:10px;position:relative;width:60px;height:60px;">
+    <img id="previewImg" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">
+    <div onclick="clearMedia()" style="position:absolute;top:-5px;right:-5px;background:red;color:white;border-radius:50%;width:18px;height:18px;font-size:12px;text-align:center;">✕</div>
   </div>
-  <input type="text" id="targetUser" style="width:100%; background:rgba(255,255,255,0.05); border:none; border-radius:12px; padding:12px; color:white; margin-bottom:15px;" placeholder="Приватно для @username">
-  <div style="display:flex; justify-content:space-between; align-items:center;">
-    <button onclick="document.getElementById('fileInput').click()" style="background:none; border:none; color:var(--accent); font-weight:600;">🖼 Фото</button>
+  <input type="text" id="targetUser" style="width:100%;background:rgba(255,255,255,0.05);border:none;border-radius:12px;padding:12px;color:white;margin-bottom:15px;" placeholder="Приватно для @username">
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <button onclick="document.getElementById('fileInput').click()" style="background:none;border:none;color:var(--accent);font-weight:600;">🖼 Фото</button>
     <input type="file" id="fileInput" hidden onchange="updatePreview()">
-    <button id="submitBtn" onclick="sendPost()" style="background:var(--accent); color:white; border:none; padding:12px 25px; border-radius:18px; font-weight:700; min-width:100px;">Отправить</button>
+    <button id="submitBtn" onclick="sendPost()" style="background:var(--accent);color:white;border:none;padding:12px 25px;border-radius:18px;font-weight:700;min-width:100px;">Отправить</button>
   </div>
 </div>
 </div>
@@ -60,24 +61,32 @@ a.linkify { color:var(--accent); text-decoration:underline; }
 <div id="imageOverlay" onclick="closeFullImage()">
 <div class="image-window" id="imgWin">
   <img id="fullImage" src="">
-  <div style="text-align:center; color:white; margin-top:20px; font-weight:600; opacity:0.7;">Закрыть ✕</div>
+  <div style="text-align:center;color:white;margin-top:20px;font-weight:600;opacity:0.7;">Закрыть ✕</div>
 </div>
 </div>
 
 <script>
 const tg=window.Telegram.WebApp; tg.expand();
-const SUPABASE_URL='https://xddulhzvzemmrhrsjfhb.supabase.co', SUPABASE_KEY='ТВОЙ_KEY';
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-const currentUserId = tg.initDataUnsafe?.user?.id?.toString();
-const myUsername = tg.initDataUnsafe?.user?.username;
-let currentReplyId=null, lastCount=0;
+const SUPABASE_URL='https://xddulhzvzemmrhrsjfhb.supabase.co'; // заменяешь своим
+const SUPABASE_KEY='sb_publishable_2FIKYuEHEQrYseRnwY58Qg__UIFN59j'; // заменяешь своим
+const supabaseClient = supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-// Ключ шифрования — можно улучшить генерацией на основе user_id
-const SECRET_KEY = 'sb_publishable_2FIKYuEHEQrYseRnwY58Qg__UIFN59j' + (currentUserId||'guest');
+let currentUserId=null, myUsername=null, currentReplyId=null, lastCount=0;
+let SECRET_KEY='';
+
+tg.ready.then(()=>{
+  currentUserId = tg.initDataUnsafe?.user?.id?.toString()||'guest';
+  myUsername = tg.initDataUnsafe?.user?.username||'Guest';
+  SECRET_KEY = 'key_'+currentUserId;
+  loadEchos(true);
+  supabaseClient.channel('any')
+    .on('postgres_changes',{event:'*',schema:'public',table:'posts'},()=>loadEchos(false))
+    .subscribe();
+});
 
 function encrypt(text){ return CryptoJS.AES.encrypt(text, SECRET_KEY).toString(); }
-function decrypt(cipher){ try{return CryptoJS.AES.decrypt(cipher, SECRET_KEY).toString(CryptoJS.enc.Utf8)}catch(e){return 'Ошибка расшифровки';} }
-
+function decrypt(cipher){ try{return CryptoJS.AES.decrypt(cipher, SECRET_KEY).toString(CryptoJS.enc.Utf8)}catch(e){return 'Ошибка'; }
+}
 function linkify(text){ const escaped=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); return escaped.replace(/(https?:\/\/[^\s]+)/g, url=>`<a class="linkify" href="${url}" target="_blank">${url}</a>`); }
 
 async function loadEchos(isInitial=false){
@@ -94,9 +103,9 @@ async function loadEchos(isInitial=false){
       tg.showAlert(`🔔 Вас упомянул @${newPost.username}!`);
     }
   }
-  lastCount=data.length;
+  lastCount = data.length;
 
-  const feed=document.getElementById('feed'); feed.innerHTML='';
+  const feed = document.getElementById('feed'); feed.innerHTML='';
   data.forEach((post,index)=>{
     const isMy=post.user_id===currentUserId;
     const isForMe=post.target_username && myUsername===post.target_username;
@@ -112,13 +121,12 @@ async function loadEchos(isInitial=false){
         <div class="card-content">
           ${replyBox}
           <div class="author">@${post.username} ${post.target_username?'🔒':''}</div>
-          <div style="font-size:16px;"></div>
+          <div style="font-size:16px;">${linkify(decryptedContent)}</div>
           <div style="display:flex; gap:15px; margin-top:15px;">
             <span style="color:var(--accent); font-size:13px; font-weight:600; cursor:pointer;" onclick="setupReply('${post.id}','${post.username}','${decryptedContent.substring(0,40)}')">Ответить</span>
             ${isMy?`<span style="color:#ff453a; font-size:13px; font-weight:600; cursor:pointer;" onclick="deleteEcho('${post.id}')">Удалить</span>`:''}
           </div>
         </div>`;
-      card.querySelector('div[style*="font-size:16px"]').innerHTML=linkify(decryptedContent);
       feed.appendChild(card); setTimeout(()=>card.classList.add('visible'),index*60);
     }
   });
@@ -133,19 +141,28 @@ function updatePreview(){ const file=document.getElementById('fileInput').files[
 async function deleteEcho(id){ if(confirm("Удалить?")){ await supabaseClient.from('posts').delete().eq('id',id); loadEchos(); } }
 
 async function sendPost(){
-  const btn=document.getElementById('submitBtn'); const text=document.getElementById('postText').value.trim(); const target=document.getElementById('targetUser').value.replace('@','').trim();
-  const file=document.getElementById('fileInput').files[0]; if(!text && !file) return;
+  const btn=document.getElementById('submitBtn'); 
+  const text=document.getElementById('postText').value.trim(); 
+  const target=document.getElementById('targetUser').value.replace('@','').trim();
+  const file=document.getElementById('fileInput').files[0]; 
+  if(!text && !file) return;
   btn.disabled=true; btn.innerHTML='<div class="loader" style="margin:auto"></div>';
-  let imageUrl=null;
-  if(file){ if(!file.type.startsWith('image/')){ alert('Только изображения!'); btn.disabled=false; btn.innerText='Отправить'; return; } const name=`${Date.now()}.jpg`; const { data }=await supabaseClient.storage.from('images').upload(name,file); if(data) imageUrl=supabaseClient.storage.from('images').getPublicUrl(name).data.publicUrl; }
-  const encrypted = encrypt(text);
-  await supabaseClient.from('posts').insert([{ username:myUsername||'Guest', content:encrypted, user_id:currentUserId, image_url:imageUrl, target_username:target||null, parent_id:currentReplyId }]);
-  btn.disabled=false; btn.innerText='Отправить'; closeModal(); loadEchos();
-}
 
-loadEchos(true);
-supabaseClient.channel('any').on('postgres_changes',{event:'*',schema:'public',table:'posts'},()=>loadEchos(false)).subscribe();
-document.addEventListener('keydown',e=>{if(e.key==='Escape') closeModal();});
+  let imageUrl=null;
+  if(file){
+    if(!file.type.startsWith('image/')){ alert('Только изображения!'); btn.disabled=false; btn.innerText='Отправить'; return; }
+    const name=`${Date.now()}.jpg`; 
+    const { data }=await supabaseClient.storage.from('images').upload(name,file);
+    if(data) imageUrl=supabaseClient.storage.from('images').getPublicUrl(name).data.publicUrl;
+  }
+
+  const encrypted = encrypt(text);
+  await supabaseClient.from('posts').insert([{ username:myUsername, content:encrypted, user_id:currentUserId, image_url:imageUrl, target_username:target||null, parent_id:currentReplyId }]);
+
+  btn.disabled=false; btn.innerText='Отправить'; 
+  closeModal(); 
+  loadEchos();
+}
 </script>
 </body>
 </html>
