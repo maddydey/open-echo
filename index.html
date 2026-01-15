@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>OpenEcho Pro Premium</title>
+    <title>OpenEcho Premium</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -21,181 +21,119 @@
             font-family: -apple-system, system-ui, sans-serif; 
             background: var(--bg); 
             color: var(--text); 
-            overflow-x: hidden;
+            padding: env(safe-area-inset-top) 20px calc(100px + env(safe-area-inset-bottom)) 20px;
             display: flex;
             justify-content: center;
         }
 
-        /* Главный контейнер */
-        .app-wrapper {
-            display: flex;
+        .container {
             width: 100%;
-            max-width: 1200px;
-            min-height: 100vh;
-            padding: 20px;
-            gap: 20px;
+            max-width: 1000px; /* Ограничение для iPad */
         }
 
-        /* Боковая панель для iPad */
-        .sidebar {
-            width: 280px;
-            position: sticky;
-            top: 20px;
-            height: calc(100vh - 40px);
-            display: none; /* Скрыта на телефонах */
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        @media (min-width: 900px) {
-            .sidebar { display: flex; }
-        }
-
-        .side-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 24px;
-            padding: 24px;
-            border: 1px solid var(--border);
-        }
-
-        /* Лента сообщений */
-        .main-content {
-            flex: 1;
-            max-width: 100%;
-        }
-
+        /* Адаптивная сетка: 1 колонка на iPhone, 2 на iPad */
         #feed { 
             display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
             gap: 16px; 
         }
 
-        /* Карточка поста */
         .card {
             background: var(--card-bg); 
-            backdrop-filter: blur(30px); 
-            -webkit-backdrop-filter: blur(30px);
-            border-radius: 28px; 
+            backdrop-filter: blur(25px); 
+            -webkit-backdrop-filter: blur(25px);
+            border-radius: 24px; 
             padding: 20px; 
             border: 1px solid var(--border); 
             height: fit-content;
-            transition: transform 0.2s ease;
+            overflow: hidden; /* Чтобы ничего не вылетало */
+            display: flex;
+            flex-direction: column;
         }
 
-        .card:active { transform: scale(0.98); }
+        /* ФИКС ТЕКСТА: Чтобы не вылезал за границы */
+        .text { 
+            font-size: 16px; 
+            line-height: 1.5; 
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
 
         .post-img { 
             width: calc(100% + 40px); 
             margin: -20px -20px 15px -20px; 
-            max-height: 400px; 
+            max-height: 450px; 
             object-fit: cover; 
-            border-radius: 28px 28px 0 0;
         }
 
-        .author { 
-            color: var(--accent); 
-            font-weight: 700; 
-            font-size: 14px; 
-            margin-bottom: 8px; 
-            display: flex; 
-            align-items: center; 
-            gap: 5px;
-        }
+        .author { color: var(--accent); font-weight: 700; font-size: 14px; margin-bottom: 8px; }
 
-        /* Кнопка создания поста */
+        /* Кнопка добавления */
         .add-btn { 
             position: fixed; 
-            bottom: 30px; 
+            bottom: calc(30px + env(safe-area-inset-bottom)); 
             right: 30px; 
-            width: 64px; 
-            height: 64px; 
+            width: 60px; height: 60px; 
             background: var(--accent); 
-            border-radius: 50%; 
-            border: none; 
-            color: white; 
-            font-size: 32px; 
-            z-index: 999; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            box-shadow: 0 8px 25px rgba(10,132,255,0.4); 
-            cursor: pointer;
+            border-radius: 50%; border: none; color: white; 
+            font-size: 30px; z-index: 99; 
+            box-shadow: 0 8px 20px rgba(10,132,255,0.3);
         }
 
-        /* Поле ввода */
+        /* Модалка */
+        .modal { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(15px); 
+            z-index: 100; align-items: center; justify-content: center; padding: 20px; 
+        }
+        .modal.show { display: flex; }
         .modal-content { 
-            background: #1c1c1e; 
-            border-radius: 35px; 
-            padding: 30px; 
-            width: 100%; 
-            max-width: 500px; 
-            border: 1px solid var(--border); 
+            background: #1c1c1e; border-radius: 30px; padding: 25px; 
+            width: 100%; max-width: 450px; border: 1px solid var(--border); 
         }
 
         textarea { 
             width: 100%; background: transparent; border: none; color: white; 
-            font-size: 18px; outline: none; resize: none; min-height: 100px;
+            font-size: 18px; outline: none; resize: none; min-height: 120px; 
+            margin: 15px 0; font-family: inherit;
         }
 
         .reply-box { 
-            background: rgba(255,255,255,0.05); 
-            padding: 12px; 
-            border-radius: 15px; 
-            border-left: 4px solid var(--accent);
-            margin-bottom: 15px;
+            background: rgba(255,255,255,0.05); padding: 10px; 
+            border-radius: 12px; border-left: 3px solid var(--accent); 
+            margin-bottom: 10px; font-size: 13px;
         }
+        
+        #mediaPreview img { width: 80px; height: 80px; border-radius: 12px; object-fit: cover; }
     </style>
 </head>
 <body>
 
-    <div class="app-wrapper">
-        <div class="sidebar">
-            <div class="side-card">
-                <h2 id="userName" style="font-size: 20px; margin-bottom: 5px;">Привет!</h2>
-                <p style="opacity: 0.5; font-size: 14px;">Рады видеть тебя в OpenEcho Pro</p>
-            </div>
-            <div class="side-card">
-                <p style="font-weight: 700; color: var(--accent);">Статистика</p>
-                <div style="margin-top:10px; font-size: 14px; opacity: 0.8;">
-                    Постов в ленте: <span id="count">0</span>
-                </div>
-            </div>
+<div class="container">
+    <div id="feed"></div>
+</div>
+
+<button class="add-btn" onclick="openModal()">+</button>
+
+<div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
+    <div class="modal-content">
+        <div id="replyPreview" style="display:none" class="reply-box">
+            <div id="replyAuthor" style="font-weight:700; color:var(--accent)"></div>
+            <div id="replyText"></div>
         </div>
-
-        <div class="main-content">
-            <div id="feed"></div>
-        </div>
-    </div>
-
-    <button class="add-btn" onclick="openModal()">+</button>
-
-    <div id="modal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); backdrop-filter:blur(20px); z-index:1000; align-items:center; justify-content:center; padding:20px;" onclick="if(event.target==this) closeModal()">
-        <div class="modal-content">
-            <div id="replyPreview" style="display:none" class="reply-box">
-                <div id="replyAuthor" style="font-weight:700; color:var(--accent)"></div>
-                <div id="replyText" style="font-size:13px; opacity:0.7"></div>
-            </div>
-            <textarea id="txt" placeholder="Напишите что-нибудь..."></textarea>
-            <div id="mediaPreview" style="display:none; margin-bottom:15px;"><img id="previewImg" style="width:80px; height:80px; border-radius:12px; object-fit:cover;"></div>
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <button onclick="document.getElementById('fileInput').click()" style="background:none; border:none; color:var(--accent); font-weight:600;">📷 Фото</button>
-                <input type="file" id="fileInput" hidden accept="image/*" onchange="handleFile()">
-                <button id="sendBtn" onclick="send()" style="background:var(--accent); color:white; border:none; padding:12px 25px; border-radius:15px; font-weight:700;">Отправить</button>
-            </div>
+        <div id="mediaPreview" style="display:none"><img id="previewImg" src=""></div>
+        <textarea id="txt" placeholder="Что нового?"></textarea>
+        <div style="display:flex; justify-content:space-between;">
+            <button onclick="document.getElementById('fileInput').click()" style="background:none; border:none; color:var(--accent); font-weight:600;">📷 Фото</button>
+            <input type="file" id="fileInput" hidden accept="image/*" onchange="handleFile()">
+            <button id="sendBtn" onclick="send()" style="background:var(--accent); color:white; border:none; padding:10px 20px; border-radius:12px; font-weight:700;">Отправить</button>
         </div>
     </div>
+</div>
 
 <script>
-// ТУТ ВСТАВЛЯЕМ ВЕСЬ JS ИЗ ПРОШЛОГО ОТВЕТА (Supabase init, load, send, del)
-// Добавляем только одну строку в функцию load:
-// document.getElementById('count').innerText = data.length;
-// document.getElementById('userName').innerText = 'Привет, @' + myUsername + '!';
-</script>
-
-<script>
-// --- ПОВТОР JS ЛОГИКИ ДЛЯ РАБОТЫ ---
 const tg = window.Telegram.WebApp;
 const haptic = tg.HapticFeedback;
 tg.expand();
@@ -208,59 +146,98 @@ const myId = tg.initDataUnsafe?.user?.id?.toString() || 'guest';
 const myUsername = tg.initDataUnsafe?.user?.username || 'Guest';
 let replyId = null;
 
+// Сжатие фото
+async function compressImage(file) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (e) => {
+            const img = new Image();
+            img.src = e.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const MAX_W = 1200;
+                let w = img.width, h = img.height;
+                if (w > MAX_W) { h *= MAX_W / w; w = MAX_W; }
+                canvas.width = w; canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+                canvas.toBlob((blob) => resolve(new File([blob], file.name, {type:'image/jpeg'})), 'image/jpeg', 0.7);
+            };
+        };
+    });
+}
+
 async function load() {
     const { data, error } = await db.from('posts').select('*').order('created_at', { ascending: false });
     if (error) return;
-    
-    document.getElementById('count').innerText = data.length;
-    document.getElementById('userName').innerText = 'Привет, @' + myUsername + '!';
-    
     const feed = document.getElementById('feed');
     feed.innerHTML = '';
-    
-    data.forEach((post) => {
+    data.forEach(post => {
         const card = document.createElement('div');
         card.className = 'card';
-        
         let replyHtml = '';
         if (post.parent_id) {
             const parent = data.find(p => p.id === post.parent_id);
-            if (parent) replyHtml = `<div class="reply-box"><b>@${parent.username}</b>: ${parent.content?.substring(0,30)}...</div>`;
+            if (parent) replyHtml = `<div class="reply-box"><b>@${parent.username}</b>: ${parent.content?.substring(0,20)}...</div>`;
         }
-
         card.innerHTML = `
-            ${post.image_url ? `<img src="${post.image_url}" class="post-img" loading="lazy">` : ''}
+            ${post.image_url ? `<img src="${post.image_url}" class="post-img">` : ''}
             <div class="author">@${post.username}</div>
             ${replyHtml}
             <div class="text">${post.content || ''}</div>
-            <div style="margin-top:15px; display:flex; gap:15px; font-size:13px; font-weight:700;">
-                <span style="color:var(--accent); cursor:pointer;" onclick="setupReply('${post.id}','${post.username}','${(post.content||'').substring(0,20)}')">💬 Ответить</span>
-                ${post.user_id === myId ? `<span style="color:#ff453a; cursor:pointer;" onclick="del('${post.id}')">🗑 Удалить</span>` : ''}
-            </div>
-        `;
+            <div style="margin-top:15px; display:flex; gap:20px; font-size:13px; font-weight:700;">
+                <span style="color:var(--accent);" onclick="setupReply('${post.id}','${post.username}','${(post.content||'').substring(0,20)}')">💬 Ответ</span>
+                ${post.user_id === myId ? `<span style="color:#ff453a;" onclick="del('${post.id}')">🗑 Удалить</span>` : ''}
+            </div>`;
         feed.appendChild(card);
     });
 }
 
-// (Функции send, del, openModal, closeModal, handleFile остаются стандартными)
-function openModal() { document.getElementById('modal').style.display = 'flex'; haptic.impactOccurred('light'); }
-function closeModal() { document.getElementById('modal').style.display = 'none'; replyId = null; }
+async function send() {
+    const txt = document.getElementById('txt').value.trim();
+    let file = document.getElementById('fileInput').files[0];
+    if (!txt && !file) return;
+    const btn = document.getElementById('sendBtn');
+    btn.disabled = true;
+    try {
+        let imageUrl = null;
+        if (file) {
+            file = await compressImage(file);
+            const name = `${Date.now()}.jpg`;
+            await db.storage.from('images').upload(name, file);
+            imageUrl = db.storage.from('images').getPublicUrl(name).data.publicUrl;
+        }
+        await db.from('posts').insert([{ content: txt, username: myUsername, user_id: myId, parent_id: replyId, image_url: imageUrl }]);
+        haptic.notificationOccurred('success');
+        closeModal(); load();
+    } catch (e) { alert(e.message); }
+    btn.disabled = false;
+}
+
+function handleFile() {
+    const file = document.getElementById('fileInput').files[0];
+    if (file) {
+        document.getElementById('previewImg').src = URL.createObjectURL(file);
+        document.getElementById('mediaPreview').style.display = 'block';
+    }
+}
+
+function openModal() { document.getElementById('modal').classList.add('show'); haptic.impactOccurred('light'); }
+function closeModal() { 
+    document.getElementById('modal').classList.remove('show'); 
+    replyId = null; document.getElementById('txt').value = ''; 
+    document.getElementById('mediaPreview').style.display = 'none';
+}
+
 function setupReply(id, user, text) {
     replyId = id;
     document.getElementById('replyAuthor').innerText = '@' + user;
-    document.getElementById('replyText').innerText = text + '...';
+    document.getElementById('replyText').innerText = text;
     document.getElementById('replyPreview').style.display = 'block';
     openModal();
 }
-async function send() {
-    const txt = document.getElementById('txt').value.trim();
-    if (!txt) return;
-    const btn = document.getElementById('sendBtn');
-    btn.disabled = true;
-    await db.from('posts').insert([{ content: txt, username: myUsername, user_id: myId, parent_id: replyId }]);
-    haptic.notificationOccurred('success');
-    closeModal(); load(); btn.disabled = false;
-}
+
 async function del(id) { if(confirm('Удалить?')) { await db.from('posts').delete().eq('id', id); load(); } }
 
 load();
