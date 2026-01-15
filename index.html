@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>OpenEcho Clean Design</title>
+    <title>OpenEcho Pro</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --bg: #000000;
-            --card-bg: #1c1c1e; /* Более плотный цвет, чтобы не было каши */
+            --card-bg: #1c1c1e;
             --accent: #0a84ff;
             --text: #ffffff;
-            --border: rgba(255, 255, 255, 0.12);
+            --border: rgba(255, 255, 255, 0.1);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -27,32 +27,30 @@
             justify-content: center;
         }
 
-        .container {
-            width: 100%;
-            max-width: 900px;
-        }
+        .container { width: 100%; max-width: 900px; }
 
-        /* Сетка с увеличенным расстоянием (gap: 24px) */
+        /* Убираем "кашу" за счет gap и теней */
         #feed { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
-            gap: 24px; 
+            gap: 25px; 
+        }
+
+        @media (max-width: 650px) {
+            #feed { grid-template-columns: 1fr; gap: 20px; }
         }
 
         .card {
             background: var(--card-bg); 
-            border-radius: 24px; 
+            border-radius: 26px; 
             padding: 24px; 
             border: 1px solid var(--border); 
             display: flex;
             flex-direction: column;
-            /* Тень для объема, чтобы карточки не сливались */
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
             transition: transform 0.2s ease;
+            overflow: hidden;
         }
-
-        /* Эффект при нажатии */
-        .card:active { transform: scale(0.98); }
 
         .post-img { 
             width: calc(100% + 48px); 
@@ -62,18 +60,12 @@
             border-bottom: 1px solid var(--border);
         }
 
-        .author { 
-            color: var(--accent); 
-            font-weight: 700; 
-            font-size: 14px; 
-            margin-bottom: 12px; /* Больше отступа до текста */
-            display: flex;
-            align-items: center;
-        }
+        .author { color: var(--accent); font-weight: 700; font-size: 14px; margin-bottom: 12px; }
 
+        /* Фикс вылета текста */
         .text { 
             font-size: 16px; 
-            line-height: 1.6; /* Увеличен межстрочный интервал для читаемости */
+            line-height: 1.6; 
             word-wrap: break-word;
             overflow-wrap: break-word;
             word-break: break-word;
@@ -89,30 +81,24 @@
             gap: 20px;
         }
 
-        .btn-action {
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-        .btn-action:hover { opacity: 0.7; }
-
         .add-btn { 
-            position: fixed; 
-            bottom: 40px; 
-            right: 30px; 
-            width: 64px; height: 64px; 
-            background: var(--accent); 
+            position: fixed; bottom: 40px; right: 30px; 
+            width: 64px; height: 64px; background: var(--accent); 
             border-radius: 50%; border: none; color: white; 
-            font-size: 32px; z-index: 99; 
-            box-shadow: 0 10px 25px rgba(10,132,255,0.4);
+            font-size: 32px; z-index: 99; box-shadow: 0 10px 25px rgba(10,132,255,0.4);
         }
 
-        /* Адаптация под мобилки */
-        @media (max-width: 600px) {
-            #feed { grid-template-columns: 1fr; gap: 16px; }
-            body { padding: 15px; }
+        .modal { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); z-index: 100;
+            align-items: center; justify-content: center; padding: 20px;
         }
+        .modal.show { display: flex; }
+        .modal-content { background: #2c2c2e; border-radius: 30px; padding: 30px; width: 100%; max-width: 450px; }
+        
+        textarea { width: 100%; background: transparent; border: none; color: white; font-size: 18px; outline: none; resize: none; min-height: 120px; margin-bottom: 20px; font-family: inherit;}
+        
+        .reply-box { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 15px; border-left: 4px solid var(--accent); margin-bottom: 15px; font-size: 13px; }
     </style>
 </head>
 <body>
@@ -123,10 +109,138 @@
 
 <button class="add-btn" onclick="openModal()">+</button>
 
-<script>
-// Вставь сюда свой JS из прошлых сообщений. 
-// Главное — проверь, чтобы функция load() генерировала верстку с классом .footer и .btn-action
-</script>
+<div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
+    <div class="modal-content">
+        <div id="replyPreview" style="display:none" class="reply-box">
+            <div id="replyAuthor" style="font-weight:700; color:var(--accent)"></div>
+            <div id="replyText"></div>
+        </div>
+        <div id="mediaPreview" style="display:none; margin-bottom:15px;"><img id="previewImg" style="width:80px; height:80px; border-radius:12px; object-fit:cover;"></div>
+        <textarea id="txt" placeholder="Напишите что-нибудь..."></textarea>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <button onclick="document.getElementById('fileInput').click()" style="background:none; border:none; color:var(--accent); font-weight:600; cursor:pointer;">📷 Фото</button>
+            <input type="file" id="fileInput" hidden accept="image/*" onchange="handleFile()">
+            <button id="sendBtn" onclick="send()" style="background:var(--accent); color:white; border:none; padding:12px 25px; border-radius:15px; font-weight:700; cursor:pointer;">Отправить</button>
+        </div>
+    </div>
+</div>
 
+<script>
+const tg = window.Telegram.WebApp;
+const haptic = tg.HapticFeedback;
+tg.expand();
+
+const SUPABASE_URL = 'https://xddulhzvzemmrhrsjfhb.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_2FIKYuEHEQrYseRnwY58Qg__UIFN59j';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const myId = tg.initDataUnsafe?.user?.id?.toString() || 'guest';
+const myUsername = tg.initDataUnsafe?.user?.username || 'Guest';
+let replyId = null;
+
+async function load() {
+    try {
+        const { data, error } = await db.from('posts').select('*').order('created_at', { ascending: false });
+        if (error) throw error;
+        
+        const feed = document.getElementById('feed');
+        feed.innerHTML = '';
+        
+        data.forEach(post => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            let replyHtml = '';
+            if (post.parent_id) {
+                const parent = data.find(p => p.id === post.parent_id);
+                if (parent) replyHtml = `<div class="reply-box"><b>@${parent.username}</b>: ${parent.content?.substring(0,30)}...</div>`;
+            }
+
+            card.innerHTML = `
+                ${post.image_url ? `<img src="${post.image_url}" class="post-img" loading="lazy">` : ''}
+                <div class="author">@${post.username}</div>
+                ${replyHtml}
+                <div class="text">${post.content || ''}</div>
+                <div class="footer">
+                    <span style="color:var(--accent); font-weight:700; cursor:pointer; font-size:13px;" onclick="setupReply('${post.id}','${post.username}','${(post.content||'').substring(0,20)}')">💬 Ответить</span>
+                    ${post.user_id === myId ? `<span style="color:#ff453a; font-weight:700; cursor:pointer; font-size:13px;" onclick="del('${post.id}')">🗑 Удалить</span>` : ''}
+                </div>
+            `;
+            feed.appendChild(card);
+        });
+    } catch (e) { console.error('Load error:', e); }
+}
+
+async function send() {
+    const txt = document.getElementById('txt').value.trim();
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
+    
+    if (!txt && !file) return;
+
+    const btn = document.getElementById('sendBtn');
+    btn.disabled = true;
+    btn.innerText = '...';
+
+    try {
+        let imageUrl = null;
+        if (file) {
+            const fileName = `${Date.now()}.jpg`;
+            const { data: upData, error: upError } = await db.storage.from('images').upload(fileName, file);
+            if (upError) throw upError;
+            imageUrl = db.storage.from('images').getPublicUrl(fileName).data.publicUrl;
+        }
+
+        const { error } = await db.from('posts').insert([{
+            content: txt,
+            username: myUsername,
+            user_id: myId,
+            parent_id: replyId,
+            image_url: imageUrl
+        }]);
+
+        if (error) throw error;
+        haptic.notificationOccurred('success');
+        closeModal();
+        load();
+    } catch (e) { tg.showAlert(e.message); }
+    finally { btn.disabled = false; btn.innerText = 'Отправить'; }
+}
+
+function handleFile() {
+    const file = document.getElementById('fileInput').files[0];
+    if (file) {
+        document.getElementById('previewImg').src = URL.createObjectURL(file);
+        document.getElementById('mediaPreview').style.display = 'block';
+    }
+}
+
+function openModal() { document.getElementById('modal').classList.add('show'); haptic.impactOccurred('light'); }
+function closeModal() { 
+    document.getElementById('modal').classList.remove('show'); 
+    replyId = null; document.getElementById('txt').value = ''; 
+    document.getElementById('mediaPreview').style.display = 'none';
+    document.getElementById('replyPreview').style.display = 'none';
+}
+
+function setupReply(id, user, text) {
+    replyId = id;
+    document.getElementById('replyAuthor').innerText = '@' + user;
+    document.getElementById('replyText').innerText = text + '...';
+    document.getElementById('replyPreview').style.display = 'block';
+    openModal();
+}
+
+async function del(id) { 
+    if(confirm('Удалить пост?')) { 
+        await db.from('posts').delete().eq('id', id); 
+        haptic.impactOccurred('warning');
+        load(); 
+    } 
+}
+
+load();
+db.channel('any').on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, load).subscribe();
+</script>
 </body>
 </html>
