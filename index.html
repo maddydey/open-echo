@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>OpenEcho Pro Fixed</title>
+<title>OpenEcho Pro Premium</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -24,7 +24,6 @@ body {
   padding-bottom: 120px; 
 }
 
-/* ИСПРАВЛЕННАЯ СЕТКА: Masonry Style */
 #feed { 
   column-count: 1; 
   column-gap: 20px; 
@@ -33,7 +32,6 @@ body {
   margin: 0 auto;
 }
 
-/* Для iPad (2 колонки) */
 @media (min-width: 600px) {
   #feed { column-count: 2; }
 }
@@ -41,9 +39,8 @@ body {
 .card {
   background: var(--card-bg); 
   border-radius: 24px; 
-  padding: 0; /* Убираем падинг здесь, чтобы картинка прилегала */
-  margin-bottom: 20px; /* Отступ между карточками вниз */
-  break-inside: avoid; /* Чтобы карточку не разрывало между колонками */
+  margin-bottom: 20px; 
+  break-inside: avoid; 
   border: 1px solid var(--border);
   overflow: hidden;
   display: flex;
@@ -52,7 +49,6 @@ body {
 
 .card-content { padding: 20px; }
 
-/* ИСПРАВЛЕНИЕ КАРТИНКИ: Чтобы не было черных полос */
 .post-img { 
   width: 100%; 
   display: block; 
@@ -66,9 +62,32 @@ body {
   line-height: 1.5; 
   word-wrap: break-word; 
   overflow-wrap: break-word; 
-  word-break: break-word; /* Фикс длинных ссылок со скрина */
+  word-break: break-word; 
   white-space: pre-wrap;
-  margin-bottom: 15px;
+}
+
+/* ТЕ САМЫЕ ХОРОШИЕ ССЫЛКИ */
+.link-bubble {
+  margin-top: 12px; 
+  background: rgba(10, 132, 255, 0.15); 
+  border: 1px solid rgba(10, 132, 255, 0.3);
+  border-radius: 18px; 
+  padding: 12px; 
+  display: flex; 
+  align-items: center; 
+  gap: 12px; 
+  text-decoration: none; 
+  color: inherit;
+}
+.link-icon { 
+  width: 36px; height: 36px; 
+  background: var(--accent); 
+  border-radius: 10px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  font-weight: 800; 
+  flex-shrink: 0;
 }
 
 .author { color: var(--accent); font-weight: 700; font-size: 14px; margin-bottom: 8px; }
@@ -80,18 +99,15 @@ body {
   font-weight: 700;
   border-top: 1px solid rgba(255,255,255,0.05);
   padding-top: 12px;
+  margin-top: 10px;
 }
 
-/* Кнопка + */
 .add-btn { position: fixed; bottom: 30px; right: 24px; width: 64px; height: 64px; background: var(--accent); border-radius: 50%; border: none; color: white; font-size: 36px; z-index: 999; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(10,132,255,0.4); }
 
 .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
 .modal.show { display: flex; }
 .modal-content { background: #1c1c1e; border-radius: 32px; padding: 25px; width: 100%; max-width: 400px; border: 1px solid var(--border); }
 textarea { width: 100%; background: transparent; border: none; color: white; font-size: 18px; outline: none; resize: none; margin-top: 10px; font-family: inherit;}
-
-.btn-file { background: rgba(10, 132, 255, 0.1); border: none; color: var(--accent); font-weight: 700; cursor: pointer; padding: 10px 16px; border-radius: 12px; }
-.send-btn { background: var(--accent); color: white; border: none; padding: 12px 28px; border-radius: 16px; font-weight: 700; cursor: pointer; }
 
 .reply-box { background: rgba(255, 255, 255, 0.05); border-left: 3px solid var(--accent); padding: 10px; border-radius: 12px; margin-bottom: 12px; font-size: 13px; }
 </style>
@@ -110,9 +126,9 @@ textarea { width: 100%; background: transparent; border: none; color: white; fon
         <div id="mediaPreview" style="display:none; margin-bottom:15px;"><img id="previewImg" style="width:80px; height:80px; border-radius:12px; object-fit:cover;"></div>
         <textarea id="txt" placeholder="Что нового?"></textarea>
         <div style="display:flex; justify-content:space-between; align-items:center;">
-            <button class="btn-file" onclick="document.getElementById('fileInput').click()">📷 Фото</button>
+            <button onclick="document.getElementById('fileInput').click()" style="background:none; border:none; color:var(--accent); font-weight:700;">📷 Фото</button>
             <input type="file" id="fileInput" hidden accept="image/*" onchange="handleFile()">
-            <button class="send-btn" id="sendBtn" onclick="send()">Отправить</button>
+            <button id="sendBtn" onclick="send()" style="background:var(--accent); color:white; border:none; padding:12px 28px; border-radius:16px; font-weight:700;">Отправить</button>
         </div>
     </div>
 </div>
@@ -130,6 +146,27 @@ const myId = tg.initDataUnsafe?.user?.id?.toString() || 'guest';
 const myUsername = tg.initDataUnsafe?.user?.username || 'Guest';
 let replyId = null;
 
+// Логика выделения ссылок
+function getLinkBubble(text) {
+    if (!text) return { cleanText: '', bubble: '' };
+    const urlPattern = /(https?:\/\/[^\s]+)/g;
+    const match = text.match(urlPattern);
+    if (!match) return { cleanText: text, bubble: '' };
+    const url = match[0];
+    const cleanText = text.replace(url, '').trim();
+    try {
+        const domain = new URL(url).hostname.replace('www.', '');
+        const bubble = `<a href="${url}" target="_blank" class="link-bubble">
+            <div class="link-icon">${domain.charAt(0).toUpperCase()}</div>
+            <div>
+                <div style="font-weight:700; color:var(--accent); font-size:14px;">Перейти</div>
+                <div style="font-size:12px; opacity:0.6;">${domain}</div>
+            </div>
+        </a>`;
+        return { cleanText, bubble };
+    } catch(e) { return { cleanText: text, bubble: '' }; }
+}
+
 async function load() {
     const { data, error } = await db.from('posts').select('*').order('created_at', { ascending: false });
     if (error) return;
@@ -141,19 +178,22 @@ async function load() {
         const card = document.createElement('div');
         card.className = 'card';
         
+        // Обработка текста и ссылок
+        const { cleanText, bubble } = getLinkBubble(post.content || '');
+
         let replyHtml = '';
         if (post.parent_id) {
             const parent = data.find(p => p.id === post.parent_id);
             if (parent) replyHtml = `<div class="reply-box"><b>@${parent.username}</b>: ${parent.content?.substring(0,25)}...</div>`;
         }
 
-        // Верстка карточки без "каши"
         card.innerHTML = `
             ${post.image_url ? `<img src="${post.image_url}" class="post-img" loading="lazy">` : ''}
             <div class="card-content">
                 <div class="author">@${post.username}</div>
                 ${replyHtml}
-                <div class="text">${post.content || ''}</div>
+                <div class="text">${cleanText || ''}</div>
+                ${bubble}
                 <div class="footer">
                     <span style="color:var(--accent); cursor:pointer;" onclick="setupReply('${post.id}','${post.username}','${(post.content||'').substring(0,20)}')">💬 Ответ</span>
                     ${post.user_id === myId ? `<span style="color:#ff453a; cursor:pointer;" onclick="del('${post.id}')">🗑 Удалить</span>` : ''}
@@ -191,7 +231,7 @@ function handleFile() {
     }
 }
 function openModal() { document.getElementById('modal').classList.add('show'); haptic.impactOccurred('light'); }
-function closeModal() { document.getElementById('modal').classList.remove('show'); replyId = null; document.getElementById('txt').value = ''; document.getElementById('mediaPreview').style.display = 'none'; }
+function closeModal() { document.getElementById('modal').classList.remove('show'); replyId = null; document.getElementById('txt').value = ''; document.getElementById('mediaPreview').style.display = 'none'; document.getElementById('replyPreview').style.display = 'none'; }
 function setupReply(id, user, text) { replyId = id; document.getElementById('replyAuthor').innerText = '@'+user; document.getElementById('replyText').innerText = text+'...'; document.getElementById('replyPreview').style.display = 'block'; openModal(); }
 async function del(id) { if (confirm('Удалить?')) { await db.from('posts').delete().eq('id', id); load(); } }
 
