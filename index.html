@@ -33,7 +33,7 @@ body {
 
 .card-content { padding: 18px; }
 
-/* ЛИНИЯ И БЛОК ОТВЕТА */
+/* ЛИНИЯ ОТВЕТА */
 .reply-line {
   margin-bottom: 12px; padding-left: 12px;
   border-left: 2px solid var(--accent);
@@ -41,6 +41,17 @@ body {
 }
 .reply-author { font-weight: 700; color: var(--accent); margin-bottom: 2px; }
 .reply-preview { opacity: 0.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ССЫЛКИ-ПУЗЫРИ */
+.link-bubble {
+  margin-top: 12px; background: rgba(10, 132, 255, 0.1); 
+  border: 1px solid rgba(10, 132, 255, 0.2);
+  border-radius: 16px; padding: 10px; 
+  display: flex; align-items: center; gap: 10px; 
+  text-decoration: none; color: inherit;
+}
+.link-logo { width: 24px; height: 24px; border-radius: 4px; background: #222; }
+.link-url { font-size: 13px; font-weight: 600; opacity: 0.8; overflow: hidden; text-overflow: ellipsis; }
 
 .post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .avatar { 
@@ -50,7 +61,7 @@ body {
 }
 
 .post-img { width: 100%; max-height: 350px; object-fit: cover; border-bottom: 1px solid var(--border); }
-.text { font-size: 15px; line-height: 1.4; opacity: 0.95; }
+.text { font-size: 15px; line-height: 1.4; opacity: 0.95; white-space: pre-wrap; word-break: break-word; }
 
 .footer { 
   display: flex; gap: 15px; margin-top: 15px; padding-top: 12px; 
@@ -79,7 +90,6 @@ body {
 .modal-content { background: #1c1c1e; width: 100%; max-width: 400px; padding: 25px; border-radius: 28px; border: 1px solid var(--border); }
 textarea { width: 100%; background: transparent; border: none; color: #fff; font-size: 17px; outline: none; resize: none; min-height: 100px; margin: 10px 0; }
 
-/* Скелетоны */
 .sk { background: var(--skeleton); height: 150px; border-radius: 24px; margin-bottom: 16px; }
 </style>
 </head>
@@ -100,7 +110,7 @@ textarea { width: 100%; background: transparent; border: none; color: #fff; font
             <div id="reAuthor" style="font-size:12px; color:var(--accent); font-weight:700"></div>
             <div id="reText" style="font-size:12px; opacity:0.5"></div>
         </div>
-        <textarea id="txt" placeholder="Ваше сообщение..."></textarea>
+        <textarea id="txt" placeholder="Напишите ссылку или текст..."></textarea>
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <button onclick="document.getElementById('fInp').click()" style="background:none; border:none; color:var(--accent); font-weight:700">📷 Фото</button>
             <input type="file" id="fInp" hidden accept="image/*">
@@ -124,6 +134,26 @@ const myPhoto = user?.photo_url || '';
 let replyId = null;
 let initial = true;
 
+// Функция для обработки ссылок
+function parseContent(text) {
+    if (!text) return { clean: '', bubble: '' };
+    const urlPattern = /(https?:\/\/[^\s]+)/g;
+    const match = text.match(urlPattern);
+    if (!match) return { clean: text, bubble: '' };
+    
+    const url = match[0];
+    const clean = text.replace(url, '').trim();
+    try {
+        const domain = new URL(url).hostname.replace('www.', '');
+        const logo = `https://www.google.com/s2/favicons?sz=64&domain=${domain}`;
+        const bubble = `<a href="${url}" target="_blank" class="link-bubble">
+            <img src="${logo}" class="link-logo" onerror="this.style.display='none'">
+            <span class="link-url">${domain}</span>
+        </a>`;
+        return { clean, bubble };
+    } catch(e) { return { clean: text, bubble: '' }; }
+}
+
 async function load() {
     const { data, error } = await db.from('posts').select('*').order('created_at', { ascending: false });
     if (error) return;
@@ -135,10 +165,10 @@ async function load() {
     feed.innerHTML = '';
 
     data.forEach(post => {
+        const { clean, bubble } = parseContent(post.content);
         const card = document.createElement('div');
         card.className = 'card';
         
-        // Поиск родительского поста для линии ответа
         let replyLine = '';
         if (post.parent_id) {
             const parent = data.find(p => p.id === post.parent_id);
@@ -163,7 +193,8 @@ async function load() {
                     ${avatar}
                     <div class="author">@${post.username}</div>
                 </div>
-                <div class="text">${post.content || ''}</div>
+                <div class="text">${clean}</div>
+                ${bubble}
                 <div class="footer">
                     <span class="btn" onclick="setupReply('${post.id}','${post.username}','${post.content||''}')">💬 Ответ</span>
                     ${post.user_id === myId ? `<span class="btn" style="color:#ff453a" onclick="del('${post.id}')">🗑 Удалить</span>` : ''}
