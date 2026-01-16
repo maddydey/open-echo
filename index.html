@@ -19,7 +19,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 120px; overflow-x: hidden; }
 
-/* ЭКРАН ЗАГРУЗКИ (SPLASH SCREEN) */
+/* ЭКРАН ЗАГРУЗКИ */
 #splash-screen { 
     position: fixed; inset: 0; background: #000; z-index: 10000; 
     display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -37,8 +37,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
 @keyframes loading { 0% { left: -100%; } 100% { left: 0%; } }
 @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(0.98); } }
 
-/* ОСНОВНОЕ ПРИЛОЖЕНИЕ */
-#main-app { opacity: 0; padding: 0 16px; transition: opacity 0.5s ease; }
+/* ОСНОВНОЙ КОНТЕНТ */
+#main-app { display: none; opacity: 0; padding: 0 16px; transition: opacity 0.5s ease; }
 .header-wrapper { position: sticky; top: 0; background: var(--bg); padding-top: 60px; padding-bottom: 20px; z-index: 1000; }
 
 @keyframes slideIn {
@@ -47,32 +47,30 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
 }
 .post-container { margin-bottom: 20px; animation: slideIn 0.4s ease forwards; }
 
-/* SKELETON */
-@keyframes skeletonPulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.6; } }
 .skeleton-post { background: var(--glass); border: 1px solid var(--border); border-radius: 28px; padding: 20px; margin-bottom: 20px; animation: skeletonPulse 1.5s infinite; }
+@keyframes skeletonPulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.6; } }
 
-/* UI ELEMENTS */
 .post-card { background: var(--glass); backdrop-filter: blur(25px); border-radius: 28px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); }
-.avatar { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--border); overflow: hidden; box-shadow: 0 0 10px rgba(10, 132, 255, 0.3); background: #1a1a1a; flex-shrink: 0; }
+.avatar { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--border); overflow: hidden; background: #1a1a1a; flex-shrink: 0; }
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
-.link-bubble { display: flex; align-items: flex-start; gap: 14px; background: var(--bubble-bg); border: 1px solid var(--border); border-radius: 20px; padding: 14px; margin-top: 12px; text-decoration: none; color: inherit; width: 100%; box-shadow: 0 4px 20px rgba(10, 132, 255, 0.15); }
-.link-logo { width: 32px; height: 32px; border-radius: 8px; background: #fff; padding: 4px; flex-shrink: 0; }
+
+.link-bubble { display: flex; align-items: flex-start; gap: 14px; background: var(--bubble-bg); border: 1px solid var(--border); border-radius: 20px; padding: 14px; margin-top: 12px; text-decoration: none; color: inherit; width: 100%; }
+.link-logo { width: 32px; height: 32px; border-radius: 8px; background: #fff; padding: 4px; }
 .link-host { font-size: 11px; color: var(--accent); font-weight: 800; text-transform: uppercase; }
-.link-url { font-size: 13px; opacity: 0.6; word-break: break-all; white-space: normal; line-height: 1.3; }
-.post-image { width: 100%; border-radius: 20px; margin-top: 12px; border: 1px solid rgba(255,255,255,0.1); }
 
 .tab-bar { position: fixed; bottom: 25px; left: 20px; right: 20px; height: 68px; background: rgba(20, 20, 22, 0.9); backdrop-filter: blur(20px); border-radius: 34px; border: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-around; align-items: center; z-index: 2000; }
 .tab-item { color: #555; font-size: 24px; }
 .tab-item.active { color: #fff; transform: scale(1.1); }
 .btn-add { position: fixed; bottom: 105px; right: 25px; width: 60px; height: 60px; background: #fff; color: #000; border-radius: 50%; border: none; font-size: 32px; z-index: 1500; }
 
+/* МОДАЛКА */
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 3000; align-items: flex-end; }
 .modal.show { display: flex; }
 .modal-content { background: #1c1c1e; width: 100%; border-radius: 32px 32px 0 0; padding: 25px 20px 50px; border-top: 1px solid var(--border); }
 
 #preview-box { display: none; position: relative; width: 100%; margin-bottom: 15px; border-radius: 20px; overflow: hidden; border: 1px solid var(--border); }
-#preview-img { width: 100%; display: block; max-height: 200px; object-fit: cover; }
-.del-preview { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: #fff; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; }
+#preview-img { width: 100%; max-height: 200px; object-fit: cover; }
+.del-preview { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: #fff; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 </style>
 </head>
 <body>
@@ -95,7 +93,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
 
 <div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
     <div class="modal-content">
-        <div id="reply-label" style="color:var(--accent); font-size:13px; margin-bottom:12px; font-weight:700; display:none;">ОТВЕТ НА ПОСТ</div>
         <div id="preview-box"><div class="del-preview" onclick="removePhoto()">✕</div><img id="preview-img" src=""></div>
         <textarea id="txt" placeholder="Напишите что-нибудь..." style="width:100%; background:transparent; border:none; color:#fff; font-size:18px; min-height:160px; outline:none; resize:none;"></textarea>
         <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -116,9 +113,9 @@ const myId = user?.id?.toString() || 'guest';
 const myUsername = user?.username || user?.first_name || 'Guest';
 const myPhoto = user?.photo_url || '';
 
-let currentTab = 'all', currentParentId = null;
+let currentTab = 'all';
 
-// ИНИЦИАЛИЗАЦИЯ (ИМИТАЦИЯ ЗАГРУЗКИ)
+// ЗАГРУЗКА ПРИЛОЖЕНИЯ
 window.onload = () => {
     tg.expand();
     setTimeout(() => { document.getElementById('load-status').innerText = "CONNECTING DATABASE"; }, 800);
@@ -146,10 +143,7 @@ function parseContent(text) {
         cleanText = text.replace(url, "").trim();
         linkHtml = `<a href="${url}" target="_blank" class="link-bubble" onclick="event.stopPropagation()">
                 <img class="link-logo" src="https://www.google.com/s2/favicons?sz=64&domain=${url}">
-                <div class="link-info">
-                    <div class="link-host">${domain}</div>
-                    <div class="link-url">${url}</div>
-                </div></a>`;
+                <div class="link-info"><div class="link-host">${domain}</div><div class="link-url">${url}</div></div></a>`;
     }
     return { cleanText, linkHtml };
 }
@@ -164,10 +158,7 @@ async function load() {
 function render(data) {
     const feed = document.getElementById('feed');
     feed.innerHTML = '';
-    const mainPosts = data?.filter(p => !p.parent_id);
-    const replies = data?.filter(p => p.parent_id);
-
-    mainPosts?.forEach((post, index) => {
+    data?.filter(p => !p.parent_id).forEach((post, index) => {
         const { cleanText, linkHtml } = parseContent(post.content);
         const container = document.createElement('div');
         container.className = 'post-container';
@@ -182,7 +173,6 @@ function render(data) {
                 <div class="content-text">${cleanText}</div>
                 ${linkHtml}
                 ${post.image_url ? `<img src="${post.image_url}" class="post-image">` : ''}
-                <div style="margin-top:18px; opacity:0.5; font-size:14px; font-weight:700;" onclick="openModal('${post.id}')">💬 Ответить</div>
             </div>`;
         feed.appendChild(container);
     });
@@ -204,17 +194,8 @@ function switchTab(tab) {
     load();
 }
 
-function openModal(pId = null) { 
-    currentParentId = pId; 
-    document.getElementById('reply-label').style.display = pId ? 'block' : 'none';
-    document.getElementById('modal').classList.add('show'); 
-}
-
-function closeModal() { 
-    document.getElementById('modal').classList.remove('show'); 
-    document.getElementById('txt').value = ""; 
-    removePhoto();
-}
+function openModal() { document.getElementById('modal').classList.add('show'); }
+function closeModal() { document.getElementById('modal').classList.remove('show'); document.getElementById('txt').value = ""; removePhoto(); }
 
 function previewImage(i) {
     const file = i.files[0];
@@ -232,7 +213,6 @@ function previewImage(i) {
 function removePhoto() {
     document.getElementById('fInp').value = "";
     document.getElementById('preview-box').style.display = 'none';
-    document.getElementById('preview-img').src = "";
 }
 
 function showSkeleton() {
@@ -259,7 +239,7 @@ async function send() {
             await db.storage.from('images').upload(name, f);
             imgUrl = db.storage.from('images').getPublicUrl(name).data.publicUrl;
         }
-        await db.from('posts').insert([{ content: t, username: myUsername, user_id: myId, image_url: imgUrl, avatar_url: myPhoto, parent_id: currentParentId }]);
+        await db.from('posts').insert([{ content: t, username: myUsername, user_id: myId, image_url: imgUrl, avatar_url: myPhoto }]);
         btn.disabled = false; btn.innerText = "Пост";
     }, 1200);
 }
