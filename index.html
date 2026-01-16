@@ -13,6 +13,7 @@
   --card-bg: rgba(255, 255, 255, 0.07);
   --accent: #0a84ff;
   --border: rgba(255, 255, 255, 0.12);
+  --skeleton: rgba(255, 255, 255, 0.05);
 }
 
 * {box-sizing: border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent;}
@@ -36,25 +37,32 @@ body {
   display: flex; flex-direction: column;
   backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
   border: 1px solid var(--border);
+  animation: fadeIn 0.4s ease;
 }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* СТИЛИ СКЕЛЕТОНА */
+.skeleton {
+  background: var(--skeleton);
+  height: 200px; border-radius: 26px; margin-bottom: 20px;
+  position: relative; overflow: hidden;
+}
+.skeleton::after {
+  content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+  animation: loading 1.5s infinite;
+}
+@keyframes loading { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
 
 .card-content { padding: 22px; }
-
-.post-img { 
-  width: 100%; display: block; max-height: 450px; 
-  object-fit: cover; border-bottom: 1px solid var(--border);
-}
-
+.post-img { width: 100%; display: block; max-height: 450px; object-fit: cover; border-bottom: 1px solid var(--border); }
 .author { color: var(--accent); font-weight: 700; font-size: 13px; margin-bottom: 8px; }
-
 .text { font-size: 16px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
 
 .link-bubble {
-  margin-top: 15px; background: rgba(10, 132, 255, 0.1); 
-  border: 1px solid rgba(10, 132, 255, 0.2);
-  border-radius: 18px; padding: 12px; 
-  display: flex; align-items: center; gap: 12px; 
-  text-decoration: none; color: inherit;
+  margin-top: 15px; background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2);
+  border-radius: 18px; padding: 12px; display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit;
 }
 .link-logo { width: 34px; height: 34px; border-radius: 8px; background: #111; flex-shrink: 0; object-fit: contain; }
 .link-title { font-weight: 700; color: #fff; font-size: 14px; }
@@ -82,18 +90,19 @@ body {
   align-items: center; justify-content: center; padding: 15px; 
 }
 .modal.show { display: flex; }
-.modal-content { 
-  background: #1c1c1e; border-radius: 35px; padding: 30px; 
-  width: 100%; max-width: 420px; border: 1px solid var(--border); 
-}
+.modal-content { background: #1c1c1e; border-radius: 35px; padding: 30px; width: 100%; max-width: 420px; border: 1px solid var(--border); }
 textarea { width: 100%; background: transparent; border: none; color: white; font-size: 18px; outline: none; resize: none; margin: 15px 0; min-height: 120px; font-family: inherit;}
-
 .reply-preview { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 14px; border-left: 3px solid var(--accent); font-size: 13px; margin-bottom: 15px; }
 </style>
 </head>
 <body>
 
-<div id="feed"></div>
+<div id="feed">
+    <div class="skeleton"></div>
+    <div class="skeleton" style="height: 300px;"></div>
+    <div class="skeleton"></div>
+</div>
+
 <button class="add-btn" onclick="openModal()">+</button>
 
 <div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
@@ -147,7 +156,8 @@ async function load() {
     const { data, error } = await db.from('posts').select('*').order('created_at', { ascending: false });
     if (error) return;
     const feed = document.getElementById('feed');
-    feed.innerHTML = '';
+    feed.innerHTML = ''; // Убираем скелетоны при загрузке данных
+    
     data.forEach(post => {
         const { clean, bubble } = getLinkInfo(post.content || '');
         const card = document.createElement('div');
