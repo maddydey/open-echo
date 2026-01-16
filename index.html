@@ -19,22 +19,6 @@
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 120px; overflow-x: hidden; }
 
-/* Анимация пульсации для заглушки */
-@keyframes skeletonPulse {
-    0% { opacity: 0.4; }
-    50% { opacity: 0.8; }
-    100% { opacity: 0.4; }
-}
-
-.skeleton-card {
-    background: var(--glass);
-    border: 1px solid var(--border);
-    border-radius: 28px;
-    padding: 20px;
-    margin-bottom: 20px;
-    animation: skeletonPulse 1.5s infinite ease-in-out;
-}
-
 @keyframes slideIn {
     0% { opacity: 0; transform: translateY(20px); filter: blur(5px); }
     100% { opacity: 1; transform: translateY(0); filter: blur(0); }
@@ -220,28 +204,8 @@ function render(data) {
     });
 }
 
-// Показываем заглушку
-function showSkeleton() {
-    const feed = document.getElementById('feed');
-    const skeleton = document.createElement('div');
-    skeleton.id = "skeleton-loader";
-    skeleton.className = 'skeleton-card';
-    skeleton.innerHTML = `
-        <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
-            <div style="width:44px; height:44px; border-radius:50%; background:rgba(255,255,255,0.1);"></div>
-            <div style="width:100px; height:14px; background:rgba(255,255,255,0.1); border-radius:4px;"></div>
-        </div>
-        <div style="width:100%; height:16px; background:rgba(255,255,255,0.1); border-radius:4px; margin-bottom:8px;"></div>
-        <div style="width:60%; height:16px; background:rgba(255,255,255,0.1); border-radius:4px;"></div>
-    `;
-    feed.prepend(skeleton);
-}
-
 function startRealtime() {
     db.channel('realtime_feed').on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => {
-        // Убираем скелетон если он есть
-        const skel = document.getElementById('skeleton-loader');
-        if (skel) skel.remove();
         haptic.impactOccurred('medium');
         load();
     }).subscribe();
@@ -266,6 +230,7 @@ function closeModal() {
     removePhoto();
 }
 
+// ПРЕДОСМОТР ФОТО
 function previewImage(input) {
     const file = input.files[0];
     if (file) {
@@ -289,26 +254,17 @@ async function send() {
     const t = document.getElementById('txt').value;
     const f = document.getElementById('fInp').files[0];
     if (!t && !f) return;
-    
     const btn = document.getElementById('sendBtn');
-    btn.disabled = true; 
-    btn.innerText = "⏳";
-    
-    closeModal(); // Сразу закрываем модалку для UX
-    showSkeleton(); // Показываем заглушку
-
-    // Искусственное замедление 1.2 секунды
-    setTimeout(async () => {
-        let imgUrl = null;
-        if (f) {
-            const name = `img_${Date.now()}.jpg`;
-            await db.storage.from('images').upload(name, f);
-            imgUrl = db.storage.from('images').getPublicUrl(name).data.publicUrl;
-        }
-        await db.from('posts').insert([{ content: t, username: myUsername, user_id: myId, image_url: imgUrl, avatar_url: myPhoto, parent_id: currentParentId }]);
-        btn.disabled = false; 
-        btn.innerText = "Пост";
-    }, 1200);
+    btn.disabled = true; btn.innerText = "⏳";
+    let imgUrl = null;
+    if (f) {
+        const name = `img_${Date.now()}.jpg`;
+        await db.storage.from('images').upload(name, f);
+        imgUrl = db.storage.from('images').getPublicUrl(name).data.publicUrl;
+    }
+    await db.from('posts').insert([{ content: t, username: myUsername, user_id: myId, image_url: imgUrl, avatar_url: myPhoto, parent_id: currentParentId }]);
+    closeModal();
+    btn.disabled = false; btn.innerText = "Пост";
 }
 
 async function del(id) { if(confirm('Удалить?')) { await db.from('posts').delete().eq('id', id); } }
