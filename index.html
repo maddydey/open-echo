@@ -15,7 +15,7 @@
   --border: rgba(10, 132, 255, 0.4);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 120px; overflow: hidden; }
+body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 120px; overflow-x: hidden; }
 
 /* SPLASH SCREEN */
 #splash-screen { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.5s; }
@@ -31,6 +31,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
 
 @keyframes postIn { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
 .post-card { background: var(--glass); backdrop-filter: blur(25px); border-radius: 28px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; animation: postIn 0.3s ease-out forwards; }
+
+/* SKELETONS */
+.skeleton { background: linear-gradient(90deg, #121212 25%, #1d1d1d 50%, #121212 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 28px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px; }
+.sk-avatar { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.05); }
+.sk-line { height: 12px; background: rgba(255,255,255,0.05); border-radius: 6px; margin-bottom: 10px; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
 .avatar { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--border); overflow: hidden; background: #1a1a1a; flex-shrink: 0; }
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
@@ -100,10 +106,23 @@ window.onload = () => {
             document.getElementById('splash-screen').style.display = "none";
             document.getElementById('main-app').style.display = "block";
             setTimeout(() => { document.getElementById('main-app').style.opacity = "1"; }, 50);
-            load(); startRealtime();
+            showInitialSkeletons();
+            load(); 
+            startRealtime();
         }, 500);
     }, 2500);
 };
+
+function showInitialSkeletons() {
+    const feed = document.getElementById('feed');
+    feed.innerHTML = '';
+    for(let i=0; i<3; i++) {
+        const sk = document.createElement('div');
+        sk.className = 'skeleton';
+        sk.innerHTML = `<div style="display:flex;gap:12px;margin-bottom:15px"><div class="sk-avatar"></div><div class="sk-line" style="width:100px;margin-top:15px"></div></div><div class="sk-line" style="width:90%"></div><div class="sk-line" style="width:60%"></div>`;
+        feed.appendChild(sk);
+    }
+}
 
 async function load() {
     let query = db.from('posts').select('*').order('created_at', { ascending: false });
@@ -151,6 +170,7 @@ function switchTab(tab, el) {
     currentTab = tab;
     document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
+    showInitialSkeletons();
     load();
 }
 
@@ -190,6 +210,13 @@ async function send() {
     btn.disabled = true;
     closeModal();
     
+    // Временный скелетон отправки
+    const feed = document.getElementById('feed');
+    const tempSk = document.createElement('div');
+    tempSk.className = 'skeleton';
+    tempSk.innerHTML = `<div class="sk-line" style="width:100%"></div>`;
+    feed.prepend(tempSk);
+
     let imgUrl = null;
     if (f) {
         const name = `img_${Date.now()}.jpg`;
