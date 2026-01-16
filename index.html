@@ -38,6 +38,15 @@ body {
 
 @keyframes cardEnter { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
+/* СТИЛИ АВАТАРКИ */
+.post-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.avatar { 
+  width: 36px; height: 36px; border-radius: 50%; object-fit: cover; 
+  background: var(--accent); display: flex; align-items: center; 
+  justify-content: center; font-weight: 700; font-size: 14px; color: white;
+  flex-shrink: 0; border: 1px solid rgba(255,255,255,0.1);
+}
+
 .skeleton {
   background: var(--skeleton); height: 220px; border-radius: 26px; margin-bottom: 20px;
   position: relative; overflow: hidden; transition: opacity 0.5s ease;
@@ -49,12 +58,10 @@ body {
 }
 @keyframes loading { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
 
-.fade-out { opacity: 0; }
-
-.card-content { padding: 22px; }
+.card-content { padding: 20px; }
 .post-img { width: 100%; display: block; max-height: 450px; object-fit: cover; border-bottom: 1px solid var(--border); }
-.author { color: var(--accent); font-weight: 700; font-size: 13px; margin-bottom: 8px; }
-.text { font-size: 16px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+.author { color: #fff; font-weight: 700; font-size: 14px; }
+.text { font-size: 15px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; opacity: 0.9; }
 
 .add-btn-wrapper { position: fixed; bottom: 35px; right: 25px; z-index: 999; }
 .add-btn { 
@@ -63,7 +70,6 @@ body {
   box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative;
 }
 
-/* ТОЧЕЧКА УВЕДОМЛЕНИЯ */
 .dot {
   position: absolute; top: 2px; right: 2px; width: 14px; height: 14px;
   background: var(--danger); border-radius: 50%; border: 2px solid #fff;
@@ -104,7 +110,7 @@ textarea { width: 100%; background: transparent; border: none; color: white; fon
     <div class="modal-content">
         <textarea id="txt" placeholder="Что нового?"></textarea>
         <div style="display:flex; justify-content:space-between; align-items:center;">
-            <button onclick="document.getElementById('fInp').click()" style="background:none; border:none; color:var(--accent); font-weight:700; font-size:15px;">📷 Фото</button>
+            <button onclick="document.getElementById('fInp').click()" style="background:none; border:none; color:var(--accent); font-weight:700; font-size:15px;">📷 Кадр</button>
             <input type="file" id="fInp" hidden accept="image/*" onchange="handleFile()">
             <button id="sendBtn" onclick="send()" style="background:var(--accent); color:white; border:none; padding:12px 28px; border-radius:18px; font-weight:700;">Пост</button>
         </div>
@@ -120,15 +126,18 @@ const SUPABASE_URL = 'https://xddulhzvzemmrhrsjfhb.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_2FIKYuEHEQrYseRnwY58Qg__UIFN59j';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const myId = tg.initDataUnsafe?.user?.id?.toString() || 'guest';
-const myUsername = tg.initDataUnsafe?.user?.username || 'Guest';
+const user = tg.initDataUnsafe?.user;
+const myId = user?.id?.toString() || 'guest';
+const myUsername = user?.username || user?.first_name || 'Guest';
+const myPhoto = user?.photo_url || ''; // Подтягиваем аватарку из ТГ
+
 let isInitialLoad = true;
 
 async function load() {
     const { data, error } = await db.from('posts').select('*').order('created_at', { ascending: false });
     if (error) return;
 
-    document.getElementById('notifDot').style.display = 'none'; // Скрываем точку при загрузке
+    document.getElementById('notifDot').style.display = 'none';
     const feed = document.getElementById('feed');
     
     if (isInitialLoad) {
@@ -140,47 +149,68 @@ async function load() {
     data.forEach(post => {
         const card = document.createElement('div');
         card.className = 'card';
+        
+        // Логика аватарки: если есть URL — ставим картинку, если нет — первую букву
+        const avatarHtml = post.avatar_url 
+            ? `<img src="${post.avatar_url}" class="avatar">`
+            : `<div class="avatar">${post.username.charAt(0).toUpperCase()}</div>`;
+
         card.innerHTML = `
             ${post.image_url ? `<img src="${post.image_url}" class="post-img">` : ''}
             <div class="card-content">
-                <div class="author">@${post.username}</div>
+                <div class="post-header">
+                    ${avatarHtml}
+                    <div class="author">@${post.username}</div>
+                </div>
                 <div class="text">${post.content || ''}</div>
-                <div style="margin-top:15px; font-size:12px; opacity:0.4">
-                    ${post.user_id === myId ? `<span onclick="del('${post.id}')" style="color:var(--danger)">Удалить</span>` : ''}
+                <div style="margin-top:15px; font-size:11px; opacity:0.3; display:flex; justify-content:space-between;">
+                    <span>${new Date(post.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                    ${post.user_id === myId ? `<span onclick="del('${post.id}')" style="color:var(--danger); cursor:pointer">Удалить</span>` : ''}
                 </div>
             </div>`;
         feed.appendChild(card);
     });
 }
 
-// Слушаем изменения в реальном времени
-db.channel('any')
-.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, payload => {
+db.channel('any').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, payload => {
     if (payload.new.user_id !== myId) {
-        // Если пост чужой — показываем точку
         document.getElementById('notifDot').style.display = 'block';
         haptic.impactOccurred('medium');
-    } else {
-        // Если свой — просто обновляем ленту
-        load();
-    }
-})
-.subscribe();
+    } else { load(); }
+}).subscribe();
 
 async function send() {
     const t = document.getElementById('txt').value.trim();
-    if (!t) return;
+    const f = document.getElementById('fInp').files[0];
+    if (!t && !f) return;
     const b = document.getElementById('sendBtn');
-    b.disabled = true;
-    await db.from('posts').insert([{ content: t, username: myUsername, user_id: myId }]);
-    haptic.notificationOccurred('success');
-    closeModal();
+    b.disabled = true; b.innerText = '...';
+    
+    try {
+        let img = null;
+        if (f) {
+            const name = `${Date.now()}.jpg`;
+            await db.storage.from('images').upload(name, f);
+            img = db.storage.from('images').getPublicUrl(name).data.publicUrl;
+        }
+
+        // Сохраняем пост вместе с ссылкой на аватарку (myPhoto)
+        await db.from('posts').insert([{ 
+            content: t, 
+            username: myUsername, 
+            user_id: myId, 
+            image_url: img,
+            avatar_url: myPhoto // <--- Новое поле
+        }]);
+        
+        haptic.notificationOccurred('success');
+        closeModal();
+    } catch(e) { alert(e.message); }
+    b.disabled = false; b.innerText = 'Пост';
 }
 
-function openModal() { 
-    document.getElementById('modal').classList.add('show'); 
-    document.getElementById('notifDot').style.display = 'none'; // Гасим точку при открытии
-}
+function handleFile() { if (document.getElementById('fInp').files[0]) haptic.impactOccurred('light'); }
+function openModal() { document.getElementById('modal').classList.add('show'); document.getElementById('notifDot').style.display = 'none'; haptic.impactOccurred('light'); }
 function closeModal() { document.getElementById('modal').classList.remove('show'); document.getElementById('txt').value = ''; }
 async function del(id) { if(confirm('Удалить?')){ await db.from('posts').delete().eq('id', id); load(); } }
 
