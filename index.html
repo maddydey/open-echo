@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Echo Private Fixed</title>
+<title>Echo Animated</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -30,16 +30,32 @@ body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-se
 /* APP CONTENT */
 #main-app { display: none; padding: 0 16px; }
 .header-wrapper { position: sticky; top: 0; background: var(--bg); padding-top: 60px; padding-bottom: 20px; z-index: 1000; }
-.header-title { font-size: 34px; font-weight: 700; }
+.header-title { font-size: 34px; font-weight: 700; transition: 0.3s; }
+
+/* АНИМАЦИЯ КОНТЕЙНЕРА ЛЕНТЫ */
+#feed { 
+    transition: opacity 0.3s ease, transform 0.3s ease; 
+    width: 100%; max-width: 600px; margin: 0 auto; 
+}
+#feed.switching { 
+    opacity: 0; 
+    transform: translateY(10px); 
+}
 
 .post-card { background: var(--glass); backdrop-filter: blur(25px); border-radius: 30px; padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); }
 .avatar { width: 46px; height: 46px; border-radius: 50%; border: 2px solid var(--border); overflow: hidden; background: #222; display: flex; align-items: center; justify-content: center; }
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
 .post-image { width: 100%; border-radius: 20px; margin-top: 10px; max-height: 450px; object-fit: cover; border: 1px solid var(--border); }
 
+/* NAV BAR */
 .tab-bar { position: fixed; bottom: 25px; left: 20px; right: 20px; height: 68px; background: rgba(30, 30, 32, 0.8); backdrop-filter: blur(20px); border-radius: 34px; border: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 2000; }
-.tab-item { color: #8e8e93; font-size: 24px; }
-.tab-item.active { color: #fff; }
+.tab-item { 
+    color: #8e8e93; font-size: 24px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+    padding: 10px 20px; border-radius: 20px;
+}
+.tab-item.active { 
+    color: #fff; background: rgba(255,255,255,0.05); transform: scale(1.1); 
+}
 
 .btn-add { position: fixed; bottom: 105px; right: 25px; width: 60px; height: 60px; background: #fff; color: #000; border-radius: 50%; border: none; font-size: 32px; z-index: 1500; }
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 3000; align-items: flex-end; }
@@ -59,7 +75,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-se
         <div class="key" onclick="press(1)">1</div><div class="key" onclick="press(2)">2</div><div class="key" onclick="press(3)">3</div>
         <div class="key" onclick="press(4)">4</div><div class="key" onclick="press(5)">5</div><div class="key" onclick="press(6)">6</div>
         <div class="key" onclick="press(7)">7</div><div class="key" onclick="press(8)">8</div><div class="key" onclick="press(9)">9</div>
-        <div onclick="press('C')">✕</div><div class="key" onclick="press(0)">0</div>
+        <div onclick="press('C')" style="display:flex; justify-content:center; align-items:center;">✕</div><div class="key" onclick="press(0)">0</div>
     </div>
 </div>
 
@@ -103,17 +119,11 @@ let dbPin = null;
 let isRegistering = false;
 let currentTab = 'all';
 
-// АВТОРИЗАЦИЯ
 async function checkAuth() {
     try {
         const { data, error } = await db.from('users').select('password').eq('user_id', myId).maybeSingle();
-        if (!data) {
-            isRegistering = true;
-            document.getElementById('lock-msg').innerText = "Создайте пароль";
-        } else {
-            dbPin = data.password;
-            document.getElementById('lock-msg').innerText = "Введите пароль";
-        }
+        if (!data) { isRegistering = true; document.getElementById('lock-msg').innerText = "Создайте пароль"; }
+        else { dbPin = data.password; document.getElementById('lock-msg').innerText = "Введите пароль"; }
     } catch(e) { document.getElementById('lock-msg').innerText = "Ошибка входа"; }
 }
 
@@ -122,14 +132,9 @@ function press(num) {
     else if (inputPin.length < 4) { inputPin += num; haptic.impactOccurred('light'); }
     updateDots();
     if (inputPin.length === 4) {
-        if (isRegistering) {
-            db.from('users').insert([{ user_id: myId, password: inputPin }]).then(() => unlock());
-        } else if (inputPin === dbPin) {
-            unlock();
-        } else {
-            haptic.notificationOccurred('error');
-            inputPin = ""; setTimeout(updateDots, 300);
-        }
+        if (isRegistering) { db.from('users').insert([{ user_id: myId, password: inputPin }]).then(() => unlock()); }
+        else if (inputPin === dbPin) { unlock(); }
+        else { haptic.notificationOccurred('error'); inputPin = ""; setTimeout(updateDots, 300); }
     }
 }
 
@@ -145,17 +150,12 @@ function unlock() {
     load();
 }
 
-// ЛЕНТА И ФИЛЬТРЫ
 async function load() {
+    const feed = document.getElementById('feed');
     let query = db.from('posts').select('*').order('created_at', { ascending: false });
-    
-    // ВОТ ТУТ ИСПРАВЛЕНА ВКЛАДКА "МОИ ПОСТЫ"
-    if (currentTab === 'my') {
-        query = query.eq('user_id', myId);
-    }
+    if (currentTab === 'my') query = query.eq('user_id', myId);
 
     const { data } = await query;
-    const feed = document.getElementById('feed');
     feed.innerHTML = '';
     
     data?.forEach(post => {
@@ -178,16 +178,31 @@ async function load() {
     });
 }
 
+// ИСПРАВЛЕННАЯ ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ С АНИМАЦИЕЙ
 function switchTab(tab) {
+    if (currentTab === tab) return;
+    
     currentTab = tab;
-    document.getElementById('page-title').innerText = tab === 'all' ? 'Лента' : 'Мои посты';
+    haptic.impactOccurred('medium');
+
+    const feed = document.getElementById('feed');
+    const title = document.getElementById('page-title');
+
+    // 1. Начинаем исчезновение
+    feed.classList.add('switching');
+    
+    // 2. Обновляем UI вкладок
     document.getElementById('tab-all').classList.toggle('active', tab === 'all');
     document.getElementById('tab-my').classList.toggle('active', tab === 'my');
-    haptic.impactOccurred('medium');
-    load();
+
+    // 3. Ждем пока лента исчезнет (300мс), обновляем контент и проявляем обратно
+    setTimeout(async () => {
+        title.innerText = tab === 'all' ? 'Лента' : 'Мои посты';
+        await load();
+        feed.classList.remove('switching');
+    }, 300);
 }
 
-// ФУНКЦИИ ФОТО
 function previewImage(input) {
     if (input.files[0]) {
         const reader = new FileReader();
