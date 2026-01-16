@@ -9,7 +9,7 @@
 <style>
 :root {
   --bg: #000; --text: #fff; --accent: #0a84ff;
-  --card-bg: rgba(255, 255, 255, 0.07);
+  --card-bg: rgba(255, 255, 255, 0.08);
   --border: rgba(255, 255, 255, 0.12);
   --skeleton: rgba(255, 255, 255, 0.05);
 }
@@ -25,7 +25,7 @@ body {
 
 .card {
   background: var(--card-bg); border-radius: 24px; margin-bottom: 16px; 
-  backdrop-filter: blur(20px); border: 1px solid var(--border);
+  backdrop-filter: blur(25px); border: 1px solid var(--border);
   animation: cardEnter 0.5s ease; overflow: hidden;
 }
 
@@ -33,72 +33,60 @@ body {
 
 .card-content { padding: 18px; }
 
-/* ЛИНИЯ ОТВЕТА */
+/* ССЫЛКИ В ТЕКСТЕ */
+.text a { color: var(--accent); text-decoration: none; word-break: break-all; }
+
+/* КАРТОЧКА ССЫЛКИ */
+.link-preview {
+  margin-top: 12px; background: rgba(255, 255, 255, 0.05); 
+  border-radius: 16px; padding: 12px; 
+  display: flex; align-items: center; gap: 12px; 
+  border: 1px solid var(--border); text-decoration: none; color: inherit;
+}
+.link-icon { width: 32px; height: 32px; border-radius: 8px; background: #222; flex-shrink: 0; }
+.link-info { overflow: hidden; }
+.link-host { font-size: 13px; font-weight: 700; color: #fff; }
+.link-sub { font-size: 11px; opacity: 0.5; }
+
 .reply-line {
-  margin-bottom: 12px; padding-left: 12px;
-  border-left: 2px solid var(--accent);
-  font-size: 13px;
+  margin-bottom: 12px; padding-left: 12px; border-left: 2px solid var(--accent); font-size: 13px;
 }
 .reply-author { font-weight: 700; color: var(--accent); margin-bottom: 2px; }
-.reply-preview { opacity: 0.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* ССЫЛКИ-ПУЗЫРИ */
-.link-bubble {
-  margin-top: 12px; background: rgba(10, 132, 255, 0.1); 
-  border: 1px solid rgba(10, 132, 255, 0.2);
-  border-radius: 16px; padding: 10px; 
-  display: flex; align-items: center; gap: 10px; 
-  text-decoration: none; color: inherit;
-}
-.link-logo { width: 24px; height: 24px; border-radius: 4px; background: #222; }
-.link-url { font-size: 13px; font-weight: 600; opacity: 0.8; overflow: hidden; text-overflow: ellipsis; }
-
-.post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
 .avatar { 
   width: 32px; height: 32px; border-radius: 50%; object-fit: cover; 
   background: #333; display: flex; align-items: center; justify-content: center;
   font-size: 12px; border: 1px solid var(--border);
 }
 
-.post-img { width: 100%; max-height: 350px; object-fit: cover; border-bottom: 1px solid var(--border); }
-.text { font-size: 15px; line-height: 1.4; opacity: 0.95; white-space: pre-wrap; word-break: break-word; }
+.post-img { width: 100%; max-height: 400px; object-fit: cover; border-bottom: 1px solid var(--border); }
+.text { font-size: 15px; line-height: 1.5; opacity: 0.95; white-space: pre-wrap; }
 
 .footer { 
-  display: flex; gap: 15px; margin-top: 15px; padding-top: 12px; 
+  display: flex; gap: 18px; margin-top: 15px; padding-top: 12px; 
   border-top: 1px solid var(--border); font-size: 12px; font-weight: 600;
 }
-.btn { cursor: pointer; opacity: 0.6; }
+.btn { cursor: pointer; opacity: 0.6; transition: 0.2s; }
 .btn:active { opacity: 1; color: var(--accent); }
 
 .add-btn {
-  position: fixed; bottom: 30px; right: 25px; width: 60px; height: 60px;
+  position: fixed; bottom: 30px; right: 25px; width: 64px; height: 64px;
   background: #fff; color: #000; border-radius: 50%; border: none;
-  font-size: 30px; font-weight: bold; z-index: 100;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+  font-size: 32px; z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
 }
 
-.dot {
-  position: absolute; top: 0; right: 0; width: 12px; height: 12px;
-  background: #ff453a; border-radius: 50%; border: 2px solid #fff; display: none;
-}
+.dot { position: absolute; top: 2px; right: 2px; width: 14px; height: 14px; background: #ff453a; border-radius: 50%; border: 2px solid #fff; display: none; }
 
-.modal { 
-  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
-  backdrop-filter: blur(15px); z-index: 1000; align-items: center; justify-content: center; padding: 20px;
-}
+.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(20px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
 .modal.show { display: flex; }
-.modal-content { background: #1c1c1e; width: 100%; max-width: 400px; padding: 25px; border-radius: 28px; border: 1px solid var(--border); }
-textarea { width: 100%; background: transparent; border: none; color: #fff; font-size: 17px; outline: none; resize: none; min-height: 100px; margin: 10px 0; }
-
-.sk { background: var(--skeleton); height: 150px; border-radius: 24px; margin-bottom: 16px; }
+.modal-content { background: #1c1c1e; width: 100%; max-width: 400px; padding: 25px; border-radius: 30px; border: 1px solid var(--border); }
+textarea { width: 100%; background: transparent; border: none; color: #fff; font-size: 18px; outline: none; resize: none; min-height: 120px; margin: 10px 0; }
 </style>
 </head>
 <body>
 
-<div id="feed">
-    <div class="sk"></div>
-    <div class="sk" style="height:250px"></div>
-</div>
+<div id="feed"></div>
 
 <button class="add-btn" onclick="openModal()">
     + <div id="notifDot" class="dot"></div>
@@ -110,11 +98,11 @@ textarea { width: 100%; background: transparent; border: none; color: #fff; font
             <div id="reAuthor" style="font-size:12px; color:var(--accent); font-weight:700"></div>
             <div id="reText" style="font-size:12px; opacity:0.5"></div>
         </div>
-        <textarea id="txt" placeholder="Напишите ссылку или текст..."></textarea>
+        <textarea id="txt" placeholder="Что нового?"></textarea>
         <div style="display:flex; justify-content:space-between; align-items:center;">
-            <button onclick="document.getElementById('fInp').click()" style="background:none; border:none; color:var(--accent); font-weight:700">📷 Фото</button>
+            <button onclick="document.getElementById('fInp').click()" style="background:none; border:none; color:var(--accent); font-weight:700">📷 Кадр</button>
             <input type="file" id="fInp" hidden accept="image/*">
-            <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:10px 22px; border-radius:15px; font-weight:700">Пост</button>
+            <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:12px 25px; border-radius:18px; font-weight:700">Пост</button>
         </div>
     </div>
 </div>
@@ -132,40 +120,46 @@ const myUsername = user?.username || user?.first_name || 'Guest';
 const myPhoto = user?.photo_url || '';
 
 let replyId = null;
-let initial = true;
 
-// Функция для обработки ссылок
-function parseContent(text) {
-    if (!text) return { clean: '', bubble: '' };
-    const urlPattern = /(https?:\/\/[^\s]+)/g;
-    const match = text.match(urlPattern);
-    if (!match) return { clean: text, bubble: '' };
+// Новый усиленный парсер контента
+function formatPost(text) {
+    if (!text) return { html: '', preview: '' };
     
-    const url = match[0];
-    const clean = text.replace(url, '').trim();
-    try {
-        const domain = new URL(url).hostname.replace('www.', '');
-        const logo = `https://www.google.com/s2/favicons?sz=64&domain=${domain}`;
-        const bubble = `<a href="${url}" target="_blank" class="link-bubble">
-            <img src="${logo}" class="link-logo" onerror="this.style.display='none'">
-            <span class="link-url">${domain}</span>
-        </a>`;
-        return { clean, bubble };
-    } catch(e) { return { clean: text, bubble: '' }; }
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const links = text.match(urlRegex);
+    
+    // Делаем ссылки кликабельными в тексте
+    let html = text.replace(urlRegex, (url) => `<a href="${url}" target="_blank">${url}</a>`);
+    
+    let preview = '';
+    if (links && links.length > 0) {
+        const firstUrl = links[0];
+        try {
+            const domain = new URL(firstUrl).hostname.replace('www.', '');
+            preview = `
+            <a href="${firstUrl}" target="_blank" class="link-preview">
+                <img src="https://www.google.com/s2/favicons?sz=64&domain=${domain}" class="link-icon" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1006/1006771.png'">
+                <div class="link-info">
+                    <div class="link-host">${domain}</div>
+                    <div class="link-sub">Нажмите, чтобы перейти</div>
+                </div>
+            </a>`;
+        } catch(e) {}
+    }
+    
+    return { html, preview };
 }
 
 async function load() {
     const { data, error } = await db.from('posts').select('*').order('created_at', { ascending: false });
     if (error) return;
 
-    if (initial) { await new Promise(r => setTimeout(r, 1200)); initial = false; }
-    
     document.getElementById('notifDot').style.display = 'none';
     const feed = document.getElementById('feed');
     feed.innerHTML = '';
 
     data.forEach(post => {
-        const { clean, bubble } = parseContent(post.content);
+        const { html, preview } = formatPost(post.content);
         const card = document.createElement('div');
         card.className = 'card';
         
@@ -173,11 +167,7 @@ async function load() {
         if (post.parent_id) {
             const parent = data.find(p => p.id === post.parent_id);
             if (parent) {
-                replyLine = `
-                <div class="reply-line">
-                    <div class="reply-author">В ответ @${parent.username}</div>
-                    <div class="reply-preview">${parent.content || 'Изображение'}</div>
-                </div>`;
+                replyLine = `<div class="reply-line"><div class="reply-author">В ответ @${parent.username}</div></div>`;
             }
         }
 
@@ -186,17 +176,17 @@ async function load() {
             : `<div class="avatar">${post.username[0].toUpperCase()}</div>`;
 
         card.innerHTML = `
-            ${post.image_url ? `<img src="${post.image_url}" class="post-img">` : ''}
+            ${post.image_url ? `<img src="${post.image_url}" class="post-img" loading="lazy">` : ''}
             <div class="card-content">
                 ${replyLine}
                 <div class="post-header">
                     ${avatar}
                     <div class="author">@${post.username}</div>
                 </div>
-                <div class="text">${clean}</div>
-                ${bubble}
+                <div class="text">${html}</div>
+                ${preview}
                 <div class="footer">
-                    <span class="btn" onclick="setupReply('${post.id}','${post.username}','${post.content||''}')">💬 Ответ</span>
+                    <span class="btn" onclick="setupReply('${post.id}','${post.username}','${post.content?.slice(0,30)}')">💬 Ответ</span>
                     ${post.user_id === myId ? `<span class="btn" style="color:#ff453a" onclick="del('${post.id}')">🗑 Удалить</span>` : ''}
                 </div>
             </div>`;
@@ -235,26 +225,17 @@ async function send() {
 function setupReply(id, u, t) {
     replyId = id;
     document.getElementById('reAuthor').innerText = '@' + u;
-    document.getElementById('reText').innerText = t.slice(0, 40) + (t.length > 40 ? '...' : '');
+    document.getElementById('reText').innerText = t + '...';
     document.getElementById('replyBox').style.display = 'block';
     openModal();
 }
 
 function openModal() { document.getElementById('modal').classList.add('show'); haptic.impactOccurred('light'); }
-function closeModal() { 
-    document.getElementById('modal').classList.remove('show'); 
-    replyId = null; 
-    document.getElementById('replyBox').style.display = 'none';
-    document.getElementById('txt').value = ''; 
-}
-
+function closeModal() { document.getElementById('modal').classList.remove('show'); replyId = null; document.getElementById('replyBox').style.display = 'none'; document.getElementById('txt').value = ''; }
 async function del(id) { if(confirm('Удалить?')) { await db.from('posts').delete().eq('id', id); load(); } }
 
 db.channel('any').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, p => {
-    if (p.new.user_id !== myId) {
-        document.getElementById('notifDot').style.display = 'block';
-        haptic.impactOccurred('medium');
-    }
+    if (p.new.user_id !== myId) { document.getElementById('notifDot').style.display = 'block'; haptic.impactOccurred('medium'); }
 }).subscribe();
 
 load();
