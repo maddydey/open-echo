@@ -45,11 +45,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
 .reply-card { margin-left: 40px; margin-top: -10px; padding: 15px 20px; border-radius: 0 0 24px 24px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-top: none; position: relative; }
 .reply-card::before { content: ''; position: absolute; left: -20px; top: -20px; bottom: 20px; width: 2px; background: var(--border); opacity: 0.4; }
 
-/* UI */
+/* TAB BAR */
 .tab-bar { position: fixed; bottom: 25px; left: 20px; right: 20px; height: 68px; background: rgba(20, 20, 22, 0.9); backdrop-filter: blur(20px); border-radius: 34px; border: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-around; align-items: center; z-index: 2000; }
-.tab-item { color: #555; font-size: 24px; }
+.tab-item { color: #555; font-size: 24px; transition: 0.2s; }
 .tab-item.active { color: #fff; transform: scale(1.1); }
-.btn-add { position: fixed; bottom: 105px; right: 25px; width: 60px; height: 60px; background: #fff; color: #000; border-radius: 50%; border: none; font-size: 32px; z-index: 1500; }
+.btn-add { position: fixed; bottom: 105px; right: 25px; width: 60px; height: 60px; background: #fff; color: #000; border-radius: 50%; border: none; font-size: 32px; z-index: 1500; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
 
 /* MODAL */
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 3000; align-items: flex-end; }
@@ -99,6 +99,20 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
 const tg = window.Telegram.WebApp;
 const haptic = tg.HapticFeedback;
 const db = supabase.createClient('https://xddulhzvzemmrhrsjfhb.supabase.co', 'sb_publishable_2FIKYuEHEQrYseRnwY58Qg__UIFN59j');
+
+// ЗВУКОВЫЕ ЭФФЕКТЫ (Short UI Sounds)
+const sounds = {
+    send: new Audio('https://www.soundjay.com/buttons/sounds/button-37.mp3'),
+    delete: new Audio('https://www.soundjay.com/buttons/sounds/button-10.mp3'),
+    preview: new Audio('https://www.soundjay.com/buttons/sounds/button-16.mp3'),
+    tab: new Audio('https://www.soundjay.com/buttons/sounds/button-50.mp3')
+};
+
+function play(sound) {
+    sounds[sound].currentTime = 0;
+    sounds[sound].volume = 0.4;
+    sounds[sound].play().catch(() => {}); // Игнорируем блокировку автоплея браузером
+}
 
 const user = tg.initDataUnsafe?.user;
 const myId = user?.id?.toString() || 'guest';
@@ -168,6 +182,7 @@ function startRealtime() {
 }
 
 function switchTab(tab) {
+    play('tab');
     currentTab = tab;
     document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
     document.getElementById('tab-' + tab).classList.add('active');
@@ -175,6 +190,7 @@ function switchTab(tab) {
 }
 
 function openModal(pId = null) { 
+    play('preview');
     currentParentId = pId; 
     document.getElementById('reply-label').style.display = pId ? 'block' : 'none';
     document.getElementById('modal').classList.add('show'); 
@@ -189,6 +205,7 @@ function closeModal() {
 function previewImage(i) {
     const file = i.files[0];
     if (file) {
+        play('preview');
         haptic.impactOccurred('medium');
         const reader = new FileReader();
         reader.onload = e => {
@@ -215,9 +232,10 @@ function showSkeleton() {
 
 async function send() {
     const t = document.getElementById('txt').value;
-    const file = document.getElementById('fInp').files[0]; // Сразу захватываем файл
+    const file = document.getElementById('fInp').files[0];
     if (!t && !file) return;
 
+    play('send'); // Звук отправки
     const btn = document.getElementById('sendBtn');
     btn.disabled = true; btn.innerText = "⏳";
     
@@ -229,24 +247,21 @@ async function send() {
         if (file) {
             const fileName = `img_${Date.now()}.jpg`;
             const { data, error } = await db.storage.from('images').upload(fileName, file);
-            if (!error) {
-                imgUrl = db.storage.from('images').getPublicUrl(fileName).data.publicUrl;
-            }
+            if (!error) imgUrl = db.storage.from('images').getPublicUrl(fileName).data.publicUrl;
         }
-        await db.from('posts').insert([{ 
-            content: t, 
-            username: myUsername, 
-            user_id: myId, 
-            image_url: imgUrl, 
-            avatar_url: myPhoto, 
-            parent_id: currentParentId 
-        }]);
+        await db.from('posts').insert([{ content: t, username: myUsername, user_id: myId, image_url: imgUrl, avatar_url: myPhoto, parent_id: currentParentId }]);
         haptic.notificationOccurred('success');
         btn.disabled = false; btn.innerText = "Пост";
     }, 1200);
 }
 
-async function del(id) { if(confirm('Удалить?')) { await db.from('posts').delete().eq('id', id); } }
+async function del(id) { 
+    if(confirm('Удалить?')) { 
+        play('delete'); // Звук удаления
+        await db.from('posts').delete().eq('id', id); 
+        haptic.impactOccurred('light');
+    } 
+}
 </script>
 </body>
 </html>
