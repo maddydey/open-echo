@@ -38,14 +38,22 @@ body {
 
 @keyframes cardEnter { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-/* СТИЛИ АВАТАРКИ */
-.post-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
 .avatar { 
-  width: 36px; height: 36px; border-radius: 50%; object-fit: cover; 
-  background: var(--accent); display: flex; align-items: center; 
-  justify-content: center; font-weight: 700; font-size: 14px; color: white;
+  width: 32px; height: 32px; border-radius: 50%; object-fit: cover; 
+  background: #333; display: flex; align-items: center; 
+  justify-content: center; font-weight: 700; font-size: 12px; color: white;
   flex-shrink: 0; border: 1px solid rgba(255,255,255,0.1);
 }
+
+/* ЛИНИЯ ОТВЕТА */
+.reply-chain {
+  margin-bottom: 15px; padding-left: 12px;
+  border-left: 2px solid var(--accent);
+  position: relative;
+}
+.reply-info { font-size: 13px; opacity: 0.6; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+.reply-text { font-size: 13px; opacity: 0.5; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .skeleton {
   background: var(--skeleton); height: 220px; border-radius: 26px; margin-bottom: 20px;
@@ -59,28 +67,24 @@ body {
 @keyframes loading { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
 
 .card-content { padding: 20px; }
-.post-img { width: 100%; display: block; max-height: 450px; object-fit: cover; border-bottom: 1px solid var(--border); }
+.post-img { width: 100%; display: block; max-height: 400px; object-fit: cover; border-bottom: 1px solid var(--border); }
 .author { color: #fff; font-weight: 700; font-size: 14px; }
-.text { font-size: 15px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; opacity: 0.9; }
+.text { font-size: 15px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
 
-.add-btn-wrapper { position: fixed; bottom: 35px; right: 25px; z-index: 999; }
+.footer {
+  display: flex; gap: 18px; font-size: 12px; font-weight: 700;
+  margin-top: 15px; padding-top: 12px; border-top: 1px solid var(--border);
+}
+.action-btn { cursor: pointer; opacity: 0.6; }
+.action-btn:active { color: var(--accent); opacity: 1; }
+
 .add-btn { 
-  width: 62px; height: 62px; background: #fff; border-radius: 50%; border: none; 
-  color: #000; font-size: 34px; display: flex; align-items: center; justify-content: center; 
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative;
+  position: fixed; bottom: 35px; right: 25px; width: 62px; height: 62px; background: #fff; 
+  border-radius: 50%; border: none; color: #000; font-size: 34px; z-index: 999;
+  display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
-.dot {
-  position: absolute; top: 2px; right: 2px; width: 14px; height: 14px;
-  background: var(--danger); border-radius: 50%; border: 2px solid #fff;
-  display: none; animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 69, 58, 0.7); }
-  70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(255, 69, 58, 0); }
-  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 69, 58, 0); }
-}
+.dot { position: absolute; top: 2px; right: 2px; width: 14px; height: 14px; background: var(--danger); border-radius: 50%; border: 2px solid #fff; display: none; }
 
 .modal { 
   display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
@@ -89,30 +93,32 @@ body {
 }
 .modal.show { display: flex; }
 .modal-content { background: #1c1c1e; border-radius: 35px; padding: 30px; width: 100%; max-width: 420px; border: 1px solid var(--border); }
-textarea { width: 100%; background: transparent; border: none; color: white; font-size: 18px; outline: none; resize: none; margin: 15px 0; min-height: 120px; font-family: inherit;}
+textarea { width: 100%; background: transparent; border: none; color: white; font-size: 18px; outline: none; resize: none; margin: 15px 0; min-height: 100px; font-family: inherit;}
 </style>
 </head>
 <body>
 
 <div id="feed">
     <div class="skeleton"></div>
-    <div class="skeleton" style="height: 320px;"></div>
+    <div class="skeleton" style="height: 300px;"></div>
 </div>
 
-<div class="add-btn-wrapper">
-    <button class="add-btn" onclick="openModal()">
-        +
-        <div id="notifDot" class="dot"></div>
-    </button>
-</div>
+<button class="add-btn" onclick="openModal()">
+    +
+    <div id="notifDot" class="dot"></div>
+</button>
 
 <div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
     <div class="modal-content">
-        <textarea id="txt" placeholder="Что нового?"></textarea>
+        <div id="replyBox" style="display:none; background:rgba(255,255,255,0.05); padding:12px; border-radius:14px; border-left:3px solid var(--accent); margin-bottom:10px;">
+            <div id="reAuthor" style="font-size:12px; font-weight:700; color:var(--accent)"></div>
+            <div id="reText" style="font-size:12px; opacity:0.6"></div>
+        </div>
+        <textarea id="txt" placeholder="Что думаете?"></textarea>
         <div style="display:flex; justify-content:space-between; align-items:center;">
-            <button onclick="document.getElementById('fInp').click()" style="background:none; border:none; color:var(--accent); font-weight:700; font-size:15px;">📷 Кадр</button>
-            <input type="file" id="fInp" hidden accept="image/*" onchange="handleFile()">
-            <button id="sendBtn" onclick="send()" style="background:var(--accent); color:white; border:none; padding:12px 28px; border-radius:18px; font-weight:700;">Пост</button>
+            <button onclick="document.getElementById('fInp').click()" style="background:none; border:none; color:var(--accent); font-weight:700;">📷 Фото</button>
+            <input type="file" id="fInp" hidden accept="image/*" onchange="haptic.impactOccurred('light')">
+            <button id="sendBtn" onclick="send()" style="background:var(--accent); color:white; border:none; padding:10px 24px; border-radius:18px; font-weight:700;">Пост</button>
         </div>
     </div>
 </div>
@@ -129,28 +135,36 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const user = tg.initDataUnsafe?.user;
 const myId = user?.id?.toString() || 'guest';
 const myUsername = user?.username || user?.first_name || 'Guest';
-const myPhoto = user?.photo_url || ''; // Подтягиваем аватарку из ТГ
-
+const myPhoto = user?.photo_url || '';
+let replyId = null;
 let isInitialLoad = true;
 
 async function load() {
     const { data, error } = await db.from('posts').select('*').order('created_at', { ascending: false });
     if (error) return;
 
+    if (isInitialLoad) { await new Promise(r => setTimeout(r, 1200)); isInitialLoad = false; }
+    
     document.getElementById('notifDot').style.display = 'none';
     const feed = document.getElementById('feed');
-    
-    if (isInitialLoad) {
-        await new Promise(r => setTimeout(r, 1200));
-        isInitialLoad = false;
-    }
-
     feed.innerHTML = '';
+
     data.forEach(post => {
         const card = document.createElement('div');
         card.className = 'card';
         
-        // Логика аватарки: если есть URL — ставим картинку, если нет — первую букву
+        let replyHtml = '';
+        if (post.parent_id) {
+            const parent = data.find(p => p.id === post.parent_id);
+            if (parent) {
+                replyHtml = `
+                <div class="reply-chain">
+                    <div class="reply-info">Ответ для <b>@${parent.username}</b></div>
+                    <div class="reply-text">${parent.content || 'Медиа-файл'}</div>
+                </div>`;
+            }
+        }
+
         const avatarHtml = post.avatar_url 
             ? `<img src="${post.avatar_url}" class="avatar">`
             : `<div class="avatar">${post.username.charAt(0).toUpperCase()}</div>`;
@@ -158,60 +172,67 @@ async function load() {
         card.innerHTML = `
             ${post.image_url ? `<img src="${post.image_url}" class="post-img">` : ''}
             <div class="card-content">
+                ${replyHtml}
                 <div class="post-header">
                     ${avatarHtml}
                     <div class="author">@${post.username}</div>
                 </div>
                 <div class="text">${post.content || ''}</div>
-                <div style="margin-top:15px; font-size:11px; opacity:0.3; display:flex; justify-content:space-between;">
-                    <span>${new Date(post.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                    ${post.user_id === myId ? `<span onclick="del('${post.id}')" style="color:var(--danger); cursor:pointer">Удалить</span>` : ''}
+                <div class="footer">
+                    <span class="action-btn" onclick="setupReply('${post.id}','${post.username}','${post.content||''}')">💬 Ответ</span>
+                    ${post.user_id === myId ? `<span class="action-btn" style="color:var(--danger)" onclick="del('${post.id}')">🗑 Удалить</span>` : ''}
                 </div>
             </div>`;
         feed.appendChild(card);
     });
 }
 
-db.channel('any').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, payload => {
-    if (payload.new.user_id !== myId) {
-        document.getElementById('notifDot').style.display = 'block';
-        haptic.impactOccurred('medium');
-    } else { load(); }
-}).subscribe();
-
 async function send() {
     const t = document.getElementById('txt').value.trim();
     const f = document.getElementById('fInp').files[0];
     if (!t && !f) return;
     const b = document.getElementById('sendBtn');
-    b.disabled = true; b.innerText = '...';
+    b.disabled = true;
     
-    try {
-        let img = null;
-        if (f) {
-            const name = `${Date.now()}.jpg`;
-            await db.storage.from('images').upload(name, f);
-            img = db.storage.from('images').getPublicUrl(name).data.publicUrl;
-        }
+    let img = null;
+    if (f) {
+        const name = `${Date.now()}.jpg`;
+        await db.storage.from('images').upload(name, f);
+        img = db.storage.from('images').getPublicUrl(name).data.publicUrl;
+    }
 
-        // Сохраняем пост вместе с ссылкой на аватарку (myPhoto)
-        await db.from('posts').insert([{ 
-            content: t, 
-            username: myUsername, 
-            user_id: myId, 
-            image_url: img,
-            avatar_url: myPhoto // <--- Новое поле
-        }]);
-        
-        haptic.notificationOccurred('success');
-        closeModal();
-    } catch(e) { alert(e.message); }
-    b.disabled = false; b.innerText = 'Пост';
+    await db.from('posts').insert([{ 
+        content: t, username: myUsername, user_id: myId, 
+        parent_id: replyId, avatar_url: myPhoto, image_url: img 
+    }]);
+    
+    haptic.notificationOccurred('success');
+    closeModal();
+    load();
 }
 
-function handleFile() { if (document.getElementById('fInp').files[0]) haptic.impactOccurred('light'); }
-function openModal() { document.getElementById('modal').classList.add('show'); document.getElementById('notifDot').style.display = 'none'; haptic.impactOccurred('light'); }
-function closeModal() { document.getElementById('modal').classList.remove('show'); document.getElementById('txt').value = ''; }
+db.channel('any').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, payload => {
+    if (payload.new.user_id !== myId) {
+        document.getElementById('notifDot').style.display = 'block';
+        haptic.impactOccurred('medium');
+    }
+}).subscribe();
+
+function setupReply(id, u, t) {
+    replyId = id;
+    document.getElementById('reAuthor').innerText = '@'+u;
+    document.getElementById('reText').innerText = t.slice(0,50)+'...';
+    document.getElementById('replyBox').style.display = 'block';
+    openModal();
+}
+
+function openModal() { document.getElementById('modal').classList.add('show'); haptic.impactOccurred('light'); }
+function closeModal() { 
+    document.getElementById('modal').classList.remove('show'); 
+    replyId = null; 
+    document.getElementById('replyBox').style.display = 'none';
+    document.getElementById('txt').value = '';
+}
 async function del(id) { if(confirm('Удалить?')){ await db.from('posts').delete().eq('id', id); load(); } }
 
 load();
