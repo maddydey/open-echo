@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Echo Private Social</title>
+<title>Echo Private Fixed Links</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -47,6 +47,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-se
 .reply-card::before {
     content: ''; position: absolute; left: -20px; top: -20px; bottom: 20px; width: 2px; background: var(--border);
 }
+
+/* СТИЛЬ ССЫЛОК */
+.content-text a { color: var(--accent); text-decoration: none; word-break: break-all; }
+.content-text a:active { opacity: 0.6; }
 
 .avatar { width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--border); overflow: hidden; background: #222; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
@@ -121,6 +125,15 @@ const myPhoto = user?.photo_url || '';
 
 let inputPin = "", dbPin = null, isRegistering = false, currentTab = 'all', currentParentId = null;
 
+// ФУНКЦИЯ ДЛЯ КРАСИВЫХ ССЫЛОК
+function formatText(text) {
+    if (!text) return "";
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.replace(urlRegex, (url) => {
+        return `<a href="${url}" target="_blank" onclick="event.stopPropagation()">${url}</a>`;
+    });
+}
+
 async function checkAuth() {
     try {
         const { data, error } = await db.from('users').select('password').eq('user_id', myId).maybeSingle();
@@ -154,13 +167,11 @@ function unlock() {
 async function load() {
     const feed = document.getElementById('feed');
     let query = db.from('posts').select('*').order('created_at', { ascending: false });
-    
     if (currentTab === 'my') query = query.eq('user_id', myId);
 
     const { data } = await query;
     feed.innerHTML = '';
     
-    // Группировка: посты и их ответы
     const mainPosts = data?.filter(p => !p.parent_id);
     const replies = data?.filter(p => p.parent_id);
 
@@ -178,7 +189,7 @@ async function load() {
                     </div>
                     ${post.user_id === myId ? `<span onclick="del('${post.id}')" style="margin-left:auto; opacity:0.3; font-size:11px;">Удалить</span>` : ''}
                 </div>
-                <div style="font-size:15px; line-height:1.4;">${post.content || ''}</div>
+                <div class="content-text" style="font-size:15px; line-height:1.4;">${formatText(post.content)}</div>
                 ${post.image_url ? `<img src="${post.image_url}" class="post-image">` : ''}
                 <div class="post-actions">
                     <div class="action-btn" onclick="openModal('${post.id}')">💬 Ответить</div>
@@ -186,7 +197,6 @@ async function load() {
             </div>
         `;
 
-        // Добавляем ответы прямо под пост
         const postReplies = replies.filter(r => r.parent_id === post.id);
         postReplies.forEach(reply => {
             const replyEl = document.createElement('div');
@@ -196,7 +206,7 @@ async function load() {
                     <div class="avatar" style="width:30px; height:30px; font-size:12px;">${reply.avatar_url ? `<img src="${reply.avatar_url}">` : `<b>${reply.username[0]}</b>`}</div>
                     <div class="username" style="font-size:13px;">@${reply.username}</div>
                 </div>
-                <div style="font-size:14px; opacity:0.9;">${reply.content || ''}</div>
+                <div class="content-text" style="font-size:14px; opacity:0.9;">${formatText(reply.content)}</div>
                 ${reply.image_url ? `<img src="${reply.image_url}" class="post-image" style="max-height:200px">` : ''}
             `;
             container.appendChild(replyEl);
