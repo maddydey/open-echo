@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ECHO Neon Edition</title>
+<title>ECHO Neon Realtime</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -12,7 +12,7 @@
   --text: #ffffff;
   --accent: #0a84ff;
   --glass: rgba(255, 255, 255, 0.08);
-  --border: rgba(10, 132, 255, 0.3); /* Синеватая обводка */
+  --border: rgba(10, 132, 255, 0.3);
   --bubble-bg: rgba(10, 132, 255, 0.05);
 }
 
@@ -36,7 +36,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-se
 .post-card { background: var(--glass); backdrop-filter: blur(25px); border-radius: 28px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); }
 .content-text { font-size: 16px; line-height: 1.5; margin-bottom: 5px; white-space: pre-wrap; }
 
-/* ТОТ САМЫЙ СИНИЙ БАБЛ С ПРЕВЬЮ */
+/* LINK BUBBLE WITH NEON GLOW */
 .link-bubble {
     display: flex; align-items: center; gap: 14px;
     background: var(--bubble-bg); 
@@ -44,7 +44,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-se
     border-radius: 20px; padding: 14px; margin-top: 12px;
     text-decoration: none; color: inherit; 
     transition: all 0.3s ease;
-    /* Синее свечение (glow) */
     box-shadow: 0 4px 15px rgba(10, 132, 255, 0.15), inset 0 0 10px rgba(10, 132, 255, 0.05);
 }
 .link-bubble:active { transform: scale(0.97); background: rgba(10, 132, 255, 0.15); }
@@ -69,7 +68,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-se
 .tab-bar { position: fixed; bottom: 25px; left: 20px; right: 20px; height: 68px; background: rgba(25, 25, 27, 0.85); backdrop-filter: blur(20px); border-radius: 34px; border: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-around; align-items: center; }
 .tab-item { color: #666; font-size: 24px; }
 .tab-item.active { color: #fff; }
-.btn-add { position: fixed; bottom: 105px; right: 25px; width: 60px; height: 60px; background: #fff; color: #000; border-radius: 50%; border: none; font-size: 32px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+.btn-add { position: fixed; bottom: 105px; right: 25px; width: 60px; height: 60px; background: #fff; color: #000; border-radius: 50%; border: none; font-size: 32px; z-index: 1500; }
 
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 3000; align-items: flex-end; }
 .modal.show { display: flex; }
@@ -105,7 +104,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-se
         <div style="display:flex; justify-content:space-between; align-items:center;">
              <button onclick="document.getElementById('fInp').click()" style="background:var(--glass); border:none; color:#fff; padding:12px 22px; border-radius:16px; font-weight:600;">🖼 Фото</button>
              <input type="file" id="fInp" hidden accept="image/*" onchange="previewImage(this)">
-             <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:12px 32px; border-radius:22px; font-weight:700; box-shadow: 0 4px 12px rgba(10,132,255,0.3);">Пост</button>
+             <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:12px 32px; border-radius:22px; font-weight:700;">Пост</button>
         </div>
     </div>
 </div>
@@ -162,15 +161,21 @@ function press(num) {
 }
 
 function updateDots() { document.querySelectorAll('.dot').forEach((dot, i) => dot.classList.toggle('fill', i < inputPin.length)); }
-function unlock() { document.getElementById('lock-screen').style.display = "none"; document.getElementById('main-app').style.display = "block"; load(); }
+function unlock() { document.getElementById('lock-screen').style.display = "none"; document.getElementById('main-app').style.display = "block"; load(); startRealtime(); }
 
+// ФУНКЦИЯ ЗАГРУЗКИ
 async function load() {
     const feed = document.getElementById('feed');
     let query = db.from('posts').select('*').order('created_at', { ascending: false });
     if (currentTab === 'my') query = query.eq('user_id', myId);
     const { data } = await query;
+    render(data);
+}
+
+// РЕНДЕР ПОСТОВ
+function render(data) {
+    const feed = document.getElementById('feed');
     feed.innerHTML = '';
-    
     const mainPosts = data?.filter(p => !p.parent_id);
     const replies = data?.filter(p => p.parent_id);
 
@@ -188,9 +193,7 @@ async function load() {
                 <div class="content-text">${cleanText}</div>
                 ${linkHtml}
                 ${post.image_url ? `<img src="${post.image_url}" class="post-image">` : ''}
-                <div style="margin-top:18px; opacity:0.5; font-size:14px; font-weight:700; display:flex; align-items:center; gap:6px;" onclick="openModal('${post.id}')">
-                   💬 Ответить
-                </div>
+                <div style="margin-top:18px; opacity:0.5; font-size:14px; font-weight:700;" onclick="openModal('${post.id}')">💬 Ответить</div>
             </div>`;
 
         replies.filter(r => r.parent_id === post.id).forEach(reply => {
@@ -207,6 +210,16 @@ async function load() {
     });
 }
 
+// РЕАЛЬНОЕ ВРЕМЯ (REALTIME)
+function startRealtime() {
+    db.channel('public:posts')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => {
+        haptic.impactOccurred('light');
+        load();
+    })
+    .subscribe();
+}
+
 function switchTab(tab) {
     currentTab = tab;
     document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
@@ -218,7 +231,6 @@ function openModal(pId = null) {
     currentParentId = pId; 
     document.getElementById('reply-label').style.display = pId ? 'block' : 'none';
     document.getElementById('modal').classList.add('show'); 
-    haptic.impactOccurred('medium');
 }
 function closeModal() { document.getElementById('modal').classList.remove('show'); document.getElementById('txt').value = ""; }
 
@@ -235,11 +247,11 @@ async function send() {
         imgUrl = db.storage.from('images').getPublicUrl(name).data.publicUrl;
     }
     await db.from('posts').insert([{ content: t, username: myUsername, user_id: myId, image_url: imgUrl, avatar_url: myPhoto, parent_id: currentParentId }]);
-    closeModal(); load();
-    haptic.notificationOccurred('success');
+    closeModal();
+    // Нам не нужно вызывать load() вручную, realtime сам всё обновит!
 }
 
-async function del(id) { if(confirm('Удалить пост?')) { await db.from('posts').delete().eq('id', id); load(); } }
+async function del(id) { if(confirm('Удалить?')) { await db.from('posts').delete().eq('id', id); } }
 function previewImage(i) { if(i.files[0]) haptic.impactOccurred('medium'); }
 
 checkAuth();
