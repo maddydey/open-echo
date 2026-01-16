@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ECHO Premium</title>
+<title>ECHO Neon Edition</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -12,8 +12,8 @@
   --text: #ffffff;
   --accent: #0a84ff;
   --glass: rgba(255, 255, 255, 0.08);
-  --border: rgba(255, 255, 255, 0.15);
-  --bubble: rgba(255, 255, 255, 0.05);
+  --border: rgba(10, 132, 255, 0.3); /* Синеватая обводка */
+  --bubble-bg: rgba(10, 132, 255, 0.05);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -33,41 +33,47 @@ body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-se
 
 /* POSTS */
 .post-container { margin-bottom: 20px; }
-.post-card { background: var(--glass); backdrop-filter: blur(20px); border-radius: 28px; padding: 20px; border: 1px solid var(--border); }
-.content-text { font-size: 16px; line-height: 1.4; margin-bottom: 10px; white-space: pre-wrap; }
+.post-card { background: var(--glass); backdrop-filter: blur(25px); border-radius: 28px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); }
+.content-text { font-size: 16px; line-height: 1.5; margin-bottom: 5px; white-space: pre-wrap; }
 
-/* LINK BUBBLE - ТОТ САМЫЙ БАБЛ */
+/* ТОТ САМЫЙ СИНИЙ БАБЛ С ПРЕВЬЮ */
 .link-bubble {
-    display: flex; align-items: center; gap: 12px;
-    background: var(--bubble); border: 1px solid var(--border);
-    border-radius: 18px; padding: 12px; margin-top: 10px;
-    text-decoration: none; color: inherit; transition: 0.2s;
+    display: flex; align-items: center; gap: 14px;
+    background: var(--bubble-bg); 
+    border: 1px solid var(--border);
+    border-radius: 20px; padding: 14px; margin-top: 12px;
+    text-decoration: none; color: inherit; 
+    transition: all 0.3s ease;
+    /* Синее свечение (glow) */
+    box-shadow: 0 4px 15px rgba(10, 132, 255, 0.15), inset 0 0 10px rgba(10, 132, 255, 0.05);
 }
-.link-bubble:active { background: rgba(255,255,255,0.1); transform: scale(0.98); }
-.link-logo { width: 32px; height: 32px; border-radius: 8px; background: #fff; flex-shrink: 0; padding: 4px; }
-.link-info { overflow: hidden; }
-.link-host { font-size: 12px; color: var(--accent); font-weight: 600; text-transform: uppercase; }
-.link-url { font-size: 14px; opacity: 0.6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.link-bubble:active { transform: scale(0.97); background: rgba(10, 132, 255, 0.15); }
+
+.link-logo { width: 36px; height: 36px; border-radius: 10px; background: #fff; flex-shrink: 0; padding: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+.link-info { overflow: hidden; display: flex; flex-direction: column; gap: 2px; }
+.link-host { font-size: 11px; color: var(--accent); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+.link-url { font-size: 14px; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* REPLIES */
 .reply-card { 
     margin-left: 40px; margin-top: -10px; padding: 15px 20px; 
     border-radius: 0 0 24px 24px; background: rgba(255,255,255,0.02); 
-    border: 1px solid var(--border); border-top: none; position: relative;
+    border: 1px solid rgba(255,255,255,0.1); border-top: none; position: relative;
 }
-.reply-card::before { content: ''; position: absolute; left: -20px; top: -20px; bottom: 20px; width: 2px; background: var(--border); }
+.reply-card::before { content: ''; position: absolute; left: -20px; top: -20px; bottom: 20px; width: 2px; background: var(--border); opacity: 0.5; }
 
-.avatar { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border); overflow: hidden; }
-.post-image { width: 100%; border-radius: 18px; margin-top: 10px; border: 1px solid var(--border); }
+.avatar { width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; }
+.post-image { width: 100%; border-radius: 20px; margin-top: 12px; border: 1px solid rgba(255,255,255,0.1); }
 
-.tab-bar { position: fixed; bottom: 25px; left: 20px; right: 20px; height: 68px; background: rgba(30,30,32,0.8); backdrop-filter: blur(20px); border-radius: 34px; border: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; }
-.tab-item { color: #8e8e93; font-size: 24px; }
+/* BOTTOM UI */
+.tab-bar { position: fixed; bottom: 25px; left: 20px; right: 20px; height: 68px; background: rgba(25, 25, 27, 0.85); backdrop-filter: blur(20px); border-radius: 34px; border: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-around; align-items: center; }
+.tab-item { color: #666; font-size: 24px; }
 .tab-item.active { color: #fff; }
-.btn-add { position: fixed; bottom: 105px; right: 25px; width: 60px; height: 60px; background: #fff; color: #000; border-radius: 50%; border: none; font-size: 32px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+.btn-add { position: fixed; bottom: 105px; right: 25px; width: 60px; height: 60px; background: #fff; color: #000; border-radius: 50%; border: none; font-size: 32px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
 
-.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 3000; align-items: flex-end; }
+.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 3000; align-items: flex-end; }
 .modal.show { display: flex; }
-.modal-content { background: #1c1c1e; width: 100%; border-radius: 30px 30px 0 0; padding: 25px 20px 45px; }
+.modal-content { background: #1c1c1e; width: 100%; border-radius: 32px 32px 0 0; padding: 25px 20px 50px; border-top: 1px solid var(--border); }
 </style>
 </head>
 <body>
@@ -83,7 +89,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-se
 </div>
 
 <div id="main-app">
-    <div class="header-wrapper"><h1 id="page-title" style="font-size:34px; font-weight:800;">Лента</h1></div>
+    <div class="header-wrapper"><h1 id="page-title" style="font-size:34px; font-weight:800; letter-spacing:-0.5px;">Лента</h1></div>
     <div id="feed"></div>
     <div class="tab-bar">
         <div class="tab-item active" id="tab-all" onclick="switchTab('all')">🏠</div>
@@ -94,12 +100,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-se
 
 <div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
     <div class="modal-content">
-        <div id="reply-label" style="color:var(--accent); font-size:13px; margin-bottom:10px; display:none;">Ответ на пост</div>
-        <textarea id="txt" placeholder="Напишите что-нибудь..." style="width:100%; background:transparent; border:none; color:#fff; font-size:18px; min-height:150px; outline:none; resize:none;"></textarea>
+        <div id="reply-label" style="color:var(--accent); font-size:13px; margin-bottom:12px; font-weight:600; display:none;">ОТВЕТ НА ПОСТ</div>
+        <textarea id="txt" placeholder="Расскажите что-нибудь..." style="width:100%; background:transparent; border:none; color:#fff; font-size:18px; min-height:160px; outline:none; resize:none;"></textarea>
         <div style="display:flex; justify-content:space-between; align-items:center;">
-             <button onclick="document.getElementById('fInp').click()" style="background:var(--glass); border:none; color:#fff; padding:12px 20px; border-radius:15px; font-weight:600;">🖼 Фото</button>
+             <button onclick="document.getElementById('fInp').click()" style="background:var(--glass); border:none; color:#fff; padding:12px 22px; border-radius:16px; font-weight:600;">🖼 Фото</button>
              <input type="file" id="fInp" hidden accept="image/*" onchange="previewImage(this)">
-             <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:12px 30px; border-radius:20px; font-weight:700;">Отправить</button>
+             <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:12px 32px; border-radius:22px; font-weight:700; box-shadow: 0 4px 12px rgba(10,132,255,0.3);">Пост</button>
         </div>
     </div>
 </div>
@@ -116,21 +122,16 @@ const myPhoto = user?.photo_url || '';
 
 let inputPin = "", dbPin = null, isRegistering = false, currentTab = 'all', currentParentId = null;
 
-// ФУНКЦИЯ ОБРАБОТКИ ТЕКСТА И ССЫЛОК
 function parseContent(text) {
     if (!text) return { cleanText: "", linkHtml: "" };
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     const match = text.match(urlRegex);
-    
     let cleanText = text;
     let linkHtml = "";
-
     if (match) {
         const url = match[0];
         const domain = new URL(url).hostname.replace('www.', '');
-        // Убираем ссылку из основного текста для чистоты
         cleanText = text.replace(url, "").trim();
-        // Генерируем бабл с логотипом через Google Favicon API
         linkHtml = `
             <a href="${url}" target="_blank" class="link-bubble" onclick="event.stopPropagation()">
                 <img class="link-logo" src="https://www.google.com/s2/favicons?sz=64&domain=${url}" alt="logo">
@@ -180,14 +181,16 @@ async function load() {
         container.innerHTML = `
             <div class="post-card">
                 <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
-                    <div class="avatar">${post.avatar_url ? `<img src="${post.avatar_url}" style="width:100%">` : `<div style="width:100%;height:100%;background:#333;display:flex;align-items:center;justify-content:center;">${post.username[0]}</div>`}</div>
+                    <div class="avatar">${post.avatar_url ? `<img src="${post.avatar_url}" style="width:100%; height:100%; object-fit:cover;">` : `<div style="width:100%;height:100%;background:#333;display:flex;align-items:center;justify-content:center;">${post.username[0]}</div>`}</div>
                     <div style="font-weight:700;">@${post.username}</div>
                     ${post.user_id === myId ? `<span onclick="del('${post.id}')" style="margin-left:auto; opacity:0.3; font-size:12px;">Удалить</span>` : ''}
                 </div>
                 <div class="content-text">${cleanText}</div>
                 ${linkHtml}
                 ${post.image_url ? `<img src="${post.image_url}" class="post-image">` : ''}
-                <div style="margin-top:15px; opacity:0.5; font-size:14px; font-weight:600;" onclick="openModal('${post.id}')">💬 Ответить</div>
+                <div style="margin-top:18px; opacity:0.5; font-size:14px; font-weight:700; display:flex; align-items:center; gap:6px;" onclick="openModal('${post.id}')">
+                   💬 Ответить
+                </div>
             </div>`;
 
         replies.filter(r => r.parent_id === post.id).forEach(reply => {
@@ -215,6 +218,7 @@ function openModal(pId = null) {
     currentParentId = pId; 
     document.getElementById('reply-label').style.display = pId ? 'block' : 'none';
     document.getElementById('modal').classList.add('show'); 
+    haptic.impactOccurred('medium');
 }
 function closeModal() { document.getElementById('modal').classList.remove('show'); document.getElementById('txt').value = ""; }
 
@@ -232,6 +236,7 @@ async function send() {
     }
     await db.from('posts').insert([{ content: t, username: myUsername, user_id: myId, image_url: imgUrl, avatar_url: myPhoto, parent_id: currentParentId }]);
     closeModal(); load();
+    haptic.notificationOccurred('success');
 }
 
 async function del(id) { if(confirm('Удалить пост?')) { await db.from('posts').delete().eq('id', id); load(); } }
