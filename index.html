@@ -19,61 +19,46 @@
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 120px; overflow-x: hidden; }
 
-/* ЭКРАН ЗАГРУЗКИ */
-#splash-screen { 
-    position: fixed; inset: 0; background: #000; z-index: 10000; 
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    transition: opacity 0.5s ease, visibility 0.5s;
-}
+/* SPLASH SCREEN */
+#splash-screen { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease, visibility 0.5s; }
 .loader-logo { font-size: 42px; font-weight: 900; letter-spacing: -2px; margin-bottom: 20px; animation: pulse 2s infinite; }
 .loader-bar { width: 140px; height: 3px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; position: relative; }
-.loader-progress { 
-    position: absolute; left: -100%; top: 0; width: 100%; height: 100%; 
-    background: var(--accent); box-shadow: 0 0 15px var(--accent);
-    animation: loading 2.5s cubic-bezier(0.65, 0, 0.35, 1) forwards; 
-}
+.loader-progress { position: absolute; left: -100%; top: 0; width: 100%; height: 100%; background: var(--accent); box-shadow: 0 0 15px var(--accent); animation: loading 2.5s cubic-bezier(0.65, 0, 0.35, 1) forwards; }
 .loader-status { margin-top: 15px; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.4; }
 
 @keyframes loading { 0% { left: -100%; } 100% { left: 0%; } }
 @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(0.98); } }
 
-/* ЛЕНТА */
+/* APP */
 #main-app { display: none; opacity: 0; padding: 0 16px; transition: opacity 0.5s ease; }
 .header-wrapper { position: sticky; top: 0; background: var(--bg); padding-top: 60px; padding-bottom: 20px; z-index: 1000; }
 
-@keyframes slideIn {
-    0% { opacity: 0; transform: translateY(20px); filter: blur(5px); }
-    100% { opacity: 1; transform: translateY(0); filter: blur(0); }
-}
+@keyframes slideIn { 0% { opacity: 0; transform: translateY(20px); filter: blur(5px); } 100% { opacity: 1; transform: translateY(0); filter: blur(0); } }
 .post-container { margin-bottom: 20px; animation: slideIn 0.4s ease forwards; }
 
 .post-card { background: var(--glass); backdrop-filter: blur(25px); border-radius: 28px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); }
 .avatar { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--border); overflow: hidden; background: #1a1a1a; flex-shrink: 0; }
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
-
 .post-image { width: 100%; max-height: 350px; object-fit: cover; border-radius: 20px; margin-top: 12px; border: 1px solid rgba(255,255,255,0.1); }
 
-/* ОТВЕТЫ */
+/* REPLIES */
 .reply-card { margin-left: 40px; margin-top: -10px; padding: 15px 20px; border-radius: 0 0 24px 24px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-top: none; position: relative; }
 .reply-card::before { content: ''; position: absolute; left: -20px; top: -20px; bottom: 20px; width: 2px; background: var(--border); opacity: 0.4; }
 
 /* UI */
-.link-bubble { display: flex; align-items: flex-start; gap: 14px; background: var(--bubble-bg); border: 1px solid var(--border); border-radius: 20px; padding: 14px; margin-top: 12px; text-decoration: none; color: inherit; width: 100%; }
-.link-logo { width: 32px; height: 32px; border-radius: 8px; background: #fff; padding: 4px; flex-shrink: 0; }
-.link-host { font-size: 11px; color: var(--accent); font-weight: 800; text-transform: uppercase; }
-
 .tab-bar { position: fixed; bottom: 25px; left: 20px; right: 20px; height: 68px; background: rgba(20, 20, 22, 0.9); backdrop-filter: blur(20px); border-radius: 34px; border: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-around; align-items: center; z-index: 2000; }
 .tab-item { color: #555; font-size: 24px; }
 .tab-item.active { color: #fff; transform: scale(1.1); }
 .btn-add { position: fixed; bottom: 105px; right: 25px; width: 60px; height: 60px; background: #fff; color: #000; border-radius: 50%; border: none; font-size: 32px; z-index: 1500; }
 
+/* MODAL */
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 3000; align-items: flex-end; }
 .modal.show { display: flex; }
 .modal-content { background: #1c1c1e; width: 100%; border-radius: 32px 32px 0 0; padding: 25px 20px 50px; border-top: 1px solid var(--border); }
 
 #preview-box { display: none; position: relative; width: 100%; margin-bottom: 15px; border-radius: 20px; overflow: hidden; border: 1px solid var(--border); }
-#preview-img { width: 100%; max-height: 200px; object-fit: cover; }
-.del-preview { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: #fff; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+#preview-img { width: 100%; max-height: 200px; object-fit: cover; display: block; }
+.del-preview { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: #fff; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 10; }
 
 .skeleton-post { background: var(--glass); border: 1px solid var(--border); border-radius: 28px; padding: 20px; margin-bottom: 20px; animation: skeletonPulse 1.5s infinite; }
 @keyframes skeletonPulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.6; } }
@@ -125,43 +110,20 @@ let currentTab = 'all', currentParentId = null;
 window.onload = () => {
     tg.expand();
     setTimeout(() => { document.getElementById('load-status').innerText = "CONNECTING DATABASE"; }, 800);
-    setTimeout(() => { 
-        document.getElementById('load-status').innerText = "SUCCESSFUL"; 
-        haptic.impactOccurred('medium'); 
-    }, 2000);
-    
+    setTimeout(() => { document.getElementById('load-status').innerText = "SUCCESSFUL"; haptic.impactOccurred('medium'); }, 2000);
     setTimeout(() => {
         document.getElementById('splash-screen').style.opacity = "0";
         document.getElementById('splash-screen').style.visibility = "hidden";
         document.getElementById('main-app').style.display = "block";
         setTimeout(() => { document.getElementById('main-app').style.opacity = "1"; }, 50);
-        load();
-        startRealtime();
+        load(); startRealtime();
     }, 2500);
 };
-
-function parseContent(text) {
-    if (!text) return { cleanText: "", linkHtml: "" };
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-    const match = text.match(urlRegex);
-    let cleanText = text;
-    let linkHtml = "";
-    if (match) {
-        const url = match[0];
-        const domain = new URL(url).hostname.replace('www.', '');
-        cleanText = text.replace(url, "").trim();
-        linkHtml = `<a href="${url}" target="_blank" class="link-bubble" onclick="event.stopPropagation()">
-                <img class="link-logo" src="https://www.google.com/s2/favicons?sz=64&domain=${url}">
-                <div class="link-info"><div class="link-host">${domain}</div><div class="link-url">${url}</div></div></a>`;
-    }
-    return { cleanText, linkHtml };
-}
 
 async function load() {
     let query = db.from('posts').select('*').order('created_at', { ascending: false });
     if (currentTab === 'my') query = query.eq('user_id', myId);
-    const { data } = await query;
-    render(data);
+    const { data } = await query; render(data);
 }
 
 function render(data) {
@@ -171,11 +133,9 @@ function render(data) {
     const replies = data?.filter(p => p.parent_id);
 
     mainPosts?.forEach((post, index) => {
-        const { cleanText, linkHtml } = parseContent(post.content);
         const container = document.createElement('div');
         container.className = 'post-container';
         container.style.animationDelay = `${index * 0.05}s`;
-        
         container.innerHTML = `
             <div class="post-card">
                 <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
@@ -183,18 +143,16 @@ function render(data) {
                     <div style="font-weight:700;">@${post.username}</div>
                     ${post.user_id === myId ? `<span onclick="del('${post.id}')" style="margin-left:auto; opacity:0.3; font-size:12px;">Удалить</span>` : ''}
                 </div>
-                <div class="content-text">${cleanText}</div>
-                ${linkHtml}
+                <div class="content-text">${post.content || ''}</div>
                 ${post.image_url ? `<img src="${post.image_url}" class="post-image">` : ''}
                 <div style="margin-top:18px; opacity:0.5; font-size:14px; font-weight:700;" onclick="openModal('${post.id}')">💬 Ответить</div>
             </div>`;
 
         replies.filter(r => r.parent_id === post.id).forEach(reply => {
-            const rData = parseContent(reply.content);
             const replyEl = document.createElement('div');
             replyEl.className = 'reply-card';
             replyEl.innerHTML = `<div style="font-weight:700; font-size:13px; margin-bottom:4px; color:var(--accent);">@${reply.username}</div>
-                <div class="content-text" style="font-size:14px; margin:0;">${rData.cleanText}</div>${rData.linkHtml}`;
+                <div class="content-text" style="font-size:14px; margin:0;">${reply.content}</div>`;
             container.appendChild(replyEl);
         });
         feed.appendChild(container);
@@ -205,7 +163,6 @@ function startRealtime() {
     db.channel('realtime_feed').on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, () => {
         const loader = document.getElementById('post-loader');
         if(loader) loader.remove();
-        haptic.impactOccurred('medium');
         load();
     }).subscribe();
 }
@@ -258,20 +215,33 @@ function showSkeleton() {
 
 async function send() {
     const t = document.getElementById('txt').value;
-    const f = document.getElementById('fInp').files[0];
-    if (!t && !f) return;
+    const file = document.getElementById('fInp').files[0]; // Сразу захватываем файл
+    if (!t && !file) return;
+
     const btn = document.getElementById('sendBtn');
     btn.disabled = true; btn.innerText = "⏳";
+    
     closeModal();
     showSkeleton();
+
     setTimeout(async () => {
         let imgUrl = null;
-        if (f) {
-            const name = `img_${Date.now()}.jpg`;
-            await db.storage.from('images').upload(name, f);
-            imgUrl = db.storage.from('images').getPublicUrl(name).data.publicUrl;
+        if (file) {
+            const fileName = `img_${Date.now()}.jpg`;
+            const { data, error } = await db.storage.from('images').upload(fileName, file);
+            if (!error) {
+                imgUrl = db.storage.from('images').getPublicUrl(fileName).data.publicUrl;
+            }
         }
-        await db.from('posts').insert([{ content: t, username: myUsername, user_id: myId, image_url: imgUrl, avatar_url: myPhoto, parent_id: currentParentId }]);
+        await db.from('posts').insert([{ 
+            content: t, 
+            username: myUsername, 
+            user_id: myId, 
+            image_url: imgUrl, 
+            avatar_url: myPhoto, 
+            parent_id: currentParentId 
+        }]);
+        haptic.notificationOccurred('success');
         btn.disabled = false; btn.innerText = "Пост";
     }, 1200);
 }
