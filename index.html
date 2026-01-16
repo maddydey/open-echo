@@ -49,7 +49,6 @@ body {
 
 .text { font-size: 16px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
 
-/* Превью ссылки с логотипом */
 .link-bubble {
   margin-top: 15px; background: rgba(10, 132, 255, 0.1); 
   border: 1px solid rgba(10, 132, 255, 0.2);
@@ -90,15 +89,6 @@ body {
 textarea { width: 100%; background: transparent; border: none; color: white; font-size: 18px; outline: none; resize: none; margin: 15px 0; min-height: 120px; font-family: inherit;}
 
 .reply-preview { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 14px; border-left: 3px solid var(--accent); font-size: 13px; margin-bottom: 15px; }
-
-/* Кнопка ЯДЕРНОЙ ОЧИСТКИ */
-.danger-btn {
-  width: 100%; margin-top: 25px; background: rgba(255, 69, 58, 0.1); 
-  color: #ff453a; border: 1px solid rgba(255, 69, 58, 0.2);
-  padding: 12px; border-radius: 18px; font-weight: 700; font-size: 13px;
-  cursor: pointer; transition: 0.3s;
-}
-.danger-btn:active { background: #ff453a; color: white; }
 </style>
 </head>
 <body>
@@ -119,7 +109,6 @@ textarea { width: 100%; background: transparent; border: none; color: white; fon
             <input type="file" id="fInp" hidden accept="image/*" onchange="handleFile()">
             <button id="sendBtn" onclick="send()" style="background:var(--accent); color:white; border:none; padding:12px 28px; border-radius:18px; font-weight:700;">Отправить</button>
         </div>
-        <button class="danger-btn" onclick="clearAllPosts()">🗑 Полная очистка ленты</button>
     </div>
 </div>
 
@@ -182,47 +171,6 @@ async function load() {
             </div>`;
         feed.appendChild(card);
     });
-}
-
-// ЯДЕРНАЯ ОЧИСТКА
-async function clearAllPosts() {
-    if (!confirm('ВНИМАНИЕ: Это удалит абсолютно все посты безвозвратно. Продолжить?')) return;
-    
-    const btn = event.target;
-    const oldText = btn.innerText;
-    btn.innerText = 'Очистка базы...';
-    btn.disabled = true;
-
-    try {
-        // 1. Сначала отвязываем все связи (parent_id), чтобы база не блокировала удаление
-        await db.from('posts').update({ parent_id: null }).neq('id', 0);
-        
-        // 2. Получаем все ID существующих постов
-        const { data: posts } = await db.from('posts').select('id');
-        
-        if (posts && posts.length > 0) {
-            // 3. Пробуем массово удалить
-            const { error } = await db.from('posts').delete().in('id', posts.map(p => p.id));
-            
-            if (error) {
-                // 4. Если массово не вышло, удаляем по одному в цикле
-                for (const p of posts) {
-                    await db.from('posts').delete().eq('id', p.id);
-                }
-            }
-            haptic.notificationOccurred('success');
-            alert('Лента полностью очищена!');
-        } else {
-            alert('Удалять нечего, лента пуста.');
-        }
-
-        closeModal(); load();
-    } catch(e) { 
-        alert('Ошибка: ' + e.message); 
-    } finally { 
-        btn.innerText = oldText; 
-        btn.disabled = false; 
-    }
 }
 
 async function send() {
