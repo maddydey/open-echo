@@ -8,117 +8,103 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
-  --bg: #000000;
-  --text: #ffffff;
+  --bg: #000; --text: #fff; --accent: #0a84ff;
   --card-bg: rgba(255, 255, 255, 0.07);
-  --accent: #0a84ff;
   --border: rgba(255, 255, 255, 0.12);
   --skeleton: rgba(255, 255, 255, 0.05);
-  --danger: #ff453a;
 }
 
-* {box-sizing: border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent;}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
 body { 
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-  background: var(--bg); color: var(--text); 
-  padding: 20px; padding-bottom: 120px; min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+  background: var(--bg); color: var(--text); padding: 20px 20px 100px;
 }
 
-#feed { column-count: 1; column-gap: 20px; width: 100%; max-width: 900px; margin: 0 auto; }
-@media (min-width: 600px) { #feed { column-count: 2; } }
+#feed { width: 100%; max-width: 600px; margin: 0 auto; }
 
 .card {
-  background: var(--card-bg); border-radius: 26px; margin-bottom: 20px; 
-  break-inside: avoid; overflow: hidden; display: flex; flex-direction: column;
-  backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-  border: 1px solid var(--border);
-  animation: cardEnter 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  background: var(--card-bg); border-radius: 24px; margin-bottom: 16px; 
+  backdrop-filter: blur(20px); border: 1px solid var(--border);
+  animation: cardEnter 0.5s ease; overflow: hidden;
 }
 
-@keyframes cardEnter { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes cardEnter { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-.post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.card-content { padding: 18px; }
+
+/* ЛИНИЯ И БЛОК ОТВЕТА */
+.reply-line {
+  margin-bottom: 12px; padding-left: 12px;
+  border-left: 2px solid var(--accent);
+  font-size: 13px;
+}
+.reply-author { font-weight: 700; color: var(--accent); margin-bottom: 2px; }
+.reply-preview { opacity: 0.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .avatar { 
   width: 32px; height: 32px; border-radius: 50%; object-fit: cover; 
-  background: #333; display: flex; align-items: center; 
-  justify-content: center; font-weight: 700; font-size: 12px; color: white;
-  flex-shrink: 0; border: 1px solid rgba(255,255,255,0.1);
+  background: #333; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; border: 1px solid var(--border);
 }
 
-/* ЛИНИЯ ОТВЕТА */
-.reply-chain {
-  margin-bottom: 15px; padding-left: 12px;
-  border-left: 2px solid var(--accent);
-  position: relative;
-}
-.reply-info { font-size: 13px; opacity: 0.6; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
-.reply-text { font-size: 13px; opacity: 0.5; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.post-img { width: 100%; max-height: 350px; object-fit: cover; border-bottom: 1px solid var(--border); }
+.text { font-size: 15px; line-height: 1.4; opacity: 0.95; }
 
-.skeleton {
-  background: var(--skeleton); height: 220px; border-radius: 26px; margin-bottom: 20px;
-  position: relative; overflow: hidden; transition: opacity 0.5s ease;
+.footer { 
+  display: flex; gap: 15px; margin-top: 15px; padding-top: 12px; 
+  border-top: 1px solid var(--border); font-size: 12px; font-weight: 600;
 }
-.skeleton::after {
-  content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
-  animation: loading 1.5s infinite;
-}
-@keyframes loading { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+.btn { cursor: pointer; opacity: 0.6; }
+.btn:active { opacity: 1; color: var(--accent); }
 
-.card-content { padding: 20px; }
-.post-img { width: 100%; display: block; max-height: 400px; object-fit: cover; border-bottom: 1px solid var(--border); }
-.author { color: #fff; font-weight: 700; font-size: 14px; }
-.text { font-size: 15px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
-
-.footer {
-  display: flex; gap: 18px; font-size: 12px; font-weight: 700;
-  margin-top: 15px; padding-top: 12px; border-top: 1px solid var(--border);
-}
-.action-btn { cursor: pointer; opacity: 0.6; }
-.action-btn:active { color: var(--accent); opacity: 1; }
-
-.add-btn { 
-  position: fixed; bottom: 35px; right: 25px; width: 62px; height: 62px; background: #fff; 
-  border-radius: 50%; border: none; color: #000; font-size: 34px; z-index: 999;
-  display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+.add-btn {
+  position: fixed; bottom: 30px; right: 25px; width: 60px; height: 60px;
+  background: #fff; color: #000; border-radius: 50%; border: none;
+  font-size: 30px; font-weight: bold; z-index: 100;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
 }
 
-.dot { position: absolute; top: 2px; right: 2px; width: 14px; height: 14px; background: var(--danger); border-radius: 50%; border: 2px solid #fff; display: none; }
+.dot {
+  position: absolute; top: 0; right: 0; width: 12px; height: 12px;
+  background: #ff453a; border-radius: 50%; border: 2px solid #fff; display: none;
+}
 
 .modal { 
-  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-  background: rgba(0,0,0,0.9); backdrop-filter: blur(20px); z-index: 1000; 
-  align-items: center; justify-content: center; padding: 15px; 
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(15px); z-index: 1000; align-items: center; justify-content: center; padding: 20px;
 }
 .modal.show { display: flex; }
-.modal-content { background: #1c1c1e; border-radius: 35px; padding: 30px; width: 100%; max-width: 420px; border: 1px solid var(--border); }
-textarea { width: 100%; background: transparent; border: none; color: white; font-size: 18px; outline: none; resize: none; margin: 15px 0; min-height: 100px; font-family: inherit;}
+.modal-content { background: #1c1c1e; width: 100%; max-width: 400px; padding: 25px; border-radius: 28px; border: 1px solid var(--border); }
+textarea { width: 100%; background: transparent; border: none; color: #fff; font-size: 17px; outline: none; resize: none; min-height: 100px; margin: 10px 0; }
+
+/* Скелетоны */
+.sk { background: var(--skeleton); height: 150px; border-radius: 24px; margin-bottom: 16px; }
 </style>
 </head>
 <body>
 
 <div id="feed">
-    <div class="skeleton"></div>
-    <div class="skeleton" style="height: 300px;"></div>
+    <div class="sk"></div>
+    <div class="sk" style="height:250px"></div>
 </div>
 
 <button class="add-btn" onclick="openModal()">
-    +
-    <div id="notifDot" class="dot"></div>
+    + <div id="notifDot" class="dot"></div>
 </button>
 
 <div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
     <div class="modal-content">
-        <div id="replyBox" style="display:none; background:rgba(255,255,255,0.05); padding:12px; border-radius:14px; border-left:3px solid var(--accent); margin-bottom:10px;">
-            <div id="reAuthor" style="font-size:12px; font-weight:700; color:var(--accent)"></div>
-            <div id="reText" style="font-size:12px; opacity:0.6"></div>
+        <div id="replyBox" style="display:none; margin-bottom:15px; padding-left:10px; border-left:2px solid var(--accent)">
+            <div id="reAuthor" style="font-size:12px; color:var(--accent); font-weight:700"></div>
+            <div id="reText" style="font-size:12px; opacity:0.5"></div>
         </div>
-        <textarea id="txt" placeholder="Что думаете?"></textarea>
+        <textarea id="txt" placeholder="Ваше сообщение..."></textarea>
         <div style="display:flex; justify-content:space-between; align-items:center;">
-            <button onclick="document.getElementById('fInp').click()" style="background:none; border:none; color:var(--accent); font-weight:700;">📷 Фото</button>
-            <input type="file" id="fInp" hidden accept="image/*" onchange="haptic.impactOccurred('light')">
-            <button id="sendBtn" onclick="send()" style="background:var(--accent); color:white; border:none; padding:10px 24px; border-radius:18px; font-weight:700;">Пост</button>
+            <button onclick="document.getElementById('fInp').click()" style="background:none; border:none; color:var(--accent); font-weight:700">📷 Фото</button>
+            <input type="file" id="fInp" hidden accept="image/*">
+            <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:10px 22px; border-radius:15px; font-weight:700">Пост</button>
         </div>
     </div>
 </div>
@@ -128,22 +114,21 @@ const tg = window.Telegram.WebApp;
 const haptic = tg.HapticFeedback;
 tg.expand();
 
-const SUPABASE_URL = 'https://xddulhzvzemmrhrsjfhb.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_2FIKYuEHEQrYseRnwY58Qg__UIFN59j';
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const db = supabase.createClient('https://xddulhzvzemmrhrsjfhb.supabase.co', 'sb_publishable_2FIKYuEHEQrYseRnwY58Qg__UIFN59j');
 
 const user = tg.initDataUnsafe?.user;
 const myId = user?.id?.toString() || 'guest';
 const myUsername = user?.username || user?.first_name || 'Guest';
 const myPhoto = user?.photo_url || '';
+
 let replyId = null;
-let isInitialLoad = true;
+let initial = true;
 
 async function load() {
     const { data, error } = await db.from('posts').select('*').order('created_at', { ascending: false });
     if (error) return;
 
-    if (isInitialLoad) { await new Promise(r => setTimeout(r, 1200)); isInitialLoad = false; }
+    if (initial) { await new Promise(r => setTimeout(r, 1200)); initial = false; }
     
     document.getElementById('notifDot').style.display = 'none';
     const feed = document.getElementById('feed');
@@ -153,34 +138,35 @@ async function load() {
         const card = document.createElement('div');
         card.className = 'card';
         
-        let replyHtml = '';
+        // Поиск родительского поста для линии ответа
+        let replyLine = '';
         if (post.parent_id) {
             const parent = data.find(p => p.id === post.parent_id);
             if (parent) {
-                replyHtml = `
-                <div class="reply-chain">
-                    <div class="reply-info">Ответ для <b>@${parent.username}</b></div>
-                    <div class="reply-text">${parent.content || 'Медиа-файл'}</div>
+                replyLine = `
+                <div class="reply-line">
+                    <div class="reply-author">В ответ @${parent.username}</div>
+                    <div class="reply-preview">${parent.content || 'Изображение'}</div>
                 </div>`;
             }
         }
 
-        const avatarHtml = post.avatar_url 
+        const avatar = post.avatar_url 
             ? `<img src="${post.avatar_url}" class="avatar">`
-            : `<div class="avatar">${post.username.charAt(0).toUpperCase()}</div>`;
+            : `<div class="avatar">${post.username[0].toUpperCase()}</div>`;
 
         card.innerHTML = `
             ${post.image_url ? `<img src="${post.image_url}" class="post-img">` : ''}
             <div class="card-content">
-                ${replyHtml}
+                ${replyLine}
                 <div class="post-header">
-                    ${avatarHtml}
+                    ${avatar}
                     <div class="author">@${post.username}</div>
                 </div>
                 <div class="text">${post.content || ''}</div>
                 <div class="footer">
-                    <span class="action-btn" onclick="setupReply('${post.id}','${post.username}','${post.content||''}')">💬 Ответ</span>
-                    ${post.user_id === myId ? `<span class="action-btn" style="color:var(--danger)" onclick="del('${post.id}')">🗑 Удалить</span>` : ''}
+                    <span class="btn" onclick="setupReply('${post.id}','${post.username}','${post.content||''}')">💬 Ответ</span>
+                    ${post.user_id === myId ? `<span class="btn" style="color:#ff453a" onclick="del('${post.id}')">🗑 Удалить</span>` : ''}
                 </div>
             </div>`;
         feed.appendChild(card);
@@ -191,37 +177,34 @@ async function send() {
     const t = document.getElementById('txt').value.trim();
     const f = document.getElementById('fInp').files[0];
     if (!t && !f) return;
-    const b = document.getElementById('sendBtn');
-    b.disabled = true;
     
-    let img = null;
-    if (f) {
-        const name = `${Date.now()}.jpg`;
-        await db.storage.from('images').upload(name, f);
-        img = db.storage.from('images').getPublicUrl(name).data.publicUrl;
-    }
+    const btn = document.getElementById('sendBtn');
+    btn.disabled = true; btn.innerText = '...';
 
-    await db.from('posts').insert([{ 
-        content: t, username: myUsername, user_id: myId, 
-        parent_id: replyId, avatar_url: myPhoto, image_url: img 
-    }]);
-    
-    haptic.notificationOccurred('success');
-    closeModal();
-    load();
+    try {
+        let img = null;
+        if (f) {
+            const name = `${Date.now()}.jpg`;
+            await db.storage.from('images').upload(name, f);
+            img = db.storage.from('images').getPublicUrl(name).data.publicUrl;
+        }
+
+        await db.from('posts').insert([{ 
+            content: t, username: myUsername, user_id: myId, 
+            parent_id: replyId, avatar_url: myPhoto, image_url: img 
+        }]);
+
+        haptic.notificationOccurred('success');
+        closeModal();
+        load();
+    } catch(e) { alert(e.message); }
+    btn.disabled = false; btn.innerText = 'Пост';
 }
-
-db.channel('any').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, payload => {
-    if (payload.new.user_id !== myId) {
-        document.getElementById('notifDot').style.display = 'block';
-        haptic.impactOccurred('medium');
-    }
-}).subscribe();
 
 function setupReply(id, u, t) {
     replyId = id;
-    document.getElementById('reAuthor').innerText = '@'+u;
-    document.getElementById('reText').innerText = t.slice(0,50)+'...';
+    document.getElementById('reAuthor').innerText = '@' + u;
+    document.getElementById('reText').innerText = t.slice(0, 40) + (t.length > 40 ? '...' : '');
     document.getElementById('replyBox').style.display = 'block';
     openModal();
 }
@@ -231,9 +214,17 @@ function closeModal() {
     document.getElementById('modal').classList.remove('show'); 
     replyId = null; 
     document.getElementById('replyBox').style.display = 'none';
-    document.getElementById('txt').value = '';
+    document.getElementById('txt').value = ''; 
 }
-async function del(id) { if(confirm('Удалить?')){ await db.from('posts').delete().eq('id', id); load(); } }
+
+async function del(id) { if(confirm('Удалить?')) { await db.from('posts').delete().eq('id', id); load(); } }
+
+db.channel('any').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, p => {
+    if (p.new.user_id !== myId) {
+        document.getElementById('notifDot').style.display = 'block';
+        haptic.impactOccurred('medium');
+    }
+}).subscribe();
 
 load();
 </script>
