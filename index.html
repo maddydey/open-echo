@@ -3,135 +3,125 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Timeline Echo Glass</title>
+<title>True Timeline</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
   --bg: #000;
-  --text: #ffffff;
-  --accent: #3e86f5;
-  --glass: rgba(255, 255, 255, 0.05); /* Подложка */
-  --border: rgba(255, 255, 255, 0.08);
-  --dim-text: #8b8b8b;
+  --text: #fff;
+  --dim: #71767b; /* Цвет текста как в X/Timeline */
+  --border: #2f3336;
+  --accent: #1d9bf0;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
 body { 
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-  background: var(--bg); color: var(--text); padding: 0 15px 140px;
+  background: var(--bg); color: var(--text); padding-bottom: 100px;
 }
 
-.header-container {
-    padding: 60px 10px 20px;
-    position: sticky; top: 0; background: var(--bg); z-index: 100;
+/* HEADER */
+.header {
+  position: sticky; top: 0; background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+  padding: 15px 20px; z-index: 100; border-bottom: 1px solid var(--border);
 }
-.header-title { font-size: 32px; font-weight: 700; transition: 0.3s; }
+.header h1 { font-size: 20px; font-weight: 800; }
 
 #feed { width: 100%; max-width: 600px; margin: 0 auto; }
 
-/* ПОСТ С ПОДЛОЖКОЙ */
-.post-container {
-    display: flex; gap: 14px;
-    padding: 20px;
-    margin-bottom: 12px; /* Расстояние между подложками */
-    background: var(--glass);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-radius: 28px;
-    border: 1px solid var(--border);
-    animation: fadeIn 0.5s ease-out forwards;
+/* ПОСТ В СТИЛЕ TIMELINE */
+.post {
+  display: flex; padding: 15px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
 }
 
-@keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+.post-left {
+  display: flex; flex-direction: column; align-items: center; margin-right: 12px;
+}
 
-.post-left { display: flex; flex-direction: column; }
-.avatar { 
-    width: 44px; height: 44px; border-radius: 50%; 
-    background: var(--accent); overflow: hidden;
-    flex-shrink: 0; border: 1px solid var(--border);
+.avatar {
+  width: 45px; height: 45px; border-radius: 50%;
+  background: #333; overflow: hidden; flex-shrink: 0;
 }
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
 
+/* Та самая линия таймлайна */
+.timeline-line {
+  width: 2px; background: var(--border);
+  flex-grow: 1; margin-top: 4px; border-radius: 1px;
+}
+
 .post-right { flex: 1; min-width: 0; }
 
-.post-info { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-.username { font-weight: 700; font-size: 15px; color: var(--text); }
-.date { font-size: 12px; color: var(--dim-text); margin-left: 6px; }
+.post-header { display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
+.name { font-weight: 700; font-size: 15px; }
+.handle { color: var(--dim); font-size: 14px; }
+.dot { color: var(--dim); font-size: 14px; }
+.time { color: var(--dim); font-size: 14px; }
 
-.post-text { font-size: 15px; line-height: 1.5; margin-bottom: 12px; white-space: pre-wrap; word-break: break-word; color: rgba(255,255,255,0.9); }
-.post-text a { color: var(--accent); text-decoration: none; }
+.post-content { font-size: 15px; line-height: 1.4; margin-bottom: 10px; white-space: pre-wrap; }
+.post-content a { color: var(--accent); text-decoration: none; }
 
 .post-img { 
-    width: 100%; border-radius: 18px; border: 1px solid var(--border);
-    margin-top: 4px; max-height: 400px; object-fit: cover;
+  width: 100%; border-radius: 16px; border: 1px solid var(--border);
+  margin-top: 8px; max-height: 500px; object-fit: cover;
 }
 
 /* NAV BAR */
-.nav-bar {
-  position: fixed; bottom: 25px; left: 20px; right: 20px; 
-  height: 65px; background: rgba(25, 25, 25, 0.7);
-  backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
-  border-radius: 32px; border: 1px solid var(--border);
+.nav {
+  position: fixed; bottom: 0; width: 100%; height: 60px;
+  background: #000; border-top: 1px solid var(--border);
   display: flex; justify-content: space-around; align-items: center; z-index: 1000;
 }
-.nav-item { color: var(--dim-text); }
-.nav-item.active { color: var(--accent); }
+.nav-item { font-size: 24px; color: var(--dim); transition: 0.2s; }
+.nav-item.active { color: #fff; }
 
-.add-btn { 
-  position: fixed; bottom: 105px; right: 20px; width: 58px; height: 58px; 
-  background: var(--accent); color: #fff; border-radius: 20px; /* One UI стиль */
-  border: none; font-size: 28px; z-index: 900; 
-  box-shadow: 0 8px 25px rgba(62, 134, 245, 0.3);
+.add-btn {
+  position: fixed; bottom: 80px; right: 20px;
+  width: 56px; height: 56px; background: var(--accent);
+  border-radius: 50%; border: none; color: #fff; font-size: 30px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5); z-index: 900;
 }
 
-/* МОДАЛКА */
-.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(15px); z-index: 2000; align-items: flex-end; }
-.modal.show { display: flex; }
-.modal-content { 
-    background: #111; width: 100%; border-radius: 30px 30px 0 0; 
-    padding: 30px 20px 40px; border-top: 1px solid var(--border);
-}
-textarea { width: 100%; background: transparent; border: none; color: #fff; font-size: 19px; outline: none; min-height: 140px; resize: none; }
-
-.send-btn { background: var(--accent); color: #fff; border: none; padding: 12px 24px; border-radius: 20px; font-weight: 700; }
-.del-btn { color: #ff453a; font-size: 11px; font-weight: 600; opacity: 0.6; }
+/* MODAL */
+.modal { display: none; position: fixed; inset: 0; background: #000; z-index: 2000; padding: 20px; }
+.modal.show { display: block; }
+.modal-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+textarea { width: 100%; background: transparent; border: none; color: #fff; font-size: 18px; outline: none; resize: none; min-height: 200px; }
+.post-btn { background: var(--accent); color: #fff; border: none; padding: 8px 16px; border-radius: 20px; font-weight: 700; }
 </style>
 </head>
 <body>
 
-<div class="header-container">
-    <div class="header-title" id="page-title">Timeline</div>
+<div class="header">
+  <h1 id="title">Timeline</h1>
 </div>
 
 <div id="feed"></div>
 
-<div class="nav-bar">
-    <div class="nav-item active" id="tab-all" onclick="switchTab('all')">
-        <span style="font-size:26px">🏠</span>
-    </div>
-    <div class="nav-item" id="tab-my" onclick="switchTab('my')">
-        <span style="font-size:26px">👤</span>
-    </div>
+<div class="nav">
+  <div class="nav-item active" id="tab-all" onclick="switchTab('all')">🏠</div>
+  <div class="nav-item" id="tab-my" onclick="switchTab('my')">👤</div>
 </div>
 
 <button class="add-btn" onclick="openModal()">+</button>
 
-<div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
-    <div class="modal-content">
-        <textarea id="txt" placeholder="Что нового?"></textarea>
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-             <button onclick="document.getElementById('fInp').click()" style="background:none; border:none; font-size:24px">🖼</button>
-             <input type="file" id="fInp" hidden accept="image/*">
-             <button id="sendBtn" class="send-btn" onclick="send()">Пост</button>
-        </div>
-    </div>
+<div id="modal" class="modal">
+  <div class="modal-top">
+    <span onclick="closeModal()" style="font-size: 17px;">Отмена</span>
+    <button id="sendBtn" class="post-btn" onclick="send()">Опубликовать</button>
+  </div>
+  <textarea id="txt" placeholder="Что происходит?"></textarea>
+  <input type="file" id="fInp" hidden accept="image/*">
+  <button onclick="document.getElementById('fInp').click()" style="background:none; border:none; font-size:24px;">🖼</button>
 </div>
 
 <script>
 const tg = window.Telegram.WebApp;
-const haptic = tg.HapticFeedback;
 const db = supabase.createClient('https://xddulhzvzemmrhrsjfhb.supabase.co', 'sb_publishable_2FIKYuEHEQrYseRnwY58Qg__UIFN59j');
 
 const user = tg.initDataUnsafe?.user;
@@ -154,25 +144,26 @@ async function load() {
     data.forEach(post => {
         const urlRegex = /(https?:\/\/[^\s]+)/g;
         const htmlText = post.content ? post.content.replace(urlRegex, (url) => `<a href="${url}" target="_blank">${url}</a>`) : '';
-        const avatar = post.avatar_url 
-            ? `<div class="avatar"><img src="${post.avatar_url}"></div>` 
-            : `<div class="avatar" style="display:flex;align-items:center;justify-content:center;font-weight:700;background:#222">${post.username[0]}</div>`;
-        const postDate = new Date(post.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        const avatar = post.avatar_url ? `<img src="${post.avatar_url}">` : `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-weight:700;background:#444">${post.username[0]}</div>`;
+        const time = new Date(post.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
         const postEl = document.createElement('div');
-        postEl.className = 'post-container';
+        postEl.className = 'post';
         postEl.innerHTML = `
-            <div class="post-left">${avatar}</div>
+            <div class="post-left">
+                <div class="avatar">${avatar}</div>
+                <div class="timeline-line"></div>
+            </div>
             <div class="post-right">
-                <div class="post-info">
-                    <div>
-                        <span class="username">@${post.username}</span>
-                        <span class="date">${postDate}</span>
-                    </div>
-                    ${post.user_id === myId ? `<span class="del-btn" onclick="del('${post.id}')">Удалить</span>` : ''}
+                <div class="post-header">
+                    <span class="name">${post.username}</span>
+                    <span class="handle">@${post.username.toLowerCase()}</span>
+                    <span class="dot">·</span>
+                    <span class="time">${time}</span>
                 </div>
-                <div class="post-text">${htmlText}</div>
+                <div class="post-content">${htmlText}</div>
                 ${post.image_url ? `<img src="${post.image_url}" class="post-img">` : ''}
+                ${post.user_id === myId ? `<div onclick="del('${post.id}')" style="color:var(--dim); font-size:12px; margin-top:10px;">Удалить</div>` : ''}
             </div>`;
         feed.appendChild(postEl);
     });
@@ -180,10 +171,9 @@ async function load() {
 
 function switchTab(tab) {
     currentTab = tab;
-    document.getElementById('page-title').innerText = tab === 'all' ? 'Timeline' : 'Профиль';
+    document.getElementById('title').innerText = tab === 'all' ? 'Timeline' : 'Профиль';
     document.getElementById('tab-all').classList.toggle('active', tab === 'all');
     document.getElementById('tab-my').classList.toggle('active', tab === 'my');
-    haptic.impactOccurred('medium');
     load();
 }
 
@@ -191,32 +181,25 @@ async function send() {
     const t = document.getElementById('txt').value.trim();
     const f = document.getElementById('fInp').files[0];
     if (!t && !f) return;
-    const btn = document.getElementById('sendBtn');
-    btn.disabled = true;
-
+    
     let imgUrl = null;
     if (f) {
         const name = `img_${Date.now()}.jpg`;
-        const { data, error } = await db.storage.from('images').upload(name, f);
-        if (!error) imgUrl = db.storage.from('images').getPublicUrl(name).data.publicUrl;
+        await db.storage.from('images').upload(name, f);
+        imgUrl = db.storage.from('images').getPublicUrl(name).data.publicUrl;
     }
 
     let payload = { content: t, username: myUsername, user_id: myId, image_url: imgUrl };
     if (myPhoto) payload.avatar_url = myPhoto;
     await db.from('posts').insert([payload]);
 
-    haptic.notificationOccurred('success');
     closeModal();
     load();
 }
 
-function openModal() { document.getElementById('modal').classList.add('show'); haptic.impactOccurred('light'); }
+function openModal() { document.getElementById('modal').classList.add('show'); }
 function closeModal() { document.getElementById('modal').classList.remove('show'); document.getElementById('txt').value = ''; }
 async function del(id) { if(confirm('Удалить?')) { await db.from('posts').delete().eq('id', id); load(); } }
-
-window.onscroll = () => {
-    document.getElementById('page-title').style.fontSize = window.scrollY > 40 ? '22px' : '32px';
-};
 
 load();
 </script>
