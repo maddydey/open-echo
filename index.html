@@ -14,36 +14,45 @@
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 120px; overflow-x: hidden; }
 
-/* LOADING */
-#splash { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; }
-.logo-anim { font-size: 42px; font-weight: 900; animation: pulse 2s infinite; }
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+/* SPLASH */
+#splash { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; transition: 1.2s cubic-bezier(0.4, 0, 0.2, 1); }
+.logo-anim { font-size: 42px; font-weight: 900; animation: pulse 2s infinite; letter-spacing: -2px; z-index: 10001; }
+@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.2; transform: scale(0.9); } }
 
-#app { display: none; opacity: 0; padding: 0 16px; transition: 0.5s; }
+#app { display: none; opacity: 0; padding: 0 16px; transition: 1s ease; }
 .header { position: sticky; top: 0; background: var(--bg); padding: 60px 0 20px; z-index: 1000; font-size: 32px; font-weight: 800; }
 
-/* POSTS & SMART SCALE */
-.post-wrap { position: relative; margin-bottom: 40px; transition: 0.3s cubic-bezier(0.2, 0, 0.2, 1); }
-.post-wrap:active { transform: scale(0.97); }
+/* REVEAL EFFECT */
+.post-wrap { 
+    position: relative; margin-bottom: 40px; 
+    opacity: 0; 
+    filter: blur(40px) brightness(0.5); /* Изначально сильно скрыты */
+    transform: scale(0.9) translateY(30px);
+    transition: 1.5s cubic-bezier(0.19, 1, 0.22, 1); /* Долгая благородная проявка */
+}
+.post-wrap.revealed { 
+    opacity: 1; 
+    filter: blur(0) brightness(1); 
+    transform: scale(1) translateY(0); 
+}
+
 .card { position: relative; z-index: 10; background: var(--glass); backdrop-filter: blur(25px); border-radius: 26px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); }
 .card::after { content: ''; position: absolute; bottom: -15px; left: 15%; right: 15%; height: 30px; background: linear-gradient(to bottom, rgba(10, 132, 255, 0.15), transparent); filter: blur(12px); z-index: -1; }
 
-.img-post { width: 100%; max-height: 350px; object-fit: cover; border-radius: 20px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.1); }
-
-/* REPLIES */
+.img-post { width: 100%; max-height: 350px; object-fit: cover; border-radius: 20px; margin-top: 15px; }
 .reply { margin-left: 35px; margin-top: -15px; padding: 25px 18px 15px; background: rgba(255,255,255,0.04); border-radius: 0 0 24px 24px; border: 1px solid rgba(255,255,255,0.05); border-top: none; }
+
+/* TABS & ADD BTN */
+.tabs { position: fixed; bottom: 25px; left: 20px; right: 20px; height: 68px; background: rgba(20,20,22,0.9); backdrop-filter: blur(20px); border-radius: 34px; display: flex; justify-content: space-around; align-items: center; z-index: 2000; border: 1px solid rgba(255,255,255,0.1); }
+.tab { color: #555; font-size: 24px; }
+.tab.active { color: #fff; }
+.add-btn { position: fixed; bottom: 105px; right: 25px; width: 60px; height: 60px; background: #fff; border-radius: 50%; border: none; font-size: 32px; font-weight: bold; z-index: 1500; }
 
 /* MODAL */
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000; align-items: flex-end; }
 .modal.show { display: flex; }
 .modal-content { background: #161618; width: 100%; border-radius: 32px 32px 0 0; padding: 25px 20px 50px; border-top: 1px solid var(--accent); }
-#preview-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 15px; margin-bottom: 10px; display: none; border: 1px solid var(--accent); }
-
-/* UI */
-.tabs { position: fixed; bottom: 25px; left: 20px; right: 20px; height: 68px; background: rgba(20,20,22,0.9); backdrop-filter: blur(20px); border-radius: 34px; display: flex; justify-content: space-around; align-items: center; z-index: 2000; border: 1px solid rgba(255,255,255,0.1); }
-.tab { color: #555; font-size: 24px; }
-.tab.active { color: #fff; }
-.add-btn { position: fixed; bottom: 105px; right: 25px; width: 60px; height: 60px; background: #fff; border-radius: 50%; border: none; font-size: 32px; font-weight: bold; z-index: 1500; box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
+#preview-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 15px; margin-bottom: 10px; display: none; }
 </style>
 </head>
 <body>
@@ -65,7 +74,7 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); color: var
         <img id="preview-img">
         <textarea id="txt" placeholder="Что нового?" style="width:100%; background:transparent; border:none; color:#fff; font-size:18px; min-height:120px; outline:none; resize:none;"></textarea>
         <div style="display:flex; justify-content:space-between; align-items:center;">
-             <button onclick="document.getElementById('fInp').click()" style="background:var(--glass); border:none; color:#fff; padding:12px 20px; border-radius:15px; font-size:14px;">🖼 Фото</button>
+             <button onclick="document.getElementById('fInp').click()" style="background:var(--glass); border:none; color:#fff; padding:12px 20px; border-radius:15px;">🖼 Фото</button>
              <input type="file" id="fInp" hidden accept="image/*" onchange="handleFile(this)">
              <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:12px 30px; border-radius:20px; font-weight:700;">Готово</button>
         </div>
@@ -84,18 +93,26 @@ const myPhoto = user?.photo_url || '';
 let curTab = 'all', parentId = null;
 
 function linkify(t) {
-    return t ? t.replace(/(\b(https?):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig, u => `<a href="${u}" target="_blank" style="color:var(--accent)">${u}</a>`) : "";
+    return t ? t.replace(/(\b(https?):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig, u => `<a href="${u}" target="_blank" style="color:var(--accent); text-decoration:none;">🔗 ${u.split('/')[2]}</a>`) : "";
 }
 
 window.onload = () => {
     tg.expand();
-    setTimeout(() => {
-        document.getElementById('splash').style.display = "none";
-        document.getElementById('app').style.display = "block";
-        document.getElementById('app').style.opacity = "1";
-        load();
-        db.channel('feed').on('postgres_changes', {event:'*', schema:'public', table:'posts'}, () => load()).subscribe();
-    }, 1500);
+    
+    // Показываем пустое приложение, но скрытое
+    document.getElementById('app').style.display = "block";
+    document.getElementById('app').style.opacity = "1";
+
+    // Намеренная задержка 2.2 секунды
+    setTimeout(async () => {
+        const splash = document.getElementById('splash');
+        splash.style.opacity = "0";
+        setTimeout(() => splash.style.display = "none", 1200);
+
+        await load(); // Загружаем данные
+    }, 2200);
+
+    db.channel('feed').on('postgres_changes', {event:'*', schema:'public', table:'posts'}, () => load()).subscribe();
 };
 
 async function load() {
@@ -105,12 +122,14 @@ async function load() {
 }
 
 function render(data) {
-    const feed = document.getElementById('feed'); feed.innerHTML = '';
+    const feed = document.getElementById('feed');
+    feed.innerHTML = '';
     if(!data) return;
+
     const main = data.filter(p => !p.parent_id);
     const repl = data.filter(p => p.parent_id);
 
-    main.forEach(p => {
+    main.forEach((p, index) => {
         const div = document.createElement('div');
         div.className = 'post-wrap';
         div.innerHTML = `
@@ -133,37 +152,21 @@ function render(data) {
                 <div style="font-size:14px;">${linkify(r.content)}</div>
             </div>`;
         });
+
         feed.appendChild(div);
+
+        // КАСКАДНАЯ ПРОЯВКА (Reveal)
+        setTimeout(() => {
+            div.classList.add('revealed');
+            // Легкая вибрация при появлении первого поста
+            if(index === 0) tg.HapticFeedback.impactOccurred('light');
+        }, index * 150 + 200); 
     });
 }
 
-function handleFile(i) {
-    const f = i.files[0];
-    if(f) {
-        const r = new FileReader();
-        r.onload = e => { document.getElementById('preview-img').src = e.target.result; document.getElementById('preview-img').style.display = 'block'; };
-        r.readAsDataURL(f);
-    }
-}
-
-async function send() {
-    const t = document.getElementById('txt').value, f = document.getElementById('fInp').files[0], b = document.getElementById('sendBtn');
-    if(!t && !f) return;
-    b.disabled = true; b.innerText = "⏳";
-    
-    try {
-        let iu = null;
-        if(f) {
-            const n = `i_${Date.now()}.jpg`;
-            await db.storage.from('images').upload(n, f);
-            iu = db.storage.from('images').getPublicUrl(n).data.publicUrl;
-        }
-        await db.from('posts').insert([{ content:t, username:myUsername, user_id:myId, image_url:iu, avatar_url:myPhoto, parent_id:parentId }]);
-        closeModal();
-    } catch(e) { alert("Ошибка: " + e.message); }
-    b.disabled = false; b.innerText = "Готово";
-}
-
+// ... остальной код (handleFile, send, openModal, del, switchTab) остается таким же
+function handleFile(i) { const f = i.files[0]; if(f) { const r = new FileReader(); r.onload = e => { document.getElementById('preview-img').src = e.target.result; document.getElementById('preview-img').style.display = 'block'; }; r.readAsDataURL(f); } }
+async function send() { const t = document.getElementById('txt').value, f = document.getElementById('fInp').files[0], b = document.getElementById('sendBtn'); if(!t && !f) return; b.disabled = true; b.innerText = "⏳"; try { let iu = null; if(f) { const n = `i_${Date.now()}.jpg`; await db.storage.from('images').upload(n, f); iu = db.storage.from('images').getPublicUrl(n).data.publicUrl; } await db.from('posts').insert([{ content:t, username:myUsername, user_id:myId, image_url:iu, avatar_url:myPhoto, parent_id:parentId }]); closeModal(); load(); } catch(e) { alert(e.message); } b.disabled = false; b.innerText = "Готово"; }
 function openModal(id = null) { parentId = id; document.getElementById('modal').classList.add('show'); tg.HapticFeedback.impactOccurred('light'); }
 function closeModal() { document.getElementById('modal').classList.remove('show'); document.getElementById('txt').value = ""; document.getElementById('fInp').value = ""; document.getElementById('preview-img').style.display = 'none'; }
 async function del(id) { if(confirm('Удалить?')) await db.from('posts').delete().eq('id', id); }
