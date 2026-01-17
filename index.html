@@ -1,45 +1,181 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>ECHO Gold Bubble</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-/* ОБНОВЛЕННЫЙ PREMIUM-CARD С ЖИВОЙ АНИМАЦИЕЙ */
-.premium-card { 
-    border: 1px solid rgba(255, 215, 0, 0.7) !important; /* Усилил границу */
-    box-shadow: 0 0 40px rgba(255, 215, 0, 0.2), inset 0 0 20px rgba(255, 215, 0, 0.1);
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.07) 0%, rgba(255, 255, 255, 0.03) 100%);
-    position: relative;
-    overflow: hidden;
-    /* Активируем анимацию */
-    animation: premiumGlow 3s infinite alternate ease-in-out;
-}
+:root { --bg: #000; --text: #fff; --accent: #0a84ff; --gold: #ffd700; --glass: rgba(255, 255, 255, 0.08); }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 200px; overflow-x: hidden; }
 
-/* КЛЮЧЕВЫЕ КАДРЫ ДЛЯ АНИМАЦИИ ЗОЛОТОГО СВЕЧЕНИЯ */
+/* АНИМАЦИЯ ПРЕМИУМ-ПОСТА */
 @keyframes premiumGlow {
-    0% {
-        box-shadow: 0 0 30px rgba(255, 215, 0, 0.15), inset 0 0 15px rgba(255, 215, 0, 0.05);
-        border-color: rgba(255, 215, 0, 0.5);
-    }
-    50% {
-        box-shadow: 0 0 50px rgba(255, 215, 0, 0.3), inset 0 0 25px rgba(255, 215, 0, 0.1);
-        border-color: rgba(255, 215, 0, 0.8);
-    }
-    100% {
-        box-shadow: 0 0 30px rgba(255, 215, 0, 0.15), inset 0 0 15px rgba(255, 215, 0, 0.05);
-        border-color: rgba(255, 215, 0, 0.5);
-    }
+    0% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.1); border-color: rgba(255, 215, 0, 0.4); }
+    100% { box-shadow: 0 0 45px rgba(255, 215, 0, 0.25); border-color: rgba(255, 215, 0, 0.9); }
 }
 
-/* Для кнопки канала тоже можно добавить эффект */
-.premium-card .channel-link {
-    background: linear-gradient(135deg, #ffd700, #ffae00);
-    color: #000;
-    box-shadow: 0 0 25px rgba(255, 215, 0, 0.6); /* Усилил тень */
-    font-weight: 900;
-    border: none;
-    animation: buttonPulse 2s infinite alternate ease-in-out; /* Отдельная анимация для кнопки */
-}
+#splash { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; transition: 0.8s; }
+#app { display: none; opacity: 0; padding: 0 16px; transition: 1s ease; }
+.header { position: sticky; top: 0; background: var(--bg); padding: 60px 0 20px; z-index: 100; font-size: 32px; font-weight: 800; }
 
-@keyframes buttonPulse {
-    0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
-    100% { box-shadow: 0 0 25px rgba(255, 215, 0, 0.8); }
-}
+/* КАРТОЧКА */
+.post-wrap { position: relative; margin-bottom: 30px; opacity: 0; filter: blur(20px); transform: translateY(20px); transition: 1s cubic-bezier(0.19, 1, 0.22, 1); }
+.post-wrap.revealed { opacity: 1; filter: blur(0); transform: translateY(0); }
 
-/* Остальные стили без изменений */
+.card { position: relative; z-index: 10; background: var(--glass); backdrop-filter: blur(25px); border-radius: 26px; padding: 22px; border: 1px solid rgba(255,255,255,0.1); }
+.premium-card { animation: premiumGlow 3s infinite alternate ease-in-out; }
+
+/* ТОТ САМЫЙ БАБЛ ПРЕВЬЮ */
+.link-bubble {
+    display: flex; align-items: center; gap: 10px;
+    margin-top: 15px; padding: 12px 16px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 18px; text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: 0.3s;
+}
+.link-bubble:active { transform: scale(0.98); }
+
+.link-icon { width: 32px; height: 32px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+
+/* ПРЕМИУМ БАБЛ */
+.premium-card .link-bubble {
+    background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05));
+    border: 1px solid rgba(255,215,0,0.3);
+}
+.premium-card .link-icon { background: var(--gold); color: #000; }
+.premium-card .link-text { color: var(--gold) !important; font-weight: 700; }
+
+/* UI */
+.tabs { position: fixed; bottom: 25px; left: 20px; right: 20px; height: 68px; background: rgba(20,20,22,0.95); backdrop-filter: blur(25px); border-radius: 34px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; border: 1px solid rgba(255,255,255,0.1); }
+.tab { color: #555; font-size: 24px; padding: 15px; }
+.tab.active { color: #fff; }
+.add-btn { position: fixed; bottom: 105px; right: 25px; width: 62px; height: 62px; background: #fff; border-radius: 50%; border: none; font-size: 32px; z-index: 1100; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+
+/* MODAL */
+.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 5000; align-items: flex-end; }
+.modal-content { background: #161618; width: 100%; border-radius: 32px 32px 0 0; padding: 25px 20px 60px; }
+.c-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 14px; color: #fff; margin-top: 10px; outline: none; }
 </style>
+</head>
+<body>
+
+<div id="splash"><div style="font-size:42px; font-weight:900;">ECHO</div></div>
+
+<div id="app">
+    <div class="header">ECHO</div>
+    <div id="feed"></div>
+    <div class="tabs">
+        <div id="tab-all" class="tab active" onclick="switchTab('all')">🏠</div>
+        <div id="tab-my" class="tab" onclick="switchTab('my')">👤</div>
+    </div>
+    <button class="add-btn" onclick="openModal()">+</button>
+</div>
+
+<div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
+    <div class="modal-content">
+        <textarea id="txt" placeholder="Что нового?" style="width:100%; background:transparent; border:none; color:#fff; font-size:18px; min-height:100px; outline:none; resize:none;"></textarea>
+        <input id="chanUrl" class="c-input" placeholder="Ссылка на канал (t.me/...)">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+             <button onclick="document.getElementById('fInp').click()" style="background:var(--glass); border:none; color:#fff; padding:12px 20px; border-radius:18px;">🖼 ФОТО</button>
+             <input type="file" id="fInp" hidden accept="image/*">
+             <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:12px 35px; border-radius:22px; font-weight:800;">ГОТОВО</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const tg = window.Telegram.WebApp;
+const db = supabase.createClient('https://xddulhzvzemmrhrsjfhb.supabase.co', 'sb_publishable_2FIKYuEHEQrYseRnwY58Qg__UIFN59j');
+
+const user = tg.initDataUnsafe?.user;
+const myId = user?.id?.toString() || 'guest';
+const PREMIUM_USERS = [myId]; 
+let curTab = 'all';
+
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playDeepClick(isPrem = false) {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(isPrem ? 450 : 400, now);
+    osc.frequency.exponentialRampToValueAtTime(40, now + 0.05);
+    gain.gain.setValueAtTime(0.12, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(); osc.stop(now + 0.05);
+}
+
+async function load() {
+    const { data } = await db.from('posts').select('*').order('created_at', { ascending: false });
+    let filtered = data || [];
+    if (curTab === 'my') filtered = data.filter(p => p.user_id === myId);
+    render(filtered);
+}
+
+function render(data) {
+    const feed = document.getElementById('feed');
+    feed.innerHTML = '';
+    data.filter(p => !p.parent_id).forEach((p, index) => {
+        const isPrem = PREMIUM_USERS.includes(p.user_id);
+        const div = document.createElement('div');
+        div.className = 'post-wrap';
+        div.innerHTML = `
+            <div class="card ${isPrem ? 'premium-card' : ''}">
+                <div style="font-weight:700; color:${isPrem ? 'var(--gold)' : 'var(--accent)'}; margin-bottom:8px;">@${p.username}</div>
+                <div>${p.content}</div>
+                ${p.image_url ? `<img src="${p.image_url}" style="width:100%; border-radius:15px; margin-top:15px;">` : ''}
+                
+                ${p.track_url ? `
+                <a href="${p.track_url}" target="_blank" class="link-bubble" onclick="playDeepClick(${isPrem})">
+                    <div class="link-icon">📣</div>
+                    <div style="flex:1">
+                        <div class="link-text" style="font-size:13px; color:#fff;">Перейти в канал</div>
+                        <div style="font-size:11px; color:#666;">${p.track_url.replace('https://', '')}</div>
+                    </div>
+                </a>` : ''}
+                
+                <div style="margin-top:15px; opacity:0.3; font-size:11px;" onclick="openModal('${p.id}')">ОТВЕТИТЬ</div>
+            </div>`;
+        feed.appendChild(div);
+        setTimeout(() => { div.classList.add('revealed'); if(index === 0) playDeepClick(isPrem); }, index * 80);
+    });
+}
+
+function openModal(id = null) { 
+    window.replyId = id; 
+    document.getElementById('modal').style.display = 'flex';
+    tg.HapticFeedback.impactOccurred('light'); 
+}
+function closeModal() { document.getElementById('modal').style.display = 'none'; }
+function switchTab(t) { curTab = t; load(); }
+
+async function send() {
+    const t = document.getElementById('txt').value, cu = document.getElementById('chanUrl').value, f = document.getElementById('fInp').files[0];
+    if(!t && !f) return;
+    const b = document.getElementById('sendBtn'); b.disabled = true;
+    let iu = null;
+    if(f) {
+        const n = `i_${Date.now()}.jpg`;
+        await db.storage.from('images').upload(n, f);
+        iu = db.storage.from('images').getPublicUrl(n).data.publicUrl;
+    }
+    await db.from('posts').insert([{ content: t, username: user?.username || 'Guest', user_id: myId, track_url: cu, image_url: iu, parent_id: window.replyId }]);
+    playDeepClick(); closeModal(); load(); b.disabled = false;
+}
+
+window.onload = () => {
+    tg.expand();
+    document.getElementById('app').style.display = "block";
+    document.getElementById('app').style.opacity = "1";
+    setTimeout(() => { document.getElementById('splash').style.display = 'none'; load(); }, 1000);
+};
+</script>
+</body>
+</html>
