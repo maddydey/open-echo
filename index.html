@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; connect-src * https://*.supabase.co wss://*.supabase.co; img-src * data: blob:;">
 
-<title>ECHO Premium</title>
+<title>ECHO Executive</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-:root { --bg: #000; --text: #fff; --accent: #0a84ff; --glass: rgba(255, 255, 255, 0.08); }
+:root { --bg: #000; --text: #fff; --accent: #0a84ff; --gold: #ffd700; --glass: rgba(255, 255, 255, 0.08); }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 120px; overflow-x: hidden; }
 
@@ -20,7 +20,7 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); color: var
 @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.1; transform: scale(0.9); } }
 
 #app { display: none; opacity: 0; padding: 0 16px; transition: 1.2s ease; }
-.header { position: sticky; top: 0; background: var(--bg); padding: 60px 0 20px; z-index: 1000; font-size: 32px; font-weight: 800; letter-spacing: -1px; }
+.header { position: sticky; top: 0; background: var(--bg); padding: 60px 0 20px; z-index: 1000; font-size: 32px; font-weight: 800; }
 
 /* REVEAL EFFECT */
 .post-wrap { 
@@ -30,32 +30,32 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); color: var
     transform: scale(0.85) translateY(40px);
     transition: 1.8s cubic-bezier(0.19, 1, 0.22, 1);
 }
-.post-wrap.revealed { 
-    opacity: 1; 
-    filter: blur(0) brightness(1); 
-    transform: scale(1) translateY(0); 
+.post-wrap.revealed { opacity: 1; filter: blur(0) brightness(1); transform: scale(1) translateY(0); }
+
+/* PREMIUM STYLES */
+.premium-card { 
+    border: 1px solid rgba(255, 215, 0, 0.4) !important; 
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.12) !important;
+}
+.premium-badge {
+    position: absolute; top: -12px; right: 20px;
+    background: linear-gradient(135deg, #ffd700, #ffae00);
+    color: #000; font-size: 9px; font-weight: 900;
+    padding: 3px 10px; border-radius: 20px; letter-spacing: 1px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
-/* CARD & LINK BUBBLE */
+/* CARD & LINKS */
 .card { position: relative; z-index: 10; background: var(--glass); backdrop-filter: blur(25px); border-radius: 26px; padding: 22px; border: 1px solid rgba(255,255,255,0.1); }
 .card::after { content: ''; position: absolute; bottom: -15px; left: 15%; right: 15%; height: 30px; background: linear-gradient(to bottom, rgba(10, 132, 255, 0.15), transparent); filter: blur(12px); z-index: -1; }
+.card.premium-card::after { background: linear-gradient(to bottom, rgba(255, 215, 0, 0.2), transparent); }
 
-.link-bubble {
-    display: flex; align-items: center; gap: 10px;
-    margin-top: 12px; padding: 12px 16px;
-    background: rgba(10, 132, 255, 0.15);
-    border: 1px solid rgba(10, 132, 255, 0.3);
-    border-radius: 18px;
-    color: var(--accent);
-    text-decoration: none;
-    font-size: 14px; font-weight: 600;
-}
+.link-bubble { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding: 14px 18px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; color: var(--accent); text-decoration: none; font-size: 14px; font-weight: 700; transition: 0.2s; }
+.img-post { width: 100%; max-height: 380px; object-fit: cover; border-radius: 20px; margin-top: 15px; }
 
-.img-post { width: 100%; max-height: 380px; object-fit: cover; border-radius: 20px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.05); }
-
-/* TABS */
+/* NAVIGATION */
 .tabs { position: fixed; bottom: 25px; left: 20px; right: 20px; height: 68px; background: rgba(20,20,22,0.9); backdrop-filter: blur(20px); border-radius: 34px; display: flex; justify-content: space-around; align-items: center; z-index: 2000; border: 1px solid rgba(255,255,255,0.1); }
-.tab { color: #555; font-size: 24px; transition: 0.3s; }
+.tab { color: #555; font-size: 24px; transition: 0.2s; }
 .tab.active { color: #fff; transform: scale(1.1); }
 .add-btn { position: fixed; bottom: 105px; right: 25px; width: 62px; height: 62px; background: #fff; border-radius: 50%; border: none; font-size: 32px; font-weight: bold; z-index: 1500; }
 
@@ -81,9 +81,9 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); color: var
 
 <div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
     <div class="modal-content">
-        <img id="preview-img" style="width:100%; max-height:220px; object-fit:cover; border-radius:18px; margin-bottom:12px; display:none; border:1px solid var(--accent);">
+        <img id="preview-img" style="width:100%; max-height:220px; object-fit:cover; border-radius:18px; margin-bottom:12px; display:none;">
         <textarea id="txt" placeholder="Что нового?" style="width:100%; background:transparent; border:none; color:#fff; font-size:18px; min-height:120px; outline:none; resize:none;"></textarea>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
              <button onclick="document.getElementById('fInp').click()" style="background:var(--glass); border:none; color:#fff; padding:12px 20px; border-radius:18px; font-weight:600;">🖼 ФОТО</button>
              <input type="file" id="fInp" hidden accept="image/*" onchange="handleFile(this)">
              <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:12px 35px; border-radius:22px; font-weight:800;">ГОТОВО</button>
@@ -100,30 +100,35 @@ const myId = user?.id?.toString() || 'guest';
 const myUsername = user?.username || user?.first_name || 'Guest';
 const myPhoto = user?.photo_url || '';
 
+// IDs пользователей, у которых будет премиум (добавь свой сюда)
+const PREMIUM_USERS = [myId, 'ADMIN_ID_HERE'];
+
 let curTab = 'all', parentId = null;
 
-// NEW DEEP SOUND ENGINE
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function playDeepPuff() {
+function playCrispyClick(isPremium = false) {
     if (audioCtx.state === 'suspended') audioCtx.resume();
     const now = audioCtx.currentTime;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(150, now);
-    osc.frequency.exponentialRampToValueAtTime(40, now + 0.1);
-    gain.gain.setValueAtTime(0.1, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+    
+    osc.type = isPremium ? 'triangle' : 'square'; 
+    osc.frequency.setValueAtTime(isPremium ? 1600 : 1400, now);
+    osc.frequency.exponentialRampToValueAtTime(800, now + 0.04);
+    
+    gain.gain.setValueAtTime(isPremium ? 0.06 : 0.04, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.04);
+    
     osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.start(); osc.stop(now + 0.1);
+    osc.start(); osc.stop(now + 0.04);
 }
 
 function linkify(t) {
     if (!t) return "";
     const pattern = /(\b(https?):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
     return t.replace(pattern, u => `
-        <a href="${u}" target="_blank" class="link-bubble">
-            <span style="font-size:18px;">🔗</span>
+        <a href="${u}" target="_blank" class="link-bubble" onclick="playCrispyClick()">
+            <span style="font-size:18px;">💎</span>
             <span>${u.split('/')[2]}</span>
         </a>
     `);
@@ -156,37 +161,37 @@ function render(data) {
     const repl = data.filter(p => p.parent_id);
 
     main.forEach((p, index) => {
+        const isPrem = PREMIUM_USERS.includes(p.user_id);
         const div = document.createElement('div');
         div.className = 'post-wrap';
         div.innerHTML = `
-            <div class="card">
+            <div class="card ${isPrem ? 'premium-card' : ''}">
+                ${isPrem ? '<div class="premium-badge">PREMIUM</div>' : ''}
                 <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-                    <div style="width:38px;height:38px;border-radius:50%;background:#222;overflow:hidden;border:1px solid var(--accent)">
+                    <div style="width:38px;height:38px;border-radius:50%;background:#222;overflow:hidden;border:1.5px solid ${isPrem ? 'var(--gold)' : 'var(--accent)'}">
                         ${p.avatar_url ? `<img src="${p.avatar_url}" style="width:100%;height:100%;object-fit:cover;">` : ''}
                     </div>
-                    <div style="font-weight:700;">@${p.username}</div>
+                    <div style="font-weight:700; color:${isPrem ? 'var(--gold)' : 'var(--text)'}">@${p.username}</div>
                     ${p.user_id === myId ? `<span onclick="del('${p.id}')" style="margin-left:auto; opacity:0.2;">✕</span>` : ''}
                 </div>
-                <div style="font-size:16px;">${linkify(p.content)}</div>
+                <div style="font-size:16px; line-height:1.5;">${linkify(p.content)}</div>
                 ${p.image_url ? `<img src="${p.image_url}" class="img-post">` : ''}
-                <div style="margin-top:18px; opacity:0.4; font-size:11px; font-weight:900;" onclick="openModal('${p.id}')">💬 ОТВЕТИТЬ</div>
+                <div style="margin-top:18px; opacity:0.4; font-size:11px; font-weight:900;" onclick="openModal('${p.id}')">REPLY</div>
             </div>`;
         
-        repl.filter(r => r.parent_id === p.id).forEach(r => {
-            div.innerHTML += `<div style="margin-left:35px; margin-top:-15px; padding:25px 18px 15px; background:rgba(255,255,255,0.04); border-radius:0 0 24px 24px; border:1px solid rgba(255,255,255,0.05); border-top:none;">
-                <div style="color:var(--accent); font-weight:800; font-size:12px;">@${r.username}</div>
-                <div>${linkify(r.content)}</div>
-            </div>`;
-        });
-
         feed.appendChild(div);
         setTimeout(() => {
             div.classList.add('revealed');
             if(index === 0) {
-                playDeepPuff();
-                tg.HapticFeedback.impactOccurred('light');
+                if(isPrem) {
+                    playCrispyClick(true);
+                    tg.HapticFeedback.notificationOccurred('success'); // Тот самый двойной "премиум" удар
+                } else {
+                    playCrispyClick(false);
+                    tg.HapticFeedback.impactOccurred('light');
+                }
             }
-        }, index * 150 + 200); 
+        }, index * 120 + 200); 
     });
 }
 
@@ -211,9 +216,10 @@ async function send() {
             iu = db.storage.from('images').getPublicUrl(n).data.publicUrl;
         }
         await db.from('posts').insert([{ content:t, username:myUsername, user_id:myId, image_url:iu, avatar_url:myPhoto, parent_id:parentId }]);
+        playCrispyClick();
         closeModal();
         load();
-    } catch(e) { alert("Ошибка"); b.disabled = false; }
+    } catch(e) { alert("Error"); b.disabled = false; }
 }
 
 function openModal(id = null) { 
@@ -222,19 +228,9 @@ function openModal(id = null) {
     tg.HapticFeedback.impactOccurred('light'); 
     if(audioCtx.state === 'suspended') audioCtx.resume();
 }
-function closeModal() { 
-    document.getElementById('modal').classList.remove('show'); 
-    document.getElementById('txt').value = ""; document.getElementById('fInp').value = ""; 
-    document.getElementById('preview-img').style.display = 'none'; 
-}
-async function del(id) { if(confirm('Удалить?')) { await db.from('posts').delete().eq('id', id); load(); } }
-function switchTab(t, el) { 
-    curTab = t; 
-    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); 
-    el.classList.add('active'); 
-    playDeepPuff();
-    load(); 
-}
+function closeModal() { document.getElementById('modal').classList.remove('show'); document.getElementById('txt').value = ""; document.getElementById('fInp').value = ""; document.getElementById('preview-img').style.display = 'none'; }
+async function del(id) { if(confirm('Delete?')) { await db.from('posts').delete().eq('id', id); load(); } }
+function switchTab(t, el) { curTab = t; document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); el.classList.add('active'); playCrispyClick(); load(); }
 </script>
 </body>
 </html>
