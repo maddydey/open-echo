@@ -24,14 +24,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
 #main-app { display: none; opacity: 0; padding: 0 16px; transition: 0.5s; height: 100vh; overflow-y: auto; }
 .header-wrapper { position: sticky; top: 0; background: var(--bg); padding: 60px 0 20px; z-index: 1000; }
 
-/* POST & SMART SCALE */
-.post-container { position: relative; margin-bottom: 40px; transition: transform 0.3s cubic-bezier(0.2, 0, 0.2, 1); }
-.post-container:active { transform: scale(0.97); }
-
+/* POSTS & REFLECTIONS */
+.post-container { position: relative; margin-bottom: 40px; transition: transform 0.3s ease; }
+.post-container:active { transform: scale(0.98); }
 .post-card { 
     position: relative; z-index: 10; background: var(--glass); backdrop-filter: blur(25px); 
     border-radius: 26px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.1); 
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 .post-card::after { 
     content: ''; position: absolute; bottom: -15px; left: 15%; right: 15%; height: 30px; 
@@ -45,9 +43,18 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
     padding: 12px 16px; border-radius: 20px; margin-top: 12px; border: 1px solid rgba(10, 132, 255, 0.2);
 }
 .play-btn { width: 34px; height: 34px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
-.voice-wave { flex-grow: 1; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; position: relative; overflow: hidden; }
+.voice-wave { flex-grow: 1; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; position: relative; }
 .voice-progress { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: var(--accent); transition: width 0.1s linear; }
 
+/* REC ANIMATION */
+@keyframes rec-pulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.5); }
+    70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(255, 59, 48, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); }
+}
+.recording-active { background: #ff3b30 !important; animation: rec-pulse 1.5s infinite; color: #fff !important; }
+
+/* REPLIES & IMAGES */
 .reply-card { position: relative; z-index: 5; margin-left: 35px; margin-top: -15px; padding: 25px 18px 15px; background: rgba(255,255,255,0.04); border-radius: 0 0 24px 24px; border: 1px solid rgba(255,255,255,0.05); border-top: none; }
 .post-image { width: 100%; max-height: 350px; object-fit: cover; border-radius: 20px; margin-top: 15px; }
 
@@ -58,10 +65,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
 .btn-add { position: fixed; bottom: 105px; right: 25px; width: 60px; height: 60px; background: #fff; border-radius: 50%; border: none; font-size: 32px; z-index: 1500; font-weight: bold; }
 
 /* MODAL */
-.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000; align-items: flex-end; }
+.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 3000; align-items: flex-end; }
 .modal.show { display: flex; }
 .modal-content { background: #161618; width: 100%; border-radius: 32px 32px 0 0; padding: 25px 20px 50px; border-top: 1px solid var(--accent); }
-#preview-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 15px; margin-bottom: 10px; display: none; }
+#preview-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 15px; margin-bottom: 15px; display: none; border: 1px solid var(--accent); }
 </style>
 </head>
 <body>
@@ -81,15 +88,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
 <div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
     <div class="modal-content">
         <img id="preview-img">
-        <div id="voice-rec-status" style="display:none; color:var(--accent); font-size:12px; margin-bottom:10px; font-weight:bold;">🎙 ЗАПИСЬ ИДЕТ...</div>
+        <div id="voice-rec-status" style="display:none; color:var(--accent); font-size:12px; margin-bottom:10px; font-weight:bold;">🎙 ЗАПИСЬ: <span id="rec-timer">0s</span></div>
         <textarea id="txt" placeholder="Что нового?" style="width:100%; background:transparent; border:none; color:#fff; font-size:18px; min-height:100px; outline:none; resize:none;"></textarea>
         <div style="display:flex; justify-content:space-between; align-items:center;">
              <div style="display:flex; gap:10px;">
-                <button onclick="document.getElementById('fInp').click()" style="background:var(--glass); border:none; color:#fff; padding:12px; border-radius:15px;">🖼</button>
-                <button id="micBtn" onpointerdown="startRec()" onpointerup="stopRec()" style="background:var(--glass); border:none; color:#fff; padding:12px; border-radius:15px;">🎙</button>
+                <button onclick="document.getElementById('fInp').click()" style="background:var(--glass); border:none; color:#fff; padding:14px; border-radius:18px;">🖼</button>
+                <button id="micBtn" onpointerdown="startRec()" onpointerup="stopRec()" style="background:var(--glass); border:none; color:#fff; padding:14px; border-radius:18px; transition:0.3s;">🎙</button>
              </div>
              <input type="file" id="fInp" hidden accept="image/*" onchange="previewFile(this)">
-             <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:12px 30px; border-radius:20px; font-weight:700;">Готово</button>
+             <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:12px 30px; border-radius:22px; font-weight:700;">Готово</button>
         </div>
     </div>
 </div>
@@ -103,7 +110,7 @@ const myId = user?.id?.toString() || 'guest';
 const myUsername = user?.username || user?.first_name || 'Guest';
 const myPhoto = user?.photo_url || '';
 
-let currentTab = 'all', currentParentId = null, mediaRec, audioChunks = [], voiceBlob = null;
+let currentTab = 'all', currentParentId = null, mediaRec, audioChunks = [], voiceBlob = null, recInterval, recSeconds = 0;
 
 function linkify(text) {
     if (!text) return "";
@@ -124,19 +131,35 @@ window.onload = () => {
 
 // VOICE LOGIC
 async function startRec() {
-    audioChunks = [];
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    mediaRec = new MediaRecorder(stream);
-    mediaRec.ondataavailable = e => audioChunks.push(e.data);
-    mediaRec.onstop = () => { voiceBlob = new Blob(audioChunks, { type: 'audio/ogg' }); };
-    mediaRec.start();
-    document.getElementById('voice-rec-status').style.display = 'block';
-    tg.HapticFeedback.impactOccurred('medium');
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioChunks = [];
+        mediaRec = new MediaRecorder(stream);
+        mediaRec.ondataavailable = e => audioChunks.push(e.data);
+        mediaRec.onstop = () => { voiceBlob = new Blob(audioChunks, { type: 'audio/webm' }); };
+        mediaRec.start();
+
+        // UI
+        document.getElementById('micBtn').classList.add('recording-active');
+        document.getElementById('voice-rec-status').style.display = 'block';
+        recSeconds = 0;
+        recInterval = setInterval(() => {
+            recSeconds++;
+            document.getElementById('rec-timer').innerText = recSeconds + "s";
+        }, 1000);
+        tg.HapticFeedback.impactOccurred('medium');
+    } catch(e) { alert("Ошибка доступа к микрофону"); }
 }
 
 function stopRec() {
-    if(mediaRec) mediaRec.stop();
-    document.getElementById('voice-rec-status').innerText = "✅ ГОЛОСОВОЕ ЗАПИСАНО";
+    if(mediaRec && mediaRec.state !== 'inactive') {
+        mediaRec.stop();
+        mediaRec.stream.getTracks().forEach(t => t.stop());
+        clearInterval(recInterval);
+        document.getElementById('micBtn').classList.remove('recording-active');
+        document.getElementById('voice-rec-status').innerHTML = "✅ ГОЛОСОВОЕ ЗАПИСАНО";
+        tg.HapticFeedback.notificationOccurred('success');
+    }
 }
 
 function playVoice(url, el) {
@@ -183,7 +206,7 @@ function render(data) {
                     <div style="font-weight:700;">@${post.username}</div>
                     ${post.user_id === myId ? `<span onclick="del('${post.id}')" style="margin-left:auto;opacity:0.3;">✕</span>` : ''}
                 </div>
-                <div style="font-size:16px;">${linkify(post.content)}</div>
+                <div style="font-size:16px;line-height:1.4;">${linkify(post.content)}</div>
                 ${voiceHtml}
                 ${post.image_url ? `<img src="${post.image_url}" class="post-image">` : ''}
                 <div style="margin-top:15px; opacity:0.4; font-size:13px; font-weight:bold;" onclick="openModal('${post.id}')">💬 ОТВЕТИТЬ</div>
@@ -238,7 +261,7 @@ async function send() {
         imgUrl = db.storage.from('images').getPublicUrl(n).data.publicUrl;
     }
     if (voiceBlob) {
-        const n = `voice_${Date.now()}.ogg`;
+        const n = `voice_${Date.now()}.webm`;
         await db.storage.from('images').upload(n, voiceBlob);
         vUrl = db.storage.from('images').getPublicUrl(n).data.publicUrl;
     }
