@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; connect-src * https://*.supabase.co wss://*.supabase.co; img-src * data: blob:;">
 
-<title>ECHO Executive</title>
+<title>ECHO Diamond Edition</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -96,26 +96,27 @@ const db = supabase.createClient('https://xddulhzvzemmrhrsjfhb.supabase.co', 'sb
 const user = tg.initDataUnsafe?.user;
 const myId = user?.id?.toString() || 'guest';
 const myUsername = user?.username || user?.first_name || 'Guest';
+const myPhoto = user?.photo_url || '';
 const PREMIUM_USERS = [myId]; 
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-// ВЕРНУЛ ТОТ САМЫЙ КВАДРАТНЫЙ ЗВУК (Square Wave)
+// ТОТ САМЫЙ ОРИГИНАЛЬНЫЙ SOLID CLICK
 function playCrispyClick(isPremium = false) {
     if (audioCtx.state === 'suspended') audioCtx.resume();
     const now = audioCtx.currentTime;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     
-    osc.type = 'square'; // Вернул квадрат для четкости
-    osc.frequency.setValueAtTime(isPremium ? 1500 : 1400, now);
-    osc.frequency.exponentialRampToValueAtTime(700, now + 0.03);
+    osc.type = 'square'; 
+    osc.frequency.setValueAtTime(isPremium ? 900 : 800, now); 
+    osc.frequency.exponentialRampToValueAtTime(100, now + 0.02);
     
-    gain.gain.setValueAtTime(0.04, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.03);
+    gain.gain.setValueAtTime(0.06, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
     
     osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.start(); osc.stop(now + 0.03);
+    osc.start(); osc.stop(now + 0.02);
 }
 
 function render(data) {
@@ -137,12 +138,14 @@ function render(data) {
                         ${p.avatar_url ? `<img src="${p.avatar_url}" style="width:100%;height:100%;object-fit:cover;">` : ''}
                     </div>
                     <div style="font-weight:700; color:${isPrem ? 'var(--gold)' : 'var(--text)'}">@${p.username}</div>
+                    ${p.user_id === myId ? `<span onclick="del('${p.id}')" style="margin-left:auto; opacity:0.2;">✕</span>` : ''}
                 </div>
                 <div style="font-size:16px;">${p.content}</div>
                 ${p.image_url ? `<img src="${p.image_url}" style="width:100%; border-radius:20px; margin-top:15px; display:block;">` : ''}
                 <div style="margin-top:18px; opacity:0.4; font-size:11px; font-weight:900;" onclick="openModal('${p.id}')">REPLY</div>
             </div>`;
         
+        // ОТВЕТЫ С КОРРЕКТНЫМ СМЕЩЕНИЕМ
         repls.filter(r => r.parent_id === p.id).forEach(r => {
             html += `<div style="margin-left:35px; margin-top:-15px; padding:20px 18px 15px; background:rgba(255,255,255,0.03); border-radius:0 0 24px 24px; border:1px solid rgba(255,255,255,0.05); border-top:none;">
                 <div style="color:var(--accent); font-weight:800; font-size:12px;">@${r.username}</div>
@@ -161,12 +164,12 @@ function render(data) {
     });
 }
 
-// Вспомогательные функции остаются без изменений
 async function load() {
     let { data } = await db.from('posts').select('*').order('created_at', { ascending: false });
     if (curTab === 'my') data = data.filter(p => p.user_id === myId);
     render(data);
 }
+
 window.onload = () => {
     tg.expand();
     document.getElementById('app').style.display = "block";
@@ -178,16 +181,34 @@ window.onload = () => {
     }, 2200);
     db.channel('feed').on('postgres_changes', {event:'*', schema:'public', table:'posts'}, () => load()).subscribe();
 };
+
+function handleFile(i) {
+    const f = i.files[0];
+    if(f) {
+        const r = new FileReader();
+        r.onload = e => { document.getElementById('preview-img').style.display = 'block'; };
+        r.readAsDataURL(f);
+    }
+}
+
+async function send() {
+    const t = document.getElementById('txt').value, f = document.getElementById('fInp').files[0], b = document.getElementById('sendBtn');
+    if(!t && !f) return;
+    b.disabled = true;
+    let iu = null;
+    if(f) {
+        const n = `i_${Date.now()}.jpg`;
+        await db.storage.from('images').upload(n, f);
+        iu = db.storage.from('images').getPublicUrl(n).data.publicUrl;
+    }
+    await db.from('posts').insert([{ content:t, username:myUsername, user_id:myId, image_url:iu, avatar_url:myPhoto, parent_id:parentId }]);
+    playCrispyClick(); closeModal(); load(); b.disabled = false;
+}
+
 function openModal(id = null) { parentId = id; document.getElementById('modal').classList.add('show'); tg.HapticFeedback.impactOccurred('light'); }
 function closeModal() { document.getElementById('modal').classList.remove('show'); document.getElementById('txt').value = ""; }
 function switchTab(t, el) { curTab = t; document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); el.classList.add('active'); playCrispyClick(); load(); }
-async function send() {
-    const t = document.getElementById('txt').value, b = document.getElementById('sendBtn');
-    if(!t) return;
-    b.disabled = true;
-    await db.from('posts').insert([{ content:t, username:myUsername, user_id:myId, parent_id:parentId }]);
-    playCrispyClick(); closeModal(); load(); b.disabled = false;
-}
+async function del(id) { if(confirm('Delete?')) { await db.from('posts').delete().eq('id', id); load(); } }
 </script>
 </body>
 </html>
