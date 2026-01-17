@@ -1,19 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>ECHO Ultimate Full</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root { --bg: #000; --text: #fff; --accent: #0a84ff; --gold: #ffd700; --glass: rgba(255, 255, 255, 0.08); }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 160px; overflow-x: hidden; }
+
+@keyframes premiumGlow {
+    0% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.1); border-color: rgba(255, 215, 0, 0.3); }
+    100% { box-shadow: 0 0 45px rgba(255, 215, 0, 0.3); border-color: rgba(255, 215, 0, 0.9); }
+}
+
+#splash { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; transition: 0.5s; }
+#app { display: none; opacity: 0; padding: 0 16px; transition: 0.5s; }
+.header { position: sticky; top: 0; background: var(--bg); padding: 50px 0 20px; z-index: 100; font-size: 32px; font-weight: 900; }
+
+.post-wrap { margin-bottom: 25px; opacity: 0; transform: translateY(20px); transition: 0.8s cubic-bezier(0.2, 1, 0.3, 1); }
+.post-wrap.revealed { opacity: 1; transform: translateY(0); }
+.card { background: var(--glass); backdrop-filter: blur(25px); border-radius: 26px; padding: 22px; border: 1px solid rgba(255,255,255,0.1); position: relative; }
+.premium-card { animation: premiumGlow 3s infinite alternate ease-in-out; }
+
+.link-bubble {
+    display: flex; align-items: center; gap: 14px; margin-top: 15px; padding: 12px 16px;
+    background: rgba(255,255,255,0.05); border-radius: 20px; text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.1); cursor: pointer;
+}
+.chan-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); }
+
+.re-box { margin-left: 20px; border-left: 2px solid rgba(255,255,255,0.05); padding-left: 15px; margin-top: 12px; }
+.re-item { background: rgba(255,255,255,0.04); padding: 12px 16px; border-radius: 18px; margin-bottom: 8px; font-size: 14px; }
+
+.tabs { position: fixed; bottom: 25px; left: 20px; right: 20px; height: 70px; background: rgba(20,20,22,0.95); backdrop-filter: blur(25px); border-radius: 35px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; border: 1px solid rgba(255,255,255,0.1); }
+.tab { color: #555; font-size: 26px; }
+.tab.active { color: #fff; }
+.add-btn { position: fixed; bottom: 110px; right: 25px; width: 64px; height: 64px; background: #fff; color: #000; border-radius: 50%; border: none; font-size: 34px; z-index: 1100; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
+
+.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 5000; align-items: flex-end; }
+.modal-content { background: #161618; width: 100%; border-radius: 35px 35px 0 0; padding: 30px 20px 60px; }
+.c-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 16px; color: #fff; margin-top: 12px; outline: none; }
+</style>
+</head>
+<body>
+
+<div id="splash"><div style="font-size:36px; font-weight:900;">ECHO</div></div>
+
+<div id="app">
+    <div class="header">ECHO</div>
+    <div id="feed"></div>
+    <div class="tabs">
+        <div id="t-all" class="tab active" onclick="switchTab('all')">🏠</div>
+        <div id="t-my" class="tab" onclick="switchTab('my')">👤</div>
+    </div>
+    <button class="add-btn" onclick="openModal()">+</button>
+</div>
+
+<div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
+    <div class="modal-content">
+        <textarea id="txt" placeholder="Что нового?" style="width:100%; background:transparent; border:none; color:#fff; font-size:19px; min-height:120px; outline:none; resize:none;"></textarea>
+        <input id="chanUrl" class="c-input" placeholder="t.me/твой_канал">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:25px;">
+             <button onclick="document.getElementById('fInp').click()" style="background:var(--glass); border:none; color:#fff; padding:14px 24px; border-radius:20px;">🖼 ФОТО</button>
+             <input type="file" id="fInp" hidden accept="image/*">
+             <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:14px 40px; border-radius:24px; font-weight:800;">ГОТОВО</button>
+        </div>
+    </div>
+</div>
+
 <script>
-// В функцию render добавляем логику удаления и исправляем ссылки
+const tg = window.Telegram.WebApp;
+const db = supabase.createClient('https://xddulhzvzemmrhrsjfhb.supabase.co', 'sb_publishable_2FIKYuEHEQrYseRnwY58Qg__UIFN59j');
+
+const user = tg.initDataUnsafe?.user;
+const myId = user?.id?.toString() || 'guest';
+const myName = user?.username || user?.first_name || 'Guest';
+const PREMIUM_USERS = [myId]; 
+let curTab = 'all';
+let replyToId = null;
+
+async function load() {
+    const { data, error } = await db.from('posts').select('*').order('created_at', { ascending: false });
+    if (error) return;
+    render(data);
+}
+
 function render(data) {
     const feed = document.getElementById('feed');
     feed.innerHTML = '';
-    
     const mains = data.filter(p => !p.parent_id);
     let display = curTab === 'my' ? mains.filter(p => p.user_id === myId) : mains;
 
     display.forEach((p, i) => {
         const isPrem = PREMIUM_USERS.includes(p.user_id);
-        const isMyPost = p.user_id === myId; // Проверка владельца
+        const isMyPost = p.user_id === myId;
         const div = document.createElement('div');
         div.className = 'post-wrap';
         
-        // Исправленный бабл: теперь через Telegram API
         let bubbleHtml = '';
         if(p.track_url) {
             const username = p.track_url.split('/').pop().replace('@', '');
@@ -32,7 +119,7 @@ function render(data) {
             <div class="card ${isPrem ? 'premium-card' : ''}">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                     <div style="font-weight:800; color:${isPrem ? 'var(--gold)' : 'var(--accent)'}; font-size:15px;">@${p.username}</div>
-                    ${isMyPost ? `<div onclick="deletePost('${p.id}')" style="cursor:pointer; opacity:0.5; font-size:18px;">🗑</div>` : ''}
+                    ${isMyPost ? `<div onclick="deletePost('${p.id}')" style="opacity:0.5; font-size:18px;">🗑</div>` : ''}
                 </div>
                 <div style="font-size:16px; line-height:1.5;">${p.content}</div>
                 ${p.image_url ? `<img src="${p.image_url}" style="width:100%; border-radius:20px; margin-top:15px; display:block;">` : ''}
@@ -40,13 +127,12 @@ function render(data) {
                 <div style="margin-top:18px; opacity:0.4; font-size:12px; font-weight:900;" onclick="openModal('${p.id}')">ОТВЕТИТЬ</div>
             </div>`;
 
-        // ... (отрисовка ответов остается такой же) ...
         const reps = data.filter(r => r.parent_id === p.id);
         if (reps.length > 0) {
             html += `<div class="re-box">`;
             reps.forEach(r => {
                 html += `<div class="re-item">
-                    <div style="display:flex; justify-content:space-between;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
                         <b style="color:var(--accent)">@${r.username}</b>
                         ${r.user_id === myId ? `<span onclick="deletePost('${r.id}')" style="opacity:0.3;">✕</span>` : ''}
                     </div>
@@ -62,21 +148,63 @@ function render(data) {
     });
 }
 
-// НОВАЯ ФУНКЦИЯ УДАЛЕНИЯ
 async function deletePost(id) {
-    if(!confirm("Удалить этот пост?")) return;
-    
-    // Сначала удаляем ответы, если это главный пост
+    if(!confirm("Удалить?")) return;
     await db.from('posts').delete().eq('parent_id', id);
-    // Затем сам пост
-    const { error } = await db.from('posts').delete().eq('id', id);
-    
-    if(error) alert("Ошибка при удалении: " + error.message);
-    else {
-        tg.HapticFeedback.notificationOccurred('success');
-        load(); // Перезагружаем ленту
-    }
+    await db.from('posts').delete().eq('id', id);
+    tg.HapticFeedback.notificationOccurred('success');
+    load();
 }
 
-// ... (остальной код функции send и window.onload) ...
+function openModal(id = null) { 
+    replyToId = id; 
+    document.getElementById('modal').style.display = 'flex';
+    tg.HapticFeedback.impactOccurred('medium'); 
+}
+
+function closeModal() { 
+    document.getElementById('modal').style.display = 'none'; 
+    replyToId = null; 
+    document.getElementById('txt').value = ""; 
+    document.getElementById('chanUrl').value = "";
+}
+
+function switchTab(t) {
+    curTab = t;
+    document.getElementById('t-all').classList.toggle('active', t==='all');
+    document.getElementById('t-my').classList.toggle('active', t==='my');
+    load();
+}
+
+async function send() {
+    const t = document.getElementById('txt').value;
+    let cu = document.getElementById('chanUrl').value;
+    const f = document.getElementById('fInp').files[0];
+    if(!t && !f) return;
+    if (cu && !cu.startsWith('http')) cu = 'https://' + cu;
+
+    const btn = document.getElementById('sendBtn');
+    btn.innerText = "⏳"; btn.disabled = true;
+
+    try {
+        let iu = null;
+        if(f) {
+            const n = `img_${Date.now()}.jpg`;
+            await db.storage.from('images').upload(n, f);
+            iu = db.storage.from('images').getPublicUrl(n).data.publicUrl;
+        }
+        await db.from('posts').insert([{ content: t, username: myName, user_id: myId, track_url: cu, image_url: iu, parent_id: replyToId }]);
+        closeModal(); load();
+    } catch(e) { alert(e.message); }
+    btn.innerText = "ГОТОВО"; btn.disabled = false;
+}
+
+window.onload = () => {
+    tg.expand();
+    document.getElementById('app').style.display = "block";
+    document.getElementById('app').style.opacity = "1";
+    setTimeout(() => { document.getElementById('splash').style.display = 'none'; load(); }, 800);
+};
 </script>
+</body>
+</html>
