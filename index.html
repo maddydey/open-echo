@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; connect-src * https://*.supabase.co wss://*.supabase.co; img-src * data: blob:;">
 
-<title>ECHO Diamond Edition</title>
+<title>ECHO Executive Edition</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -101,22 +101,23 @@ const PREMIUM_USERS = [myId];
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-// ТОТ САМЫЙ ОРИГИНАЛЬНЫЙ SOLID CLICK
+// НОВАЯ МЯГКАЯ ВЕРСИЯ КЛИКА
 function playCrispyClick(isPremium = false) {
     if (audioCtx.state === 'suspended') audioCtx.resume();
     const now = audioCtx.currentTime;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     
-    osc.type = 'square'; 
-    osc.frequency.setValueAtTime(isPremium ? 900 : 800, now); 
-    osc.frequency.exponentialRampToValueAtTime(100, now + 0.02);
+    // Используем triangle для более мягкого, благородного тембра
+    osc.type = 'triangle'; 
+    osc.frequency.setValueAtTime(isPremium ? 750 : 700, now); 
+    osc.frequency.exponentialRampToValueAtTime(100, now + 0.04);
     
-    gain.gain.setValueAtTime(0.06, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
+    gain.gain.setValueAtTime(0.08, now); // Чуть выше громкость, так как треугольник тише квадрата
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
     
     osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.start(); osc.stop(now + 0.02);
+    osc.start(); osc.stop(now + 0.04);
 }
 
 function render(data) {
@@ -145,7 +146,6 @@ function render(data) {
                 <div style="margin-top:18px; opacity:0.4; font-size:11px; font-weight:900;" onclick="openModal('${p.id}')">REPLY</div>
             </div>`;
         
-        // ОТВЕТЫ С КОРРЕКТНЫМ СМЕЩЕНИЕМ
         repls.filter(r => r.parent_id === p.id).forEach(r => {
             html += `<div style="margin-left:35px; margin-top:-15px; padding:20px 18px 15px; background:rgba(255,255,255,0.03); border-radius:0 0 24px 24px; border:1px solid rgba(255,255,255,0.05); border-top:none;">
                 <div style="color:var(--accent); font-weight:800; font-size:12px;">@${r.username}</div>
