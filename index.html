@@ -3,67 +3,57 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ECHO Executive Elite</title>
+<title>ECHO Diamond Final</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root { --bg: #000; --text: #fff; --accent: #0a84ff; --gold: #ffd700; --glass: rgba(255, 255, 255, 0.08); }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 180px; overflow-x: hidden; }
+body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 200px; overflow-x: hidden; }
 
-/* ЭФФЕКТ ЗАГРУЗКИ (SPLASH) */
-#splash { 
-    position: fixed; inset: 0; background: #000; z-index: 10000; 
-    display: flex; align-items: center; justify-content: center; 
-    transition: 1.8s cubic-bezier(0.19, 1, 0.22, 1); 
-}
-.logo-anim { font-size: 42px; font-weight: 900; animation: pulse 2s infinite; letter-spacing: -2px; }
-@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.1; transform: scale(0.95); } }
+/* АНИМАЦИИ */
+#splash { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; transition: 1.5s; }
+.logo-anim { font-size: 42px; font-weight: 900; animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.1; } }
 
-#app { display: none; opacity: 0; padding: 0 16px; transition: 1.5s ease; }
-.header { position: sticky; top: 0; background: var(--bg); padding: 60px 0 20px; z-index: 100; font-size: 32px; font-weight: 800; letter-spacing: -1px; }
+#app { display: none; opacity: 0; padding: 0 16px; transition: 1.2s ease; }
+.header { position: sticky; top: 0; background: var(--bg); padding: 60px 0 20px; z-index: 100; font-size: 32px; font-weight: 800; }
 
-/* АНИМАЦИЯ КАРТОЧЕК (REVEAL) */
-.post-wrap { 
-    position: relative; margin-bottom: 30px; 
-    opacity: 0; 
-    filter: blur(40px) brightness(0.5);
-    transform: scale(0.88) translateY(50px);
-    transition: 1.8s cubic-bezier(0.19, 1, 0.22, 1); 
-}
-.post-wrap.revealed { opacity: 1; filter: blur(0) brightness(1); transform: scale(1) translateY(0); }
+.post-wrap { position: relative; margin-bottom: 30px; opacity: 0; filter: blur(40px); transform: translateY(30px); transition: 1.5s cubic-bezier(0.19, 1, 0.22, 1); }
+.post-wrap.revealed { opacity: 1; filter: blur(0); transform: translateY(0); }
 
-/* ДИЗАЙН КАРТОЧЕК */
-.card { position: relative; z-index: 10; background: var(--glass); backdrop-filter: blur(25px); border-radius: 28px; padding: 22px; border: 1px solid rgba(255,255,255,0.1); }
-.premium-card { border: 1px solid rgba(255, 215, 0, 0.35) !important; box-shadow: 0 0 30px rgba(255, 215, 0, 0.1); }
-.premium-card::after { content: ''; position: absolute; inset: 0; border-radius: 28px; background: linear-gradient(135deg, rgba(255,215,0,0.05), transparent); pointer-events: none; }
+/* ДИЗАЙН */
+.card { position: relative; z-index: 10; background: var(--glass); backdrop-filter: blur(25px); border-radius: 26px; padding: 22px; border: 1px solid rgba(255,255,255,0.1); }
+.premium-card { border: 1px solid rgba(255, 215, 0, 0.3) !important; box-shadow: 0 0 25px rgba(255, 215, 0, 0.08); }
 
-.post-img { width: 100%; border-radius: 20px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.08); }
+.post-img { width: 100%; border-radius: 20px; margin-top: 15px; display: block; }
 
-/* КНОПКА КАНАЛА */
-.channel-row { margin-top: 18px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.06); }
+.channel-row { margin-top: 15px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); }
 .channel-link {
     display: inline-flex; align-items: center; gap: 8px;
-    background: rgba(255,255,255,0.06); padding: 12px 22px; border-radius: 18px;
-    color: var(--accent); text-decoration: none; font-size: 13px; font-weight: 800; transition: 0.3s;
+    background: rgba(255,255,255,0.05); padding: 10px 18px; border-radius: 16px;
+    color: var(--accent); text-decoration: none; font-size: 13px; font-weight: 700;
 }
-.premium-card .channel-link {
-    background: linear-gradient(135deg, #ffd700, #ffae00);
-    color: #000; box-shadow: 0 5px 15px rgba(255,215,0,0.2);
+.premium-card .channel-link { background: var(--gold); color: #000; }
+
+/* ОТВЕТЫ (REPLIES) */
+.reply-card {
+    margin-left: 35px; margin-top: -15px; padding: 20px 18px;
+    background: rgba(255,255,255,0.03); border-radius: 0 0 24px 24px;
+    border: 1px solid rgba(255,255,255,0.05); border-top: none;
 }
 
-/* UI ТАБЫ */
-.tabs { position: fixed; bottom: 30px; left: 20px; right: 20px; height: 72px; background: rgba(15,15,17,0.85); backdrop-filter: blur(30px); border-radius: 36px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; border: 1px solid rgba(255,255,255,0.08); }
-.tab { color: #444; font-size: 26px; transition: 0.3s; }
-.tab.active { color: #fff; transform: scale(1.15); }
-.add-btn { position: fixed; bottom: 115px; right: 25px; width: 64px; height: 64px; background: #fff; border-radius: 50%; border: none; font-size: 34px; font-weight: bold; z-index: 1100; box-shadow: 0 12px 35px rgba(0,0,0,0.7); }
+/* UI */
+.tabs { position: fixed; bottom: 25px; left: 20px; right: 20px; height: 68px; background: rgba(20,20,22,0.9); backdrop-filter: blur(25px); border-radius: 34px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; border: 1px solid rgba(255,255,255,0.1); }
+.tab { color: #555; font-size: 24px; }
+.tab.active { color: #fff; }
+.add-btn { position: fixed; bottom: 105px; right: 25px; width: 62px; height: 62px; background: #fff; border-radius: 50%; border: none; font-size: 32px; z-index: 1100; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
 
-/* MODAL */
-.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.94); z-index: 5000; align-items: flex-end; }
+.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 5000; align-items: flex-end; }
 .modal.show { display: flex; }
-.modal-content { background: #121214; width: 100%; border-radius: 35px 35px 0 0; padding: 30px 20px 60px; border-top: 1px solid var(--accent); }
-.c-input { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px; color: #fff; margin-top: 12px; font-size: 15px; outline: none; }
+.modal-content { background: #161618; width: 100%; border-radius: 32px 32px 0 0; padding: 25px 20px 60px; }
+.c-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 14px; color: #fff; margin-top: 10px; font-size: 15px; outline: none; }
 </style>
 </head>
 <body>
@@ -82,12 +72,12 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); color: var
 
 <div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
     <div class="modal-content">
-        <textarea id="txt" placeholder="Что нового?" style="width:100%; background:transparent; border:none; color:#fff; font-size:19px; min-height:120px; outline:none; resize:none;"></textarea>
-        <input id="chanUrl" class="c-input" placeholder="Ссылка на твой канал (t.me/...)">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:25px;">
-             <button onclick="document.getElementById('fInp').click()" style="background:var(--glass); border:none; color:#fff; padding:14px 22px; border-radius:20px; font-weight:700;">🖼 ФОТО</button>
+        <textarea id="txt" placeholder="Что нового?" style="width:100%; background:transparent; border:none; color:#fff; font-size:18px; min-height:100px; outline:none; resize:none;"></textarea>
+        <input id="chanUrl" class="c-input" placeholder="Ссылка на канал (t.me/...)">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+             <button onclick="document.getElementById('fInp').click()" style="background:var(--glass); border:none; color:#fff; padding:12px 20px; border-radius:18px; font-weight:600;">🖼 ФОТО</button>
              <input type="file" id="fInp" hidden accept="image/*" onchange="handleFile(this)">
-             <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:14px 40px; border-radius:25px; font-weight:900;">ГОТОВО</button>
+             <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:12px 35px; border-radius:22px; font-weight:800;">ГОТОВО</button>
         </div>
     </div>
 </div>
@@ -98,12 +88,13 @@ const db = supabase.createClient('https://xddulhzvzemmrhrsjfhb.supabase.co', 'sb
 
 const user = tg.initDataUnsafe?.user;
 const myId = user?.id?.toString() || 'guest';
+const myUsername = user?.username || user?.first_name || 'Guest';
 const PREMIUM_USERS = [myId]; 
 let curTab = 'all';
+let replyId = null;
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-// ТОТ САМЫЙ ЗВУК 400Hz
 function playDeepClick(isPremium = false) {
     if (audioCtx.state === 'suspended') audioCtx.resume();
     const now = audioCtx.currentTime;
@@ -126,48 +117,56 @@ async function load() {
 
 function render(data) {
     const feed = document.getElementById('feed'); feed.innerHTML = '';
-    data?.forEach((p, index) => {
+    if(!data) return;
+
+    const mainPosts = data.filter(p => !p.parent_id);
+    const replies = data.filter(p => p.parent_id);
+
+    mainPosts.forEach((p, index) => {
         const isPrem = PREMIUM_USERS.includes(p.user_id);
         const div = document.createElement('div');
         div.className = 'post-wrap';
-        div.innerHTML = `
-            <div class="card ${isPrem ? 'premium-card' : ''}">
-                <div style="font-weight:800; color:${isPrem ? 'var(--gold)' : 'var(--accent)'}; margin-bottom:10px; font-size:14px; letter-spacing:0.5px;">@${p.username}</div>
-                <div style="font-size:17px; line-height:1.5; font-weight:400;">${p.content}</div>
-                ${p.image_url ? `<img src="${p.image_url}" class="post-img">` : ''}
-                ${p.track_url ? `
-                <div class="channel-row">
-                    <a href="${p.track_url}" target="_blank" class="channel-link" onclick="playDeepClick(${isPrem})">
-                        <span>${isPrem ? '💎 МОЙ КАНАЛ' : '🔗 ПЕРЕЙТИ'}</span>
-                    </a>
-                </div>` : ''}
-            </div>`;
-        feed.appendChild(div);
         
-        // АНИМАЦИЯ ПОЯВЛЕНИЯ
-        setTimeout(() => {
-            div.classList.add('revealed');
-            if(index === 0) {
-                playDeepClick(isPrem);
-                isPrem ? tg.HapticFeedback.notificationOccurred('success') : tg.HapticFeedback.impactOccurred('medium');
-            }
-        }, index * 120 + 300);
+        let html = `
+            <div class="card ${isPrem ? 'premium-card' : ''}">
+                <div style="font-weight:700; color:${isPrem ? 'var(--gold)' : 'var(--accent)'}; margin-bottom:8px; font-size:14px;">@${p.username}</div>
+                <div style="font-size:16px;">${p.content}</div>
+                ${p.image_url ? `<img src="${p.image_url}" class="post-img">` : ''}
+                ${p.track_url ? `<div class="channel-row"><a href="${p.track_url}" target="_blank" class="channel-link"><span>🔗 КАНАЛ</span></a></div>` : ''}
+                <div style="margin-top:15px; opacity:0.4; font-size:11px; font-weight:900;" onclick="openModal('${p.id}')">ОТВЕТИТЬ</div>
+            </div>`;
+
+        replies.filter(r => r.parent_id === p.id).forEach(r => {
+            html += `
+            <div class="reply-card">
+                <div style="color:var(--accent); font-weight:800; font-size:12px;">@${r.username}</div>
+                <div style="font-size:14px;">${r.content}</div>
+            </div>`;
+        });
+
+        div.innerHTML = html;
+        feed.appendChild(div);
+        setTimeout(() => { div.classList.add('revealed'); if(index === 0) playDeepClick(isPrem); }, index * 100 + 200);
     });
 }
-
-// ... (остальные функции: handleFile, send, closeModal и т.д. остаются из основного кода)
 
 async function send() {
     const t = document.getElementById('txt').value, cu = document.getElementById('chanUrl').value, f = document.getElementById('fInp').files[0];
     if(!t && !f) return;
     const b = document.getElementById('sendBtn'); b.disabled = true;
+    
     let iu = null;
     if(f) {
         const n = `i_${Date.now()}.jpg`;
         await db.storage.from('images').upload(n, f);
         iu = db.storage.from('images').getPublicUrl(n).data.publicUrl;
     }
-    await db.from('posts').insert([{ content: t, username: user?.username || 'Guest', user_id: myId, track_url: cu, image_url: iu }]);
+
+    await db.from('posts').insert([{ 
+        content: t, username: myUsername, user_id: myId,
+        track_url: cu, image_url: iu, parent_id: replyId
+    }]);
+    
     playDeepClick(); closeModal(); load(); b.disabled = false;
 }
 
@@ -175,17 +174,14 @@ window.onload = () => {
     tg.expand();
     document.getElementById('app').style.display = "block";
     document.getElementById('app').style.opacity = "1";
-    setTimeout(() => {
-        document.getElementById('splash').style.opacity = "0";
-        setTimeout(() => document.getElementById('splash').style.display = 'none', 1500);
-        load();
-    }, 2000);
+    setTimeout(() => { document.getElementById('splash').style.opacity = "0"; load(); }, 1500);
+    db.channel('any').on('postgres_changes', {event:'*', schema:'public', table:'posts'}, () => load()).subscribe();
 };
 
-function openModal() { document.getElementById('modal').classList.add('show'); tg.HapticFeedback.impactOccurred('medium'); }
-function closeModal() { document.getElementById('modal').classList.remove('show'); }
-function switchTab(t, el) { curTab = t; document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); el.classList.add('active'); playDeepClick(); load(); }
-function handleFile(i) { /* предпросмотр фото */ }
+function openModal(id = null) { replyId = id; document.getElementById('modal').classList.add('show'); tg.HapticFeedback.impactOccurred('light'); }
+function closeModal() { document.getElementById('modal').classList.remove('show'); replyId = null; document.getElementById('txt').value = ""; }
+function handleFile(i) { /* Предпросмотр если нужен */ }
+function switchTab(t, el) { curTab = t; document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); el.classList.add('active'); load(); }
 </script>
 </body>
 </html>
