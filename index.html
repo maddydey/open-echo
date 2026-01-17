@@ -14,22 +14,24 @@
   --glass: rgba(255, 255, 255, 0.08);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 120px; }
+body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 120px; overflow-x: hidden; }
 
 /* LOADING */
 #splash-screen { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; }
-.loader-logo { font-size: 42px; font-weight: 900; animation: pulse 2s infinite; }
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+.loader-logo { font-size: 42px; font-weight: 900; letter-spacing: -2px; animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; } }
 
-#main-app { display: none; opacity: 0; padding: 0 16px; transition: 0.5s; }
+#main-app { display: none; opacity: 0; padding: 0 16px; transition: 0.5s; height: 100vh; overflow-y: auto; }
 .header-wrapper { position: sticky; top: 0; background: var(--bg); padding: 60px 0 20px; z-index: 1000; }
 
-/* POSTS */
-.post-container { position: relative; margin-bottom: 40px; transition: 0.3s; }
-.post-container:active { transform: scale(0.98); }
+/* POST & SMART SCALE */
+.post-container { position: relative; margin-bottom: 40px; transition: transform 0.3s cubic-bezier(0.2, 0, 0.2, 1); }
+.post-container:active { transform: scale(0.97); }
+
 .post-card { 
-    position: relative; z-index: 10; background: var(--glass); backdrop-filter: blur(20px); 
+    position: relative; z-index: 10; background: var(--glass); backdrop-filter: blur(25px); 
     border-radius: 26px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.1); 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 .post-card::after { 
     content: ''; position: absolute; bottom: -15px; left: 15%; right: 15%; height: 30px; 
@@ -37,30 +39,29 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
     filter: blur(12px); z-index: -1; 
 }
 
-/* REPLIES */
-.reply-card { 
-    position: relative; z-index: 5; margin-left: 35px; margin-top: -15px; 
-    padding: 25px 18px 15px; background: rgba(255,255,255,0.04); 
-    border-radius: 0 0 24px 24px; border: 1px solid rgba(255,255,255,0.05); border-top: none; 
+/* VOICE PLAYER */
+.voice-player {
+    display: flex; align-items: center; gap: 12px; background: rgba(255, 255, 255, 0.05);
+    padding: 12px 16px; border-radius: 20px; margin-top: 12px; border: 1px solid rgba(10, 132, 255, 0.2);
 }
+.play-btn { width: 34px; height: 34px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.voice-wave { flex-grow: 1; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; position: relative; overflow: hidden; }
+.voice-progress { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: var(--accent); transition: width 0.1s linear; }
 
+.reply-card { position: relative; z-index: 5; margin-left: 35px; margin-top: -15px; padding: 25px 18px 15px; background: rgba(255,255,255,0.04); border-radius: 0 0 24px 24px; border: 1px solid rgba(255,255,255,0.05); border-top: none; }
 .post-image { width: 100%; max-height: 350px; object-fit: cover; border-radius: 20px; margin-top: 15px; }
 
-/* UI ELEMENTS */
-.tab-bar { position: fixed; bottom: 25px; left: 20px; right: 20px; height: 68px; background: rgba(20, 20, 22, 0.95); backdrop-filter: blur(25px); border-radius: 34px; display: flex; justify-content: space-around; align-items: center; z-index: 2000; border: 1px solid rgba(255,255,255,0.1); }
+/* UI */
+.tab-bar { position: fixed; bottom: 25px; left: 20px; right: 20px; height: 68px; background: rgba(20, 20, 22, 0.95); backdrop-filter: blur(25px); border-radius: 34px; border: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-around; align-items: center; z-index: 2000; }
 .tab-item { color: #555; font-size: 24px; }
 .tab-item.active { color: #fff; }
 .btn-add { position: fixed; bottom: 105px; right: 25px; width: 60px; height: 60px; background: #fff; border-radius: 50%; border: none; font-size: 32px; z-index: 1500; font-weight: bold; }
 
-/* MODAL & PHOTO PREVIEW */
+/* MODAL */
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000; align-items: flex-end; }
 .modal.show { display: flex; }
 .modal-content { background: #161618; width: 100%; border-radius: 32px 32px 0 0; padding: 25px 20px 50px; border-top: 1px solid var(--accent); }
-
-#create-photo-preview { 
-    width: 100%; max-height: 200px; object-fit: cover; border-radius: 15px; 
-    margin-bottom: 15px; display: none; border: 1px solid var(--accent);
-}
+#preview-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 15px; margin-bottom: 10px; display: none; }
 </style>
 </head>
 <body>
@@ -79,12 +80,16 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
 
 <div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
     <div class="modal-content">
-        <img id="create-photo-preview" src="">
-        <textarea id="txt" placeholder="Напишите что-нибудь..." style="width:100%; background:transparent; border:none; color:#fff; font-size:18px; min-height:100px; outline:none; resize:none;"></textarea>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
-             <button onclick="document.getElementById('fInp').click()" style="background:var(--glass); border:none; color:#fff; padding:12px 20px; border-radius:15px; font-size:14px;">🖼 Добавить фото</button>
-             <input type="file" id="fInp" hidden accept="image/*" onchange="handleFile(this)">
-             <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:12px 30px; border-radius:20px; font-weight:700;">Пост</button>
+        <img id="preview-img">
+        <div id="voice-rec-status" style="display:none; color:var(--accent); font-size:12px; margin-bottom:10px; font-weight:bold;">🎙 ЗАПИСЬ ИДЕТ...</div>
+        <textarea id="txt" placeholder="Что нового?" style="width:100%; background:transparent; border:none; color:#fff; font-size:18px; min-height:100px; outline:none; resize:none;"></textarea>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+             <div style="display:flex; gap:10px;">
+                <button onclick="document.getElementById('fInp').click()" style="background:var(--glass); border:none; color:#fff; padding:12px; border-radius:15px;">🖼</button>
+                <button id="micBtn" onpointerdown="startRec()" onpointerup="stopRec()" style="background:var(--glass); border:none; color:#fff; padding:12px; border-radius:15px;">🎙</button>
+             </div>
+             <input type="file" id="fInp" hidden accept="image/*" onchange="previewFile(this)">
+             <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:12px 30px; border-radius:20px; font-weight:700;">Готово</button>
         </div>
     </div>
 </div>
@@ -98,7 +103,7 @@ const myId = user?.id?.toString() || 'guest';
 const myUsername = user?.username || user?.first_name || 'Guest';
 const myPhoto = user?.photo_url || '';
 
-let currentTab = 'all', currentParentId = null;
+let currentTab = 'all', currentParentId = null, mediaRec, audioChunks = [], voiceBlob = null;
 
 function linkify(text) {
     if (!text) return "";
@@ -117,17 +122,38 @@ window.onload = () => {
     }, 1500);
 };
 
-// ОБРАБОТКА ВЫБОРА ФАЙЛА (ПРЕВЬЮ)
-function handleFile(input) {
-    const file = input.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const preview = document.getElementById('create-photo-preview');
-            preview.src = e.target.result;
-            preview.style.display = 'block';
-        }
-        reader.readAsDataURL(file);
+// VOICE LOGIC
+async function startRec() {
+    audioChunks = [];
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRec = new MediaRecorder(stream);
+    mediaRec.ondataavailable = e => audioChunks.push(e.data);
+    mediaRec.onstop = () => { voiceBlob = new Blob(audioChunks, { type: 'audio/ogg' }); };
+    mediaRec.start();
+    document.getElementById('voice-rec-status').style.display = 'block';
+    tg.HapticFeedback.impactOccurred('medium');
+}
+
+function stopRec() {
+    if(mediaRec) mediaRec.stop();
+    document.getElementById('voice-rec-status').innerText = "✅ ГОЛОСОВОЕ ЗАПИСАНО";
+}
+
+function playVoice(url, el) {
+    const audio = new Audio(url);
+    const progress = el.querySelector('.voice-progress');
+    const btn = el.querySelector('.play-btn');
+    audio.play(); btn.innerText = "⏸";
+    audio.ontimeupdate = () => progress.style.width = (audio.currentTime / audio.duration) * 100 + "%";
+    audio.onended = () => { btn.innerText = "▶"; progress.style.width = "0%"; };
+}
+
+function previewFile(input) {
+    const f = input.files[0];
+    if (f) {
+        const r = new FileReader();
+        r.onload = e => { document.getElementById('preview-img').src = e.target.result; document.getElementById('preview-img').style.display = 'block'; };
+        r.readAsDataURL(f);
     }
 }
 
@@ -138,16 +164,16 @@ async function load() {
 }
 
 function render(data) {
-    const feed = document.getElementById('feed');
-    feed.innerHTML = '';
+    const feed = document.getElementById('feed'); feed.innerHTML = '';
     if (!data) return;
-    
     const mainPosts = data.filter(p => !p.parent_id);
     const replies = data.filter(p => p.parent_id);
 
     mainPosts.forEach(post => {
         const container = document.createElement('div');
         container.className = 'post-container';
+        let voiceHtml = post.voice_url ? `<div class="voice-player" onclick="playVoice('${post.voice_url}', this)"><div class="play-btn">▶</div><div class="voice-wave"><div class="voice-progress"></div></div></div>` : "";
+        
         let html = `
             <div class="post-card">
                 <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
@@ -158,8 +184,9 @@ function render(data) {
                     ${post.user_id === myId ? `<span onclick="del('${post.id}')" style="margin-left:auto;opacity:0.3;">✕</span>` : ''}
                 </div>
                 <div style="font-size:16px;">${linkify(post.content)}</div>
+                ${voiceHtml}
                 ${post.image_url ? `<img src="${post.image_url}" class="post-image">` : ''}
-                <div style="margin-top:15px; opacity:0.4; font-size:13px;" onclick="openModal('${post.id}')">💬 Ответить</div>
+                <div style="margin-top:15px; opacity:0.4; font-size:13px; font-weight:bold;" onclick="openModal('${post.id}')">💬 ОТВЕТИТЬ</div>
             </div>`;
         
         replies.filter(r => r.parent_id === post.id).forEach(reply => {
@@ -191,30 +218,36 @@ function closeModal() {
     document.getElementById('modal').classList.remove('show');
     document.getElementById('txt').value = "";
     document.getElementById('fInp').value = "";
-    document.getElementById('create-photo-preview').style.display = 'none';
-    currentParentId = null;
+    document.getElementById('preview-img').style.display = 'none';
+    document.getElementById('voice-rec-status').style.display = 'none';
+    voiceBlob = null; currentParentId = null;
 }
 
 async function send() {
     const t = document.getElementById('txt').value;
     const f = document.getElementById('fInp').files[0];
-    if (!t && !f) return;
+    if (!t && !f && !voiceBlob) return;
     
     const btn = document.getElementById('sendBtn');
     btn.disabled = true; btn.innerText = "⏳";
     
-    let imgUrl = null;
+    let imgUrl = null, vUrl = null;
     if (f) {
-        const name = `img_${Date.now()}.jpg`;
-        await db.storage.from('images').upload(name, f);
-        imgUrl = db.storage.from('images').getPublicUrl(name).data.publicUrl;
+        const n = `img_${Date.now()}.jpg`;
+        await db.storage.from('images').upload(n, f);
+        imgUrl = db.storage.from('images').getPublicUrl(n).data.publicUrl;
+    }
+    if (voiceBlob) {
+        const n = `voice_${Date.now()}.ogg`;
+        await db.storage.from('images').upload(n, voiceBlob);
+        vUrl = db.storage.from('images').getPublicUrl(n).data.publicUrl;
     }
     
-    await db.from('posts').insert([{ content: t, username: myUsername, user_id: myId, image_url: imgUrl, avatar_url: myPhoto, parent_id: currentParentId }]);
+    await db.from('posts').insert([{ content: t, username: myUsername, user_id: myId, image_url: imgUrl, voice_url: vUrl, avatar_url: myPhoto, parent_id: currentParentId }]);
     
     tg.HapticFeedback.notificationOccurred('success');
     closeModal();
-    btn.disabled = false; btn.innerText = "Пост";
+    btn.disabled = false; btn.innerText = "Готово";
 }
 
 async function del(id) {
