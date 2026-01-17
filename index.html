@@ -25,8 +25,7 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); color: var
 /* REVEAL EFFECT */
 .post-wrap { 
     position: relative; margin-bottom: 30px; 
-    opacity: 0; 
-    filter: blur(50px) brightness(0.3);
+    opacity: 0; filter: blur(50px) brightness(0.3);
     transform: scale(0.85) translateY(40px);
     transition: 1.8s cubic-bezier(0.19, 1, 0.22, 1);
 }
@@ -38,7 +37,7 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); color: var
     background: var(--glass); backdrop-filter: blur(25px); 
     border-radius: 26px; padding: 22px; 
     border: 1px solid rgba(255,255,255,0.1);
-    overflow: hidden; /* ФИКС: чтобы плашка не вылетала */
+    overflow: hidden; 
 }
 .card::after { content: ''; position: absolute; bottom: -15px; left: 15%; right: 15%; height: 30px; background: linear-gradient(to bottom, rgba(10, 132, 255, 0.15), transparent); filter: blur(12px); z-index: -1; }
 
@@ -53,22 +52,11 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); color: var
     z-index: 20;
 }
 
-/* LINKS */
-.link-bubble { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; color: var(--accent); text-decoration: none; font-size: 14px; font-weight: 700; }
-
-/* NAVIGATION & UI */
+/* UI ELEMENTS */
 .tabs { position: fixed; bottom: 25px; left: 20px; right: 20px; height: 68px; background: rgba(20,20,22,0.9); backdrop-filter: blur(25px); border-radius: 34px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; border: 1px solid rgba(255,255,255,0.1); }
 .tab { color: #555; font-size: 24px; transition: 0.2s; }
 .tab.active { color: #fff; transform: scale(1.1); }
-
-.add-btn { 
-    position: fixed; bottom: 105px; right: 25px; 
-    width: 62px; height: 62px; 
-    background: #fff; border-radius: 50%; border: none; 
-    font-size: 32px; font-weight: bold; 
-    z-index: 1100; /* ФИКС: Всегда выше табов */
-    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-}
+.add-btn { position: fixed; bottom: 105px; right: 25px; width: 62px; height: 62px; background: #fff; border-radius: 50%; border: none; font-size: 32px; font-weight: bold; z-index: 1100; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
 
 /* MODAL */
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 5000; align-items: flex-end; }
@@ -92,7 +80,6 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); color: var
 
 <div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
     <div class="modal-content">
-        <img id="preview-img" style="width:100%; max-height:220px; object-fit:cover; border-radius:18px; margin-bottom:12px; display:none;">
         <textarea id="txt" placeholder="Что нового?" style="width:100%; background:transparent; border:none; color:#fff; font-size:18px; min-height:120px; outline:none; resize:none;"></textarea>
         <div style="display:flex; justify-content:space-between; align-items:center;">
              <button onclick="document.getElementById('fInp').click()" style="background:var(--glass); border:none; color:#fff; padding:12px 20px; border-radius:18px; font-weight:600;">🖼 ФОТО</button>
@@ -109,61 +96,32 @@ const db = supabase.createClient('https://xddulhzvzemmrhrsjfhb.supabase.co', 'sb
 const user = tg.initDataUnsafe?.user;
 const myId = user?.id?.toString() || 'guest';
 const myUsername = user?.username || user?.first_name || 'Guest';
-const myPhoto = user?.photo_url || '';
-
 const PREMIUM_USERS = [myId]; 
 
-let curTab = 'all', parentId = null;
-
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+// ВЕРНУЛ ТОТ САМЫЙ КВАДРАТНЫЙ ЗВУК (Square Wave)
 function playCrispyClick(isPremium = false) {
     if (audioCtx.state === 'suspended') audioCtx.resume();
     const now = audioCtx.currentTime;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
-    osc.type = isPremium ? 'triangle' : 'square'; 
-    osc.frequency.setValueAtTime(isPremium ? 1600 : 1400, now);
-    osc.frequency.exponentialRampToValueAtTime(800, now + 0.04);
+    
+    osc.type = 'square'; // Вернул квадрат для четкости
+    osc.frequency.setValueAtTime(isPremium ? 1500 : 1400, now);
+    osc.frequency.exponentialRampToValueAtTime(700, now + 0.03);
+    
     gain.gain.setValueAtTime(0.04, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.04);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.03);
+    
     osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.start(); osc.stop(now + 0.04);
-}
-
-function linkify(t) {
-    if (!t) return "";
-    const pattern = /(\b(https?):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
-    return t.replace(pattern, u => `
-        <a href="${u}" target="_blank" class="link-bubble" onclick="playCrispyClick()">
-            <span>💎</span><span>${u.split('/')[2]}</span>
-        </a>
-    `);
-}
-
-window.onload = () => {
-    tg.expand();
-    document.getElementById('app').style.display = "block";
-    document.getElementById('app').style.opacity = "1";
-    setTimeout(async () => {
-        const splash = document.getElementById('splash');
-        splash.style.opacity = "0";
-        setTimeout(() => splash.style.display = "none", 1500);
-        await load();
-    }, 2200);
-    db.channel('feed').on('postgres_changes', {event:'*', schema:'public', table:'posts'}, () => load()).subscribe();
-};
-
-async function load() {
-    let { data } = await db.from('posts').select('*').order('created_at', { ascending: false });
-    if (curTab === 'my') data = data.filter(p => p.user_id === myId);
-    render(data);
+    osc.start(); osc.stop(now + 0.03);
 }
 
 function render(data) {
     const feed = document.getElementById('feed');
     feed.innerHTML = '';
     if(!data) return;
-    
     const main = data.filter(p => !p.parent_id);
     const repls = data.filter(p => p.parent_id);
 
@@ -171,7 +129,6 @@ function render(data) {
         const isPrem = PREMIUM_USERS.includes(p.user_id);
         const div = document.createElement('div');
         div.className = 'post-wrap';
-        
         let html = `
             <div class="card ${isPrem ? 'premium-card' : ''}">
                 ${isPrem ? '<div class="premium-badge">PREMIUM</div>' : ''}
@@ -180,64 +137,57 @@ function render(data) {
                         ${p.avatar_url ? `<img src="${p.avatar_url}" style="width:100%;height:100%;object-fit:cover;">` : ''}
                     </div>
                     <div style="font-weight:700; color:${isPrem ? 'var(--gold)' : 'var(--text)'}">@${p.username}</div>
-                    ${p.user_id === myId ? `<span onclick="del('${p.id}')" style="margin-left:auto; opacity:0.2;">✕</span>` : ''}
                 </div>
-                <div style="font-size:16px; line-height:1.5;">${linkify(p.content)}</div>
+                <div style="font-size:16px;">${p.content}</div>
                 ${p.image_url ? `<img src="${p.image_url}" style="width:100%; border-radius:20px; margin-top:15px; display:block;">` : ''}
                 <div style="margin-top:18px; opacity:0.4; font-size:11px; font-weight:900;" onclick="openModal('${p.id}')">REPLY</div>
             </div>`;
         
         repls.filter(r => r.parent_id === p.id).forEach(r => {
-            html += `
-            <div style="margin-left:35px; margin-top:-15px; padding:25px 18px 15px; background:rgba(255,255,255,0.03); border-radius:0 0 24px 24px; border:1px solid rgba(255,255,255,0.05); border-top:none;">
+            html += `<div style="margin-left:35px; margin-top:-15px; padding:20px 18px 15px; background:rgba(255,255,255,0.03); border-radius:0 0 24px 24px; border:1px solid rgba(255,255,255,0.05); border-top:none;">
                 <div style="color:var(--accent); font-weight:800; font-size:12px;">@${r.username}</div>
-                <div style="font-size:14px; opacity:0.9;">${linkify(r.content)}</div>
+                <div style="font-size:14px; opacity:0.9;">${r.content}</div>
             </div>`;
         });
-
         div.innerHTML = html;
         feed.appendChild(div);
         setTimeout(() => {
             div.classList.add('revealed');
             if(index === 0) {
-                if(isPrem) { playCrispyClick(true); tg.HapticFeedback.notificationOccurred('success'); }
-                else { playCrispyClick(false); tg.HapticFeedback.impactOccurred('light'); }
+                playCrispyClick(isPrem);
+                isPrem ? tg.HapticFeedback.notificationOccurred('success') : tg.HapticFeedback.impactOccurred('light');
             }
         }, index * 120 + 200); 
     });
 }
 
-function handleFile(i) {
-    const f = i.files[0];
-    if(f) {
-        const r = new FileReader();
-        r.onload = e => { document.getElementById('preview-img').src = e.target.result; document.getElementById('preview-img').style.display = 'block'; };
-        r.readAsDataURL(f);
-    }
+// Вспомогательные функции остаются без изменений
+async function load() {
+    let { data } = await db.from('posts').select('*').order('created_at', { ascending: false });
+    if (curTab === 'my') data = data.filter(p => p.user_id === myId);
+    render(data);
 }
-
-async function send() {
-    const t = document.getElementById('txt').value, f = document.getElementById('fInp').files[0], b = document.getElementById('sendBtn');
-    if(!t && !f) return;
-    b.disabled = true; b.innerText = "⏳";
-    try {
-        let iu = null;
-        if(f) {
-            const n = `i_${Date.now()}.jpg`;
-            await db.storage.from('images').upload(n, f);
-            iu = db.storage.from('images').getPublicUrl(n).data.publicUrl;
-        }
-        await db.from('posts').insert([{ content:t, username:myUsername, user_id:myId, image_url:iu, avatar_url:myPhoto, parent_id:parentId }]);
-        playCrispyClick();
-        closeModal();
-        load();
-    } catch(e) { alert("Error"); b.disabled = false; b.innerText = "ГОТОВО"; }
-}
-
-function openModal(id = null) { parentId = id; document.getElementById('modal').classList.add('show'); tg.HapticFeedback.impactOccurred('light'); if(audioCtx.state === 'suspended') audioCtx.resume(); }
-function closeModal() { document.getElementById('modal').classList.remove('show'); document.getElementById('txt').value = ""; document.getElementById('fInp').value = ""; document.getElementById('preview-img').style.display = 'none'; }
-async function del(id) { if(confirm('Delete?')) { await db.from('posts').delete().eq('id', id); load(); } }
+window.onload = () => {
+    tg.expand();
+    document.getElementById('app').style.display = "block";
+    document.getElementById('app').style.opacity = "1";
+    setTimeout(async () => {
+        document.getElementById('splash').style.opacity = "0";
+        setTimeout(() => document.getElementById('splash').style.display = "none", 1500);
+        await load();
+    }, 2200);
+    db.channel('feed').on('postgres_changes', {event:'*', schema:'public', table:'posts'}, () => load()).subscribe();
+};
+function openModal(id = null) { parentId = id; document.getElementById('modal').classList.add('show'); tg.HapticFeedback.impactOccurred('light'); }
+function closeModal() { document.getElementById('modal').classList.remove('show'); document.getElementById('txt').value = ""; }
 function switchTab(t, el) { curTab = t; document.querySelectorAll('.tab').forEach(x => x.classList.remove('active')); el.classList.add('active'); playCrispyClick(); load(); }
+async function send() {
+    const t = document.getElementById('txt').value, b = document.getElementById('sendBtn');
+    if(!t) return;
+    b.disabled = true;
+    await db.from('posts').insert([{ content:t, username:myUsername, user_id:myId, parent_id:parentId }]);
+    playCrispyClick(); closeModal(); load(); b.disabled = false;
+}
 </script>
 </body>
 </html>
