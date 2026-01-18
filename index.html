@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ECHO Ultimate Full</title>
+<title>ECHO Ultimate Final Fix</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -83,6 +83,17 @@ const PREMIUM_USERS = [myId];
 let curTab = 'all';
 let replyToId = null;
 
+// Универсальная функция открытия ссылок
+function openLink(url) {
+    if (!url) return;
+    tg.HapticFeedback.impactOccurred('light');
+    if (url.includes('t.me')) {
+        tg.openTelegramLink(url);
+    } else {
+        tg.openLink(url);
+    }
+}
+
 async function load() {
     const { data, error } = await db.from('posts').select('*').order('created_at', { ascending: false });
     if (error) return;
@@ -106,11 +117,11 @@ function render(data) {
             const username = p.track_url.split('/').pop().replace('@', '');
             const avatarUrl = `https://t.me/i/userpic/320/${username}.jpg`;
             bubbleHtml = `
-                <div class="link-bubble" onclick="tg.openTelegramLink('${p.track_url}')">
+                <div class="link-bubble" onclick="openLink('${p.track_url}')">
                     <img src="${avatarUrl}" onerror="this.src='https://ui-avatars.com/api/?name=TG&background=0a84ff&color=fff'" class="chan-avatar">
                     <div style="flex:1">
                         <div style="font-size:14px; color:#fff; font-weight:700;">@${username}</div>
-                        <div style="font-size:11px; color:var(--accent);">Открыть канал</div>
+                        <div style="font-size:11px; color:var(--accent);">Перейти в канал</div>
                     </div>
                 </div>`;
         }
@@ -119,7 +130,7 @@ function render(data) {
             <div class="card ${isPrem ? 'premium-card' : ''}">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                     <div style="font-weight:800; color:${isPrem ? 'var(--gold)' : 'var(--accent)'}; font-size:15px;">@${p.username}</div>
-                    ${isMyPost ? `<div onclick="deletePost('${p.id}')" style="opacity:0.5; font-size:18px;">🗑</div>` : ''}
+                    ${isMyPost ? `<div onclick="deletePost('${p.id}')" style="cursor:pointer; opacity:0.5; font-size:18px;">🗑</div>` : ''}
                 </div>
                 <div style="font-size:16px; line-height:1.5;">${p.content}</div>
                 ${p.image_url ? `<img src="${p.image_url}" style="width:100%; border-radius:20px; margin-top:15px; display:block;">` : ''}
@@ -134,7 +145,7 @@ function render(data) {
                 html += `<div class="re-item">
                     <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
                         <b style="color:var(--accent)">@${r.username}</b>
-                        ${r.user_id === myId ? `<span onclick="deletePost('${r.id}')" style="opacity:0.3;">✕</span>` : ''}
+                        ${r.user_id === myId ? `<span onclick="deletePost('${r.id}')" style="opacity:0.3; font-weight:bold; cursor:pointer;">✕</span>` : ''}
                     </div>
                     <div>${r.content}</div>
                 </div>`;
@@ -181,7 +192,14 @@ async function send() {
     let cu = document.getElementById('chanUrl').value;
     const f = document.getElementById('fInp').files[0];
     if(!t && !f) return;
-    if (cu && !cu.startsWith('http')) cu = 'https://' + cu;
+
+    // Умная очистка ссылки перед сохранением
+    if (cu) {
+        cu = cu.replace('@', '').trim();
+        if (!cu.startsWith('http')) {
+            cu = 'https://t.me/' + cu.replace('t.me/', '');
+        }
+    }
 
     const btn = document.getElementById('sendBtn');
     btn.innerText = "⏳"; btn.disabled = true;
