@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ECHO PREVIEW EDITION</title>
+<title>ECHO SOURCE FIXED</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -16,91 +16,77 @@ body {
     background: var(--bg); color: var(--text); overflow: hidden; height: 100vh;
 }
 
-/* --- МАГИЯ АНИМАЦИИ --- */
 @keyframes flyIn {
     0% { opacity: 0; transform: translateY(40px) scale(0.95); filter: blur(15px); }
     100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
 }
 
-#app { 
-    height: 100vh; overflow-y: scroll; -webkit-overflow-scrolling: touch;
-    padding: 0 16px 260px; transition: 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
+#app { height: 100vh; overflow-y: scroll; padding: 0 16px 260px; transition: 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
 body.modal-open #app { transform: scale(0.9) translateY(40px); filter: blur(20px) brightness(0.4); }
 
-.post-wrap { 
-    margin-bottom: 45px; 
-    animation: flyIn 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
-}
+.post-wrap { margin-bottom: 45px; animation: flyIn 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
 
-/* --- КАРТОЧКА --- */
 .card { 
     background: var(--glass); backdrop-filter: blur(35px); -webkit-backdrop-filter: blur(35px);
     border-radius: 32px; padding: 24px; border: 1px solid rgba(255,255,255,0.12);
 }
 
-/* --- ПРЕДПРОСМОТР ФОТО В МОДАЛКЕ --- */
+/* --- ИСТОЧНИК --- */
+.source-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 15px; padding: 8px 14px; border-radius: 14px;
+    background: rgba(10, 132, 255, 0.15); color: var(--accent);
+    font-size: 12px; font-weight: 800; border: 1px solid rgba(10, 132, 255, 0.2);
+}
+
+/* --- ПРЕДПРОСМОТР --- */
 #imgPreviewContainer {
     display: none; position: relative; width: 100%; height: 180px; 
     margin-bottom: 20px; border-radius: 20px; overflow: hidden;
-    animation: zoomIn 0.3s ease;
 }
-@keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
 #imgPreview { width: 100%; height: 100%; object-fit: cover; }
 .del-preview {
     position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7);
     color: #fff; width: 30px; height: 30px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center; font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
 }
 
-/* --- СТИЛИ ИНТЕРФЕЙСА --- */
-.avatar { width: 50px; height: 50px; border-radius: 50%; background: #1a1a1a; display: flex; align-items: center; justify-content: center; font-weight: 900; border: 1px solid rgba(255,255,255,0.1); }
-.premium-avatar { border: 2px solid var(--gold) !important; box-shadow: 0 0 20px rgba(255, 215, 0, 0.4); }
-.source-tag { display: inline-flex; margin-top: 15px; padding: 6px 12px; border-radius: 12px; background: rgba(10, 132, 255, 0.1); color: var(--accent); font-size: 11px; font-weight: 800; text-transform: uppercase; }
+/* --- ОТВЕТЫ --- */
 .reply-chain { margin-left: 20px; border-left: 2px solid rgba(255,255,255,0.1); padding-left: 15px; margin-top: 15px; }
-.reply-item { background: rgba(255,255,255,0.04); padding: 16px; border-radius: 22px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.05); }
-.quote { font-size: 12px; opacity: 0.4; border-left: 2px solid var(--accent); padding-left: 8px; margin-bottom: 8px; }
+.reply-item { background: rgba(255,255,255,0.04); padding: 16px; border-radius: 22px; margin-bottom: 10px; }
+.quote-box { font-size: 11px; opacity: 0.4; border-left: 2px solid var(--accent); padding-left: 8px; margin-bottom: 8px; }
 
-.b-container { display: flex; flex-direction: column; gap: 4px; margin-top: -15px; }
-.b-item { margin: 0 24px; padding: 15px; background: rgba(15, 15, 17, 0.98); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; }
-.b-item:last-child { border-radius: 0 0 28px 28px; }
-
+/* --- UI --- */
 .tabs { position: fixed; bottom: 30px; left: 20px; right: 20px; height: 74px; background: rgba(10,10,10,0.8); backdrop-filter: blur(25px); border-radius: 37px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
-.add-btn { position: fixed; bottom: 120px; right: 25px; width: 70px; height: 70px; background: #fff; border-radius: 50%; border: none; font-size: 40px; z-index: 1100; box-shadow: 0 15px 40px rgba(0,0,0,0.6); }
+.add-btn { position: fixed; bottom: 120px; right: 25px; width: 70px; height: 70px; background: #fff; border-radius: 50%; border: none; font-size: 40px; z-index: 1100; }
 
 .modal { display: none; position: fixed; inset: 0; z-index: 5000; align-items: flex-end; }
 .modal-content { background: #0d0d0f; width: 100%; border-radius: 45px 45px 0 0; padding: 35px; transform: translateY(100%); transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
 .modal.open .modal-content { transform: translateY(0); }
-.input-field { width: 100%; background: #1a1a1c; border: none; border-radius: 16px; padding: 18px; color: #fff; margin-bottom: 12px; outline: none; }
+.input-f { width: 100%; background: #1a1a1c; border: none; border-radius: 16px; padding: 18px; color: #fff; margin-bottom: 12px; outline: none; }
 </style>
 </head>
 <body id="body">
 
 <div id="app">
-    <div class="header" style="padding: 60px 0 20px; font-size: 40px; font-weight: 900; letter-spacing: -1.5px;">ECHO</div>
+    <div class="header" style="padding: 60px 0 20px; font-size: 40px; font-weight: 900;">ECHO</div>
     <div id="feed"></div>
 </div>
 
 <div class="tabs">
-    <div class="tab" style="font-size: 28px;" onclick="switchTab('all')">🏠</div>
-    <div class="tab" style="font-size: 28px;" onclick="switchTab('my')">👤</div>
+    <div class="tab" onclick="switchTab('all')">🏠</div>
+    <div class="tab" onclick="switchTab('my')">👤</div>
 </div>
 <button class="add-btn" onclick="openModal()">+</button>
 
 <div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
     <div class="modal-content">
-        <div id="imgPreviewContainer">
-            <img id="imgPreview" src="">
-            <div class="del-preview" onclick="clearPhoto()">✕</div>
-        </div>
-
-        <textarea id="txt" placeholder="Напиши что-нибудь..." style="width:100%; background:transparent; border:none; color:#fff; font-size:20px; min-height:140px; outline:none; resize:none;"></textarea>
-        <input id="chanUrl" class="input-field" placeholder="Ссылка (ТГ или Сайт)">
-        <input id="srcName" class="input-field" placeholder="Источник">
+        <div id="imgPreviewContainer"><img id="imgPreview" src=""><div class="del-preview" onclick="clearPhoto()">✕</div></div>
+        <textarea id="txt" placeholder="Что происходит?" style="width:100%; background:transparent; border:none; color:#fff; font-size:20px; min-height:120px; outline:none; resize:none;"></textarea>
+        <input id="chanUrl" class="input-f" placeholder="Ссылка (URL)">
+        <input id="srcName" class="input-f" placeholder="Источник (Название)">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
-             <button onclick="document.getElementById('fInp').click()" style="background:#1a1a1c; color:#fff; border:none; padding:18px 35px; border-radius:22px; font-weight:700;">ФОТО</button>
+             <button onclick="document.getElementById('fInp').click()" style="background:#1a1a1c; color:#fff; border:none; padding:18px 35px; border-radius:22px;">ФОТО</button>
              <input type="file" id="fInp" hidden accept="image/*" onchange="previewFile()">
              <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:18px 60px; border-radius:24px; font-weight:900;">POST</button>
         </div>
@@ -113,20 +99,15 @@ const db = supabase.createClient('https://xddulhzvzemmrhrsjfhb.supabase.co', 'sb
 
 const myId = tg.initDataUnsafe?.user?.id?.toString() || 'guest';
 const myName = tg.initDataUnsafe?.user?.username || 'Guest';
-const ADMINS = [myId, '5223391218'];
 
-// --- ПРЕДПРОСМОТР ФОТО ---
 function previewFile() {
     const file = document.getElementById('fInp').files[0];
-    const preview = document.getElementById('imgPreview');
-    const container = document.getElementById('imgPreviewContainer');
-    
     if (file) {
         const reader = new FileReader();
         reader.onloadend = () => {
-            preview.src = reader.result;
-            container.style.display = 'block';
-        }
+            document.getElementById('imgPreview').src = reader.result;
+            document.getElementById('imgPreviewContainer').style.display = 'block';
+        };
         reader.readAsDataURL(file);
     }
 }
@@ -134,14 +115,6 @@ function previewFile() {
 function clearPhoto() {
     document.getElementById('fInp').value = "";
     document.getElementById('imgPreviewContainer').style.display = 'none';
-}
-
-function getBubble(url) {
-    const isT = url.includes('t.me');
-    return `<div class="b-item" onclick="event.stopPropagation(); ${isT?'tg.openTelegramLink':'tg.openLink'}('${url}')">
-        <div style="font-size:20px;">${isT ? '🔹' : '🌐'}</div>
-        <div style="font-size:14px; font-weight:800;">${isT ? 'Telegram' : 'Website'}</div>
-    </div>`;
 }
 
 let curTab = 'all';
@@ -159,45 +132,38 @@ function render(data) {
     const display = curTab === 'my' ? mains.filter(p => p.user_id === myId) : mains;
 
     display.forEach((p, idx) => {
-        const isPrem = ADMINS.includes(p.user_id);
         const wrap = document.createElement('div');
         wrap.className = 'post-wrap';
         wrap.style.animationDelay = `${idx * 0.08}s`;
 
-        let cleanContent = p.content;
-        let srcTag = '';
-        if(cleanContent.includes('>>SRC:')) {
-            const parts = cleanContent.split('>>SRC:');
-            cleanContent = parts[0];
-            srcTag = `<div class="source-tag">🔗 ${parts[1].trim()}</div>`;
-        }
-
-        let links = new Set();
-        if (p.track_url) links.add(p.track_url);
-        const found = p.content.match(/(https?:\/\/[^\s]+|t\.me\/[^\s]+)/g);
-        if (found) found.forEach(l => links.add(l));
-        let bHtml = Array.from(links).length ? `<div class="b-container">${Array.from(links).slice(0,2).map(l => getBubble(l)).join('')}</div>` : '';
-
         const replies = data.filter(r => r.parent_id === p.id);
         let repsHtml = replies.length ? `<div class="reply-chain">${replies.map(r => `
             <div class="reply-item">
-                <div class="quote">@${p.username}: ${cleanContent.substring(0,30)}...</div>
+                <div class="quote-box">@${p.username}: ${p.content.substring(0,30)}...</div>
                 <b style="color:var(--accent); font-size:13px;">@${r.username}</b>
                 <div style="margin-top:4px; font-size:15px;">${r.content}</div>
             </div>`).join('')}</div>` : '';
 
+        // Чистое отображение источника из колонки track_url (используем как доп. поле) или из текста
+        let cleanText = p.content;
+        let sourceView = "";
+        if (cleanText.includes(">>SRC:")) {
+            const parts = cleanText.split(">>SRC:");
+            cleanText = parts[0];
+            sourceView = `<div class="source-badge">🔗 ${parts[1].trim()}</div>`;
+        }
+
         wrap.innerHTML = `
             <div class="card" onclick="openModal('${p.id}')">
                 <div style="display:flex; align-items:center; margin-bottom:18px;">
-                    <div class="avatar ${isPrem ? 'premium-avatar' : ''}">${p.username[0].toUpperCase()}</div>
+                    <div style="width:40px; height:40px; border-radius:50%; background:#333; display:flex; align-items:center; justify-content:center; margin-right:12px; font-weight:bold;">${p.username[0].toUpperCase()}</div>
                     <b style="color:var(--accent); font-size:16px;">@${p.username}</b>
-                    ${p.user_id === myId ? `<span onclick="event.stopPropagation(); del('${p.id}')" style="margin-left:auto; opacity:0.2;">✕</span>` : ''}
+                    ${p.user_id === myId ? `<span onclick="event.stopPropagation(); del('${p.id}')" style="margin-left:auto; opacity:0.3;">✕</span>` : ''}
                 </div>
-                <div style="font-size:18px; line-height:1.5; white-space:pre-wrap;">${cleanContent}</div>
+                <div style="font-size:18px; line-height:1.5; white-space:pre-wrap;">${cleanText}</div>
                 ${p.image_url ? `<img src="${p.image_url}" style="width:calc(100% + 48px); margin-left:-24px; margin-top:20px; display:block;">` : ''}
-                ${srcTag}
+                ${sourceView}
             </div>
-            ${bHtml}
             ${repsHtml}`;
         feed.appendChild(wrap);
     });
@@ -215,20 +181,21 @@ function closeModal() {
     document.getElementById('body').classList.remove('modal-open');
     const m = document.getElementById('modal');
     m.classList.remove('open');
-    setTimeout(() => { 
-        m.style.display = 'none'; 
-        replyId = null; 
-        clearPhoto(); 
-    }, 400);
+    setTimeout(() => { m.style.display = 'none'; replyId = null; clearPhoto(); }, 400);
 }
 
 async function send() {
     const btn = document.getElementById('sendBtn');
-    btn.disabled = true; btn.innerText = '...';
-    let t = document.getElementById('txt').value, f = document.getElementById('fInp').files[0];
-    const url = document.getElementById('chanUrl').value, src = document.getElementById('srcName').value;
+    btn.disabled = true; btn.innerText = 'SENDING...';
     
+    let t = document.getElementById('txt').value;
+    const f = document.getElementById('fInp').files[0];
+    const src = document.getElementById('srcName').value;
+    const url = document.getElementById('chanUrl').value;
+
     if(!t && !f) { btn.disabled = false; return; }
+    
+    // Безопасное хранение источника внутри текста, чтобы не ломать структуру БД
     if(src) t += ` >>SRC: ${src}`;
 
     let iu = null;
@@ -243,7 +210,9 @@ async function send() {
     } catch(e) { alert(e.message); }
     finally {
         btn.disabled = false; btn.innerText = 'POST';
-        document.getElementById('txt').value = ''; document.getElementById('srcName').value = '';
+        document.getElementById('txt').value = ''; 
+        document.getElementById('srcName').value = '';
+        document.getElementById('chanUrl').value = '';
     }
 }
 
