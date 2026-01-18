@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ECHO Ultimate Fix</title>
+<title>ECHO Multi-Link Smart</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -22,22 +22,24 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); color: var
 .header { position: sticky; top: 0; background: var(--bg); padding: 50px 0 20px; z-index: 100; font-size: 32px; font-weight: 900; }
 
 .post-wrap { margin-bottom: 35px; }
-.card { background: var(--glass); backdrop-filter: blur(20px); border-radius: 24px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); position: relative; z-index: 5; }
+.card { background: var(--glass); backdrop-filter: blur(20px); border-radius: 24px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); position: relative; z-index: 10; }
 .premium-card { animation: premiumGlow 3s infinite alternate; border: 1px solid var(--gold) !important; }
 
+/* ВНЕШНЕЕ ОКНО - АДАПТИРОВАНО ПОД 2 ИСТОЧНИКА */
 .ext-window {
-    margin: -12px 15px 0; background: #1c1c1e; border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 0 0 20px 20px; padding: 14px; display: flex; align-items: center; gap: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; z-index: 1; cursor: pointer;
+    margin: -10px 15px 0; background: #1c1c1e; border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 0 0 18px 18px; padding: 12px; display: flex; align-items: center; gap: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4); position: relative; z-index: 1; cursor: pointer;
 }
+.ext-window:nth-of-type(3) { margin-top: -5px; border-radius: 0 0 18px 18px; z-index: 0; filter: brightness(0.9); }
 
-.re-box { margin-left: 20px; border-left: 2px solid var(--accent); padding-left: 15px; margin-top: 10px; }
+.re-box { margin-left: 20px; border-left: 2px solid var(--accent); padding-left: 15px; margin-top: 15px; }
 .re-item { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 16px; margin-bottom: 8px; font-size: 14px; position: relative; }
 
 .tabs { position: fixed; bottom: 25px; left: 20px; right: 20px; height: 70px; background: rgba(20,20,22,0.95); backdrop-filter: blur(25px); border-radius: 35px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; border: 1px solid rgba(255,255,255,0.1); }
 .tab { color: #555; font-size: 26px; }
 .tab.active { color: #fff; }
-.add-btn { position: fixed; bottom: 110px; right: 25px; width: 64px; height: 64px; background: #fff; border-radius: 50%; border: none; font-size: 34px; z-index: 1100; display: flex; align-items: center; justify-content: center; }
+.add-btn { position: fixed; bottom: 110px; right: 25px; width: 64px; height: 64px; background: #fff; border-radius: 50%; border: none; font-size: 34px; z-index: 1100; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 30px rgba(0,0,0,0.5); }
 
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 5000; align-items: flex-end; }
 .modal-content { background: #1c1c1e; width: 100%; border-radius: 30px 30px 0 0; padding: 25px 25px 50px; }
@@ -61,8 +63,8 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); color: var
 <div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
     <div class="modal-content">
         <div id="reply-label" style="color:var(--accent); font-size:12px; margin-bottom:10px; display:none; font-weight:800;">ОТВЕТ НА ПОСТ</div>
-        <textarea id="txt" placeholder="Что нового?" style="width:100%; background:transparent; border:none; color:#fff; font-size:18px; min-height:100px; outline:none; resize:none;"></textarea>
-        <input id="chanUrl" class="c-input" placeholder="Ссылка (YouTube, Сайт или TG)">
+        <textarea id="txt" placeholder="Текст со ссылками..." style="width:100%; background:transparent; border:none; color:#fff; font-size:18px; min-height:100px; outline:none; resize:none;"></textarea>
+        <input id="chanUrl" class="c-input" placeholder="Основной источник (поле)">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
              <button onclick="document.getElementById('fInp').click()" style="background:#2c2c2e; border:none; color:#fff; padding:12px 20px; border-radius:14px;">ФОТО</button>
              <input type="file" id="fInp" hidden accept="image/*">
@@ -78,20 +80,38 @@ const db = supabase.createClient('https://xddulhzvzemmrhrsjfhb.supabase.co', 'sb
 const user = tg.initDataUnsafe?.user;
 const myId = user?.id?.toString() || 'guest';
 const myName = user?.username || user?.first_name || 'Guest';
-const ADMINS = ['5223391218', myId]; // Добавь сюда свой ID для вечного према
+const ADMINS = [myId, '5223391218']; 
 
 let curTab = 'all';
 let replyToId = null;
 
-// ФУНКЦИЯ ОТКРЫТИЯ ССЫЛОК
 function openLink(url) {
     if (!url) return;
-    tg.HapticFeedback.impactOccurred('medium');
-    if (url.includes('t.me')) {
-        tg.openTelegramLink(url);
-    } else {
-        tg.openLink(url, { try_instant_view: true });
-    }
+    tg.HapticFeedback.selectionChanged();
+    if (url.includes('t.me')) tg.openTelegramLink(url);
+    else tg.openLink(url, { try_instant_view: true });
+}
+
+// Генератор окошка
+function getWindowHtml(url) {
+    if(!url) return '';
+    const isTG = url.includes('t.me');
+    const isYT = url.includes('youtu');
+    const icon = isTG ? '🔹' : (isYT ? '🔴' : '🌐');
+    let title = 'Источник';
+    try {
+        if(isTG) title = '@' + url.split('/').pop();
+        else title = new URL(url).hostname.replace('www.', '');
+    } catch(e) {}
+
+    return `
+        <div class="ext-window" onclick="openLink('${url}')">
+            <div style="width:32px; height:32px; background:#2c2c2e; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px;">${icon}</div>
+            <div style="flex:1; overflow:hidden;">
+                <div style="font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#fff;">${title}</div>
+                <div style="font-size:10px; color:rgba(255,255,255,0.4);">КЛИКНИ ДЛЯ ПЕРЕХОДА</div>
+            </div>
+        </div>`;
 }
 
 async function load() {
@@ -110,21 +130,21 @@ function render(data) {
         const div = document.createElement('div');
         div.className = 'post-wrap';
         
-        // Внешнее окно ссылки
-        let windowHtml = '';
-        if (p.track_url) {
-            const isTG = p.track_url.includes('t.me');
-            const icon = isTG ? '🔹' : (p.track_url.includes('youtu') ? '🔴' : '🌐');
-            const title = isTG ? '@' + p.track_url.split('/').pop() : p.track_url.split('/')[2];
-            windowHtml = `
-                <div class="ext-window" onclick="openLink('${p.track_url}')">
-                    <div style="width:36px; height:36px; background:#2c2c2e; border-radius:8px; display:flex; align-items:center; justify-content:center;">${icon}</div>
-                    <div style="flex:1; overflow:hidden;">
-                        <div style="font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${title}</div>
-                        <div style="font-size:10px; color:rgba(255,255,255,0.4);">НАЖМИ, ЧТОБЫ ПЕРЕЙТИ</div>
-                    </div>
-                </div>`;
+        // --- ЛОГИКА СБОРА ССЫЛОК (МАКС 2) ---
+        let links = [];
+        if (p.track_url) links.push(p.track_url);
+        
+        // Регулярка для поиска ссылок в тексте
+        const urlRegex = /(https?:\/\/[^\s]+|t\.me\/[^\s]+)/g;
+        const foundInText = p.content.match(urlRegex);
+        if (foundInText) {
+            foundInText.forEach(u => {
+                let cleanUrl = u.startsWith('t.me') ? 'https://' + u : u;
+                if (!links.includes(cleanUrl) && links.length < 2) links.push(cleanUrl);
+            });
         }
+
+        let windowsHtml = links.map(l => getWindowHtml(l)).join('');
 
         // Ответы
         let repliesHtml = '';
@@ -134,9 +154,9 @@ function render(data) {
             reps.forEach(r => {
                 repliesHtml += `
                     <div class="re-item">
-                        <div style="color:var(--accent); font-weight:700; font-size:12px; margin-bottom:4px;">@${r.username}</div>
-                        <div>${r.content}</div>
-                        ${r.user_id === myId ? `<span onclick="deletePost('${r.id}')" style="position:absolute; right:10px; top:10px; opacity:0.3;">✕</span>` : ''}
+                        <b style="color:var(--accent); font-size:12px;">@${r.username}</b>
+                        <div style="margin-top:2px;">${r.content}</div>
+                        ${r.user_id === myId ? `<span onclick="deletePost('${r.id}')" style="position:absolute; right:10px; top:12px; opacity:0.3;">✕</span>` : ''}
                     </div>`;
             });
             repliesHtml += '</div>';
@@ -150,11 +170,9 @@ function render(data) {
                 </div>
                 <div style="font-size:15px; line-height:1.5; white-space:pre-wrap;">${p.content}</div>
                 ${p.image_url ? `<img src="${p.image_url}" style="width:calc(100% + 40px); margin-left:-20px; margin-top:15px; display:block;">` : ''}
-                <div style="margin-top:15px; display:flex; gap:15px;">
-                    <span style="opacity:0.4; font-size:10px; font-weight:800;" onclick="openModal('${p.id}')">ОТВЕТИТЬ</span>
-                </div>
+                <div style="margin-top:15px; opacity:0.4; font-size:10px; font-weight:900;" onclick="openModal('${p.id}')">ОТВЕТИТЬ</div>
             </div>
-            ${windowHtml}
+            ${windowsHtml}
             ${repliesHtml}`;
         feed.appendChild(div);
     });
@@ -210,7 +228,6 @@ async function send() {
             await db.storage.from('images').upload(n, f);
             iu = db.storage.from('images').getPublicUrl(n).data.publicUrl;
         }
-        // ВАЖНО: записываем parent_id
         await db.from('posts').insert([{ 
             content: t, 
             username: myName, 
