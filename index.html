@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ECHO PREMIUM STABLE</title>
+<title>ECHO LIQUID EDITION</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -17,56 +17,72 @@
 body { 
     font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); 
     padding-bottom: 160px; overflow-x: hidden;
-    /* Умное масштабирование шрифта для 12 Mini */
     font-size: clamp(14px, 4.5vw, 17px);
 }
 
-/* --- АНИМАЦИИ --- */
-@keyframes premiumPulse {
-    0% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.15); border-color: rgba(255, 215, 0, 0.3); }
-    50% { box-shadow: 0 0 35px rgba(255, 215, 0, 0.35); border-color: rgba(255, 215, 0, 1); }
-    100% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.15); border-color: rgba(255, 215, 0, 0.3); }
+/* --- ЖИДКИЕ АНИМАЦИИ --- */
+@keyframes cardFloat {
+    from { transform: translateY(20px) scale(0.95); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
 }
 
-@keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+@keyframes premiumGlow {
+    0% { border-color: rgba(255, 215, 0, 0.3); box-shadow: 0 0 15px rgba(255, 215, 0, 0.1); }
+    50% { border-color: rgba(255, 215, 0, 1); box-shadow: 0 0 30px rgba(255, 215, 0, 0.2); }
+    100% { border-color: rgba(255, 215, 0, 0.3); box-shadow: 0 0 15px rgba(255, 215, 0, 0.1); }
+}
 
-#splash { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; font-weight: 900; letter-spacing: 2px; }
+#splash { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; font-weight: 900; }
 #app { display: none; opacity: 0; padding: 0 16px; transition: 0.5s; }
 
 .header { position: sticky; top: 0; background: var(--bg); padding: 50px 0 20px; z-index: 100; font-size: 32px; font-weight: 900; }
 
-.post-wrap { margin-bottom: 35px; animation: slideUp 0.5s ease forwards; }
+/* ЭФФЕКТ КОНТЕЙНЕРА */
+.post-wrap { 
+    margin-bottom: 30px; 
+    animation: cardFloat 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
 
-/* КАРТОЧКА */
 .card { 
-    background: var(--glass); backdrop-filter: blur(25px); border-radius: 26px; 
+    background: var(--glass); backdrop-filter: blur(25px); border-radius: 28px; 
     padding: 22px; border: 1px solid rgba(255,255,255,0.1); position: relative; z-index: 10;
-    transition: transform 0.2s;
+    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-.card:active { transform: scale(0.98); }
+.card:active { transform: scale(0.96) translateY(4px); }
 
-.premium-card { animation: premiumPulse 4s infinite ease-in-out; border-width: 1.5px !important; }
+.premium-card { animation: premiumGlow 4s infinite ease-in-out; border-width: 1.5px !important; }
 
-/* ОКНА ССЫЛОК */
+/* ОКНА ССЫЛОК - ПЛАВАЮЩИЕ */
 .ext-window {
-    margin: -12px 18px 0; background: #18181a; border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 0 0 20px 20px; padding: 14px; display: flex; align-items: center; gap: 12px;
-    position: relative; z-index: 1;
+    margin: -10px 18px 0; background: #161618; border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 0 0 22px 22px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.4); position: relative; z-index: 1;
 }
-
-/* ОТВЕТЫ */
-.re-box { margin-left: 15px; border-left: 2px solid var(--accent); padding-left: 15px; margin-top: 15px; }
-.re-item { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 18px; margin-bottom: 8px; font-size: 0.9em; }
 
 /* ИНТЕРФЕЙС */
-.tabs { position: fixed; bottom: 25px; left: 20px; right: 20px; height: 70px; background: rgba(15,15,15,0.9); backdrop-filter: blur(20px); border-radius: 35px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; border: 1px solid rgba(255,255,255,0.1); }
-.tab { color: #555; font-size: 26px; }
-.tab.active { color: #fff; transform: scale(1.1); }
-.add-btn { position: fixed; bottom: 110px; right: 25px; width: 64px; height: 64px; background: #fff; border-radius: 50%; border: none; font-size: 34px; z-index: 1100; box-shadow: 0 10px 40px rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; }
+.tabs { 
+    position: fixed; bottom: calc(env(safe-area-inset-bottom) + 20px); 
+    left: 20px; right: 20px; height: 70px; 
+    background: rgba(15,15,15,0.85); backdrop-filter: blur(20px); 
+    border-radius: 35px; display: flex; justify-content: space-around; 
+    align-items: center; z-index: 1000; border: 1px solid rgba(255,255,255,0.1); 
+}
+.tab { color: #555; font-size: 26px; transition: 0.3s; }
+.tab.active { color: #fff; transform: translateY(-3px) scale(1.1); }
 
-.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 5000; align-items: flex-end; }
-.modal-content { background: #161618; width: 100%; border-radius: 35px 35px 0 0; padding: 30px 30px 60px; }
-.c-input { width: 100%; background: #242426; border: 1px solid #333; border-radius: 16px; padding: 18px; color: #fff; margin-top: 12px; outline: none; font-size: 16px; }
+.add-btn { 
+    position: fixed; bottom: calc(env(safe-area-inset-bottom) + 105px); 
+    right: 25px; width: 64px; height: 64px; background: #fff; 
+    border-radius: 50%; border: none; font-size: 34px; z-index: 1100;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+}
+
+.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 5000; align-items: flex-end; }
+.modal-content { 
+    background: #141416; width: 100%; border-radius: 35px 35px 0 0; 
+    padding: 30px; transform: translateY(100%); transition: 0.5s cubic-bezier(0.2, 0.8, 0.2, 1.1);
+}
+.modal.active .modal-content { transform: translateY(0); }
 </style>
 </head>
 <body>
@@ -85,44 +101,35 @@ body {
 
 <div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
     <div class="modal-content">
-        <textarea id="txt" placeholder="Что нового?" style="width:100%; background:transparent; border:none; color:#fff; font-size:19px; min-height:100px; outline:none; resize:none;"></textarea>
-        <input id="chanUrl" class="c-input" placeholder="Ссылка (опционально)">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
-             <button onclick="document.getElementById('fInp').click()" style="background:#242426; border:none; color:#fff; padding:12px 20px; border-radius:15px;">ФОТО</button>
+        <textarea id="txt" placeholder="Что происходит?" style="width:100%; background:transparent; border:none; color:#fff; font-size:1.1rem; min-height:120px; outline:none; resize:none;"></textarea>
+        <input id="chanUrl" style="width:100%; background:#222; border:none; border-radius:15px; padding:15px; color:#fff; margin-top:10px;" placeholder="Ссылка">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:25px;">
+             <button onclick="document.getElementById('fInp').click()" style="background:#222; border:none; color:#fff; padding:15px 25px; border-radius:18px;">ФОТО</button>
              <input type="file" id="fInp" hidden accept="image/*">
-             <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:12px 30px; border-radius:15px; font-weight:800;">POST</button>
+             <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:15px 40px; border-radius:20px; font-weight:800;">POST</button>
         </div>
     </div>
 </div>
 
 <script>
 const tg = window.Telegram.WebApp;
-// ПОЛНАЯ ИНИЦИАЛИЗАЦИЯ
 const db = supabase.createClient('https://xddulhzvzemmrhrsjfhb.supabase.co', 'sb_publishable_2FIKYuEHEQrYseRnwY58Qg__UIFN59j');
 
 const myId = tg.initDataUnsafe?.user?.id?.toString() || 'guest';
-const myName = tg.initDataUnsafe?.user?.username || tg.initDataUnsafe?.user?.first_name || 'Guest';
+const myName = tg.initDataUnsafe?.user?.username || 'Guest';
 const ADMINS = [myId, '5223391218'];
 
 let curTab = 'all';
 let replyToId = null;
 
-function getWindow(url) {
-    if(!url) return '';
-    const isTG = url.includes('t.me');
-    const host = isTG ? '@' + url.split('/').pop() : url.split('/')[2];
-    return `<div class="ext-window" onclick="tg.openLink('${url}')">
-        <div style="font-size:18px;">${isTG?'🔹':'🌐'}</div>
-        <div style="font-weight:700; font-size:13px;">${host}</div>
-    </div>`;
-}
+const play = (s) => {
+    const a = new Audio(`https://www.soundjay.com/buttons/sounds/button-${s}.mp3`);
+    a.volume = 0.1; a.play().catch(()=>{});
+};
 
 async function load() {
-    try {
-        const { data, error } = await db.from('posts').select('*').order('created_at', { ascending: false });
-        if (error) throw error;
-        render(data);
-    } catch(e) { console.error(e); }
+    const { data } = await db.from('posts').select('*').order('created_at', { ascending: false });
+    if (data) render(data);
 }
 
 function render(data) {
@@ -131,20 +138,16 @@ function render(data) {
     const mains = data.filter(p => !p.parent_id);
     let display = curTab === 'my' ? mains.filter(p => p.user_id === myId) : mains;
 
-    display.forEach(p => {
-        const isPrem = ADMINS.includes(p.user_id);
+    display.forEach((p, idx) => {
         const div = document.createElement('div');
         div.className = 'post-wrap';
+        div.style.animationDelay = `${idx * 0.1}s`;
 
         const reps = data.filter(r => r.parent_id === p.id);
-        let repsHtml = reps.length ? `<div class="re-box">${reps.map(r => `
-            <div class="re-item">
-                <b style="color:var(--accent); font-size:11px;">@${r.username}</b>
-                <div>${r.content}</div>
-            </div>`).join('')}</div>` : '';
+        let repsHtml = reps.length ? `<div style="margin-left:20px; border-left:2px solid var(--accent); padding-left:15px; margin-top:15px;">${reps.map(r => `<div style="background:rgba(255,255,255,0.05); padding:12px; border-radius:15px; margin-bottom:8px; font-size:0.9em;"><b style="color:var(--accent)">@${r.username}</b><div>${r.content}</div></div>`).join('')}</div>` : '';
 
         div.innerHTML = `
-            <div class="card ${isPrem?'premium-card':''}" onclick="tg.HapticFeedback.impactOccurred('light')">
+            <div class="card ${ADMINS.includes(p.user_id)?'premium-card':''}" onclick="tg.HapticFeedback.impactOccurred('light')">
                 <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
                     <b style="color:var(--accent); font-size:14px;">@${p.username}</b>
                     ${p.user_id === myId ? `<span onclick="event.stopPropagation(); del('${p.id}')">🗑</span>` : ''}
@@ -153,43 +156,44 @@ function render(data) {
                 ${p.image_url ? `<img src="${p.image_url}" style="width:calc(100% + 44px); margin-left:-22px; margin-top:15px; display:block;">` : ''}
                 <div style="margin-top:15px; opacity:0.3; font-size:10px; font-weight:900;" onclick="event.stopPropagation(); openModal('${p.id}')">REPLY</div>
             </div>
-            ${p.track_url ? getWindow(p.track_url) : ''}
+            ${p.track_url ? `<div class="ext-window" onclick="tg.openLink('${p.track_url}')"><div style="font-size:18px;">🌐</div><div style="font-weight:700; font-size:13px;">Source</div></div>` : ''}
             ${repsHtml}`;
         feed.appendChild(div);
     });
 }
 
-async function del(id) { if(confirm("Удалить?")) { await db.from('posts').delete().eq('id', id); load(); } }
-function openModal(id = null) { replyToId = id; document.getElementById('modal').style.display = 'flex'; tg.HapticFeedback.impactOccurred('medium'); }
-function closeModal() { document.getElementById('modal').style.display = 'none'; }
-function switchTab(t) { curTab = t; load(); tg.HapticFeedback.selectionChanged(); }
+function openModal(id = null) { 
+    replyToId = id; 
+    const m = document.getElementById('modal');
+    m.style.display = 'flex'; 
+    setTimeout(() => m.classList.add('active'), 10);
+    tg.HapticFeedback.impactOccurred('medium');
+}
+
+function closeModal() { 
+    const m = document.getElementById('modal');
+    m.classList.remove('active');
+    setTimeout(() => m.style.display = 'none', 400);
+}
 
 async function send() {
     const t = document.getElementById('txt').value;
-    if(!t && !document.getElementById('fInp').files[0]) return;
+    if(!t) return;
     const btn = document.getElementById('sendBtn'); btn.disabled = true;
     try {
-        let iu = null; const f = document.getElementById('fInp').files[0];
-        if(f) {
-            const n = `img_${Date.now()}.jpg`;
-            await db.storage.from('images').upload(n, f);
-            iu = db.storage.from('images').getPublicUrl(n).data.publicUrl;
-        }
-        await db.from('posts').insert([{ 
-            content: t, username: myName, user_id: myId, 
-            track_url: document.getElementById('chanUrl').value, 
-            image_url: iu, parent_id: replyToId 
-        }]);
+        await db.from('posts').insert([{ content: t, username: myName, user_id: myId, track_url: document.getElementById('chanUrl').value, parent_id: replyToId }]);
         closeModal(); load();
-    } catch(e) { alert("Ошибка: " + e.message); }
+    } catch(e) { alert(e.message); }
     btn.disabled = false;
 }
+
+function switchTab(t) { curTab = t; load(); tg.HapticFeedback.selectionChanged(); }
 
 window.onload = () => {
     tg.expand();
     document.getElementById('app').style.display = "block";
     document.getElementById('app').style.opacity = "1";
-    setTimeout(() => { document.getElementById('splash').style.display = 'none'; load(); }, 800);
+    setTimeout(() => { document.getElementById('splash').style.display = 'none'; load(); }, 600);
 };
 </script>
 </body>
