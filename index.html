@@ -3,14 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ECHO SMART EDITION</title>
+<title>ECHO AUTO LINK</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root { --bg: #000; --text: #fff; --accent: #0a84ff; --gold: #ffd700; --glass: rgba(255, 255, 255, 0.08); }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
 body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; }
 
 @keyframes flyIn {
@@ -20,17 +19,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: v
 
 #app { height: 100vh; overflow-y: scroll; padding: 0 16px 260px; transition: 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
 body.modal-open #app { transform: scale(0.92) translateY(30px); filter: blur(15px) brightness(0.5); }
-
 .post-wrap { margin-bottom: 40px; animation: flyIn 0.6s ease-out backwards; position: relative; }
 
-/* --- КАРТОЧКА --- */
 .card { 
     background: var(--glass); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
     border-radius: 28px; padding: 20px; border: 1px solid rgba(255,255,255,0.1);
     position: relative; z-index: 5; overflow: hidden; 
 }
 
-/* --- АВАТАРКИ --- */
 .ava-box {
     width: 44px; height: 44px; border-radius: 50%; margin-right: 12px; overflow: hidden;
     background: #222; border: 1px solid rgba(255,255,255,0.1); flex-shrink: 0;
@@ -38,12 +34,10 @@ body.modal-open #app { transform: scale(0.92) translateY(30px); filter: blur(15p
 }
 .ava-img { width: 100%; height: 100%; object-fit: cover; }
 
-/* --- ПРЕМИУМ --- */
 .premium-glow { border: 1.5px solid var(--gold) !important; box-shadow: 0 0 25px rgba(255, 215, 0, 0.15) !important; }
 .premium-glow .nick { background: linear-gradient(90deg, #ffd700, #fff, #ffd700); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shine 3s linear infinite; }
 @keyframes shine { to { background-position: 200% center; } }
 
-/* --- RICH LINKS --- */
 .rich-link-box { margin-top: -12px; display: flex; flex-direction: column; gap: 4px; position: relative; z-index: 10; }
 .rich-link {
     margin: 0 15px; background: #111; border: 1px solid rgba(255,255,255,0.15);
@@ -52,14 +46,11 @@ body.modal-open #app { transform: scale(0.92) translateY(30px); filter: blur(15p
 }
 .link-icon { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
 
-/* --- ОТВЕТЫ --- */
 .re-box { margin-left: 20px; border-left: 2px solid var(--accent); padding-left: 12px; margin-top: 10px; position: relative; z-index: 4; }
 .re-item { background: rgba(255,255,255,0.03); padding: 12px; border-radius: 18px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.05); }
 
-/* --- UI --- */
 .tabs { position: fixed; bottom: 30px; left: 20px; right: 20px; height: 70px; background: rgba(10,10,10,0.9); backdrop-filter: blur(20px); border-radius: 35px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; border: 1px solid rgba(255,255,255,0.1); }
 .add-btn { position: fixed; bottom: 115px; right: 25px; width: 65px; height: 65px; background: #fff; border-radius: 50%; border: none; font-size: 35px; z-index: 1100; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-
 .modal { display: none; position: fixed; inset: 0; z-index: 5000; align-items: flex-end; }
 .modal-content { background: #0a0a0a; width: 100%; border-radius: 35px 35px 0 0; padding: 30px; transform: translateY(100%); transition: 0.4s; }
 .modal.open .modal-content { transform: translateY(0); }
@@ -81,7 +72,7 @@ body.modal-open #app { transform: scale(0.92) translateY(30px); filter: blur(15p
 <div id="modal" class="modal" onclick="if(event.target==this) closeM()">
     <div class="modal-content">
         <textarea id="txt" placeholder="Твои мысли..." style="width:100%; background:transparent; border:none; color:#fff; font-size:18px; min-height:100px; outline:none; resize:none;"></textarea>
-        <input id="linkInp" style="width:100%; background:#151515; border:none; border-radius:12px; padding:16px; color:#fff; margin-bottom:10px;" placeholder="Ссылка (t.me/канал)">
+        <input id="linkInp" style="width:100%; background:#151515; border:none; border-radius:12px; padding:16px; color:#fff; margin-bottom:10px;" placeholder="Доп. ссылка (необязательно)">
         <input id="srcInp" style="width:100%; background:#151515; border:none; border-radius:12px; padding:16px; color:#fff; margin-bottom:10px;" placeholder="Источник">
         <div style="display:flex; justify-content:space-between; align-items:center;">
              <button onclick="document.getElementById('fInp').click()" style="background:#151515; color:#fff; border:none; padding:15px 25px; border-radius:15px;">ФОТО</button>
@@ -105,16 +96,16 @@ function getAva(url, name) {
     return `<div class="ava-box"><div style="font-weight:900; color:#555;">${name[0].toUpperCase()}</div></div>`;
 }
 
+// УЛУЧШЕННАЯ ФУНКЦИЯ ГЕНЕРАЦИИ ССЫЛОК
 function getRichLink(url) {
     let title = "Resource";
     let icon = "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Telegram_logo.svg/1024px-Telegram_logo.svg.png";
     
-    // Авто-определение названия канала
     const cleanUrl = url.replace(/^https?:\/\//, '');
     if (url.includes('t.me')) {
-        const parts = cleanUrl.split('t.me/')[1];
+        const parts = url.split('t.me/')[1];
         if(parts) {
-            const name = parts.split('/')[0].replace('@','');
+            const name = parts.split('/')[0].replace('@','').split('?')[0];
             title = '@' + name;
             icon = `https://t.me/i/userpic/320/${name}.jpg`;
         }
@@ -145,12 +136,25 @@ function render(data) {
         wrap.className = 'post-wrap';
         wrap.style.animationDelay = `${idx * 0.05}s`;
 
-        let txt = p.content, sHtml = "";
+        let originalContent = p.content;
+        let txt = originalContent, sHtml = "";
+        
+        // Извлекаем Источник
         if(txt.includes("||SRC||")) { 
             const pts = txt.split("||SRC||"); 
             txt = pts[0].trim(); 
             sHtml = `<div style="background:rgba(10,132,255,0.1); border:1px solid rgba(10,132,255,0.2); padding:5px 10px; border-radius:8px; display:inline-flex; font-size:11px; color:var(--accent); font-weight:800; margin-bottom:10px;">🔗 ${pts[1].trim()}</div>`; 
         }
+
+        // АВТО-ПОИСК ССЫЛОК В ТЕКСТЕ
+        let foundLinks = new Set();
+        if(p.track_url) foundLinks.add(p.track_url);
+        const urlRegex = /(https?:\/\/[^\s]+|t\.me\/[^\s]+)/g;
+        const matches = txt.match(urlRegex);
+        if(matches) matches.forEach(link => foundLinks.add(link));
+
+        let linkHtml = "";
+        foundLinks.forEach(link => { linkHtml += getRichLink(link); });
 
         const reps = data.filter(r => r.parent_id === p.id);
         let rHtml = reps.length ? `<div class="re-box">${reps.map(r => `
@@ -164,12 +168,13 @@ function render(data) {
             <div style="display:flex; align-items:center; margin-bottom:12px;">${getAva(p.avatar_url, p.username)}<b class="nick" style="color:var(--accent);">@${p.username}</b>${p.user_id===myId?'<span onclick="event.stopPropagation(); del(\''+p.id+'\')" style="margin-left:auto; opacity:0.2;">✕</span>':''}</div>
             ${sHtml}<div style="font-size:17px; line-height:1.5; white-space:pre-wrap;">${txt}</div>
             ${p.image_url ? `<img src="${p.image_url}" style="width:calc(100% + 40px); margin-left:-20px; margin-top:15px; display:block;">` : ''}
-        </div>${p.track_url ? getRichLink(p.track_url) : ''}${rHtml}`;
+        </div><div class="rich-link-box">${linkHtml}</div>${rHtml}`;
         feed.appendChild(wrap);
     });
 }
 
 let replyId = null;
+let curTab = 'all';
 function openM(id=null) { replyId=id; document.getElementById('body').classList.add('modal-open'); const m=document.getElementById('modal'); m.style.display='flex'; setTimeout(()=>m.classList.add('open'),10); }
 function closeM() { document.getElementById('body').classList.remove('modal-open'); document.getElementById('modal').classList.remove('open'); setTimeout(()=>{document.getElementById('modal').style.display='none'; replyId=null;},400); }
 
