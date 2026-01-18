@@ -3,108 +3,110 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ECHO WATER EDITION</title>
+<title>ECHO LIQUID REFINED</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-:root { --bg: #000; --text: #fff; --accent: #0a84ff; --glass: rgba(255, 255, 255, 0.07); }
+:root { --bg: #000; --text: #fff; --accent: #0a84ff; --glass: rgba(255, 255, 255, 0.08); }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
 body { 
     font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); 
-    padding-bottom: 160px; overflow-x: hidden;
-    font-size: clamp(15px, 4.8vw, 17px);
+    padding-bottom: env(safe-area-inset-bottom); overflow: hidden;
 }
 
-/* --- ЭФФЕКТ ПЛАВАНИЯ (WATER DRIFT) --- */
-@keyframes waterDrift {
-    0% { transform: translate(0, 0) rotate(0deg); }
-    33% { transform: translate(3px, -5px) rotate(0.5deg); }
-    66% { transform: translate(-3px, 5px) rotate(-0.5deg); }
-    100% { transform: translate(0, 0) rotate(0deg); }
+/* КОНТЕЙНЕР ДЛЯ СКРОЛЛА */
+#app { 
+    height: 100vh; overflow-y: scroll; -webkit-overflow-scrolling: touch;
+    padding: 0 16px 180px; transition: 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-/* ГЛАВНЫЙ КОНТЕЙНЕР ПРИ МОДАЛКЕ */
-#app { transition: 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
-body.modal-open #app { transform: scale(0.9) translateY(30px); filter: blur(10px) brightness(0.4); }
+body.modal-open #app { transform: scale(0.92); filter: blur(10px) brightness(0.6); pointer-events: none; }
 
-/* ПОСТ-ОБЕРТКА */
+/* ЭФФЕКТ ПЛАВАНИЯ (Оптимизирован для GPU) */
+@keyframes waterFloat {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-6px) rotate(0.4deg); }
+}
+
 .post-wrap { 
-    margin-bottom: 35px; 
-    will-change: transform;
-    animation: waterDrift 6s ease-in-out infinite; /* Эффект дрейфа */
+    margin-bottom: 30px; position: relative;
+    animation: waterFloat 5s ease-in-out infinite;
 }
 
-/* КАРТОЧКА */
 .card { 
-    background: var(--glass); backdrop-filter: blur(30px); border-radius: 30px; 
-    padding: 24px; border: 1px solid rgba(255,255,255,0.1);
-    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    background: var(--glass); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+    border-radius: 28px; padding: 22px; border: 1px solid rgba(255,255,255,0.1);
+    position: relative; z-index: 10; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* ПРИ НАЖАТИИ - "УХОДИТ ПОД ВОДУ" */
-.card:active { transform: scale(0.94) translateY(10px); background: rgba(255,255,255,0.15); }
+.card:active { transform: scale(0.95); background: rgba(255,255,255,0.15); }
 
-/* ПЛАВАЮЩИЕ ОКНА ССЫЛОК */
+/* ПРЕМИУМ */
+.premium-card { border-color: rgba(255,215,0,0.4) !important; box-shadow: 0 0 20px rgba(255,215,0,0.1); }
+
+/* ССЫЛКИ И ОТВЕТЫ (ПРИКЛЕЕНЫ К ПОСТУ) */
 .ext-window {
-    margin: -15px 22px 0; background: #121214; border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 0 0 25px 25px; padding: 15px 20px; 
-    display: flex; align-items: center; gap: 12px;
-    position: relative; z-index: 1;
-    animation: waterDrift 8s ease-in-out infinite reverse; /* Дрейфует в другую сторону */
+    margin: -12px 18px 0; background: #161618; border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 0 0 22px 22px; padding: 12px 16px; display: flex; align-items: center; gap: 10px;
+    font-size: 13px; font-weight: 700; position: relative; z-index: 5;
 }
 
-/* ПРЕМИУМ-СВЕЧЕНИЕ (МЯГКОЕ) */
-.premium-card { 
-    border-color: rgba(255, 215, 0, 0.4) !important;
-    background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,215,0,0.04));
-    box-shadow: 0 0 30px rgba(255, 215, 0, 0.1);
+/* ИНТЕРФЕЙС - ФИКСИРОВАННЫЙ СЛОЙ */
+.ui-layer { position: fixed; inset: 0; pointer-events: none; z-index: 1000; }
+.ui-layer * { pointer-events: auto; }
+
+.tabs { 
+    position: absolute; bottom: calc(env(safe-area-inset-bottom) + 20px); 
+    left: 20px; right: 20px; height: 70px; background: rgba(15,15,15,0.85); 
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border-radius: 35px; display: flex; justify-content: space-around; 
+    align-items: center; border: 1px solid rgba(255,255,255,0.1); 
+}
+.tab { color: #555; font-size: 24px; transition: 0.3s; }
+.tab.active { color: #fff; transform: scale(1.2) translateY(-3px); }
+
+.add-btn { 
+    position: absolute; bottom: calc(env(safe-area-inset-bottom) + 105px); 
+    right: 25px; width: 64px; height: 64px; background: #fff; 
+    border-radius: 50%; border: none; font-size: 32px; font-weight: bold;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.5);
 }
 
-/* МОДАЛКА (ВСПЛЫТИЕ) */
+/* МОДАЛКА */
 .modal { display: none; position: fixed; inset: 0; z-index: 10000; align-items: flex-end; }
 .modal-content { 
-    background: #0d0d0f; width: 100%; border-radius: 40px 40px 0 0; 
-    padding: 35px; border-top: 1px solid rgba(255,255,255,0.1);
-    transform: translateY(100%); transition: 0.6s cubic-bezier(0.2, 1, 0.3, 1.1);
+    background: #111; width: 100%; border-radius: 40px 40px 0 0; 
+    padding: 30px; transform: translateY(100%); transition: 0.5s cubic-bezier(0.2, 1, 0.3, 1);
 }
 .modal.active .modal-content { transform: translateY(0); }
 
-/* ТАБЫ */
-.tabs { 
-    position: fixed; bottom: calc(env(safe-area-inset-bottom) + 20px); 
-    left: 20px; right: 20px; height: 72px; 
-    background: rgba(15,15,15,0.8); backdrop-filter: blur(25px); 
-    border-radius: 36px; display: flex; justify-content: space-around; 
-    align-items: center; z-index: 1000; border: 1px solid rgba(255,255,255,0.1); 
-}
-.tab.active { color: #fff; transform: scale(1.2) translateY(-4px); }
-
-.header { padding: 60px 20px 20px; font-size: 34px; font-weight: 900; }
+.header { padding: 50px 0 20px; font-size: 32px; font-weight: 900; letter-spacing: -1.5px; }
 </style>
 </head>
 <body id="body">
 
 <div id="app">
     <div class="header">ECHO</div>
-    <div id="feed" style="padding: 0 16px;"></div>
-    
+    <div id="feed"></div>
+</div>
+
+<div class="ui-layer">
     <div class="tabs">
         <div class="tab active" onclick="switchTab('all', this)">🏠</div>
         <div class="tab" onclick="switchTab('my', this)">👤</div>
     </div>
-    <button onclick="openModal()" style="position:fixed; bottom:110px; right:25px; width:68px; height:68px; background:#fff; border-radius:50%; border:none; font-size:36px; z-index:1100; box-shadow:0 15px 45px rgba(0,0,0,0.5);">+</button>
+    <button class="add-btn" onclick="openModal()">+</button>
 </div>
 
 <div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
     <div class="modal-content">
-        <textarea id="txt" placeholder="Speak to the water..." style="width:100%; background:transparent; border:none; color:#fff; font-size:1.2rem; min-height:140px; outline:none; resize:none;"></textarea>
-        <div style="display:flex; justify-content:space-between; margin-top:30px;">
-             <button onclick="document.getElementById('fInp').click()" style="background:#1a1a1c; color:#fff; border:none; padding:18px 30px; border-radius:20px; font-weight:700;">PHOTO</button>
+        <textarea id="txt" placeholder="Speak your mind..." style="width:100%; background:transparent; border:none; color:#fff; font-size:1.2rem; min-height:140px; outline:none; resize:none;"></textarea>
+        <div style="display:flex; justify-content:space-between; margin-top:20px;">
+             <button onclick="document.getElementById('fInp').click()" style="background:#222; color:#fff; border:none; padding:15px 25px; border-radius:18px;">PHOTO</button>
              <input type="file" id="fInp" hidden>
-             <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:18px 50px; border-radius:22px; font-weight:900;">POST</button>
+             <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:15px 45px; border-radius:20px; font-weight:900;">POST</button>
         </div>
     </div>
 </div>
@@ -116,6 +118,9 @@ const db = supabase.createClient('https://xddulhzvzemmrhrsjfhb.supabase.co', 'sb
 const myId = tg.initDataUnsafe?.user?.id?.toString() || 'guest';
 const myName = tg.initDataUnsafe?.user?.username || 'Guest';
 
+let curTab = 'all';
+let replyId = null;
+
 async function load() {
     const { data } = await db.from('posts').select('*').order('created_at', { ascending: false });
     if (data) render(data);
@@ -124,30 +129,35 @@ async function load() {
 function render(data) {
     const feed = document.getElementById('feed');
     feed.innerHTML = '';
-    
-    data.filter(p => !p.parent_id).forEach((p, idx) => {
+    const mains = data.filter(p => !p.parent_id);
+    let display = curTab === 'my' ? mains.filter(p => p.user_id === myId) : mains;
+
+    display.forEach((p, idx) => {
         const div = document.createElement('div');
         div.className = 'post-wrap';
-        // Каждому посту - своя задержка дрейфа
-        div.style.animationDelay = `${idx * -1.5}s`; 
+        div.style.animationDelay = `${idx * -0.8}s`;
 
         div.innerHTML = `
-            <div class="card ${p.user_id === myId ? 'premium-card' : ''}" onclick="tg.HapticFeedback.impactOccurred('medium')">
-                <b style="color:var(--accent); font-size:13px;">@${p.username}</b>
-                <div style="margin-top:12px; line-height:1.5;">${p.content}</div>
-                <div style="margin-top:20px; opacity:0.3; font-size:10px; font-weight:900;">REPLY</div>
+            <div class="card ${p.user_id === myId ? 'premium-card' : ''}" onclick="openModal('${p.id}')">
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <b style="color:var(--accent); font-size:13px;">@${p.username}</b>
+                    ${p.user_id === myId ? `<span onclick="event.stopPropagation(); del('${p.id}')">✕</span>` : ''}
+                </div>
+                <div style="line-height:1.5;">${p.content}</div>
+                <div style="margin-top:15px; opacity:0.3; font-size:10px; font-weight:900;">REPLY</div>
             </div>
-            ${p.track_url ? `<div class="ext-window" onclick="tg.openLink('${p.track_url}')">🌐 <span style="font-weight:700; font-size:13px; margin-left:8px;">Source Link</span></div>` : ''}`;
+            ${p.track_url ? `<div class="ext-window" onclick="tg.openLink('${p.track_url}')">🌐 Link</div>` : ''}`;
         feed.appendChild(div);
     });
 }
 
-function openModal() {
+function openModal(id = null) {
+    replyId = id;
     document.getElementById('body').classList.add('modal-open');
     const m = document.getElementById('modal');
     m.style.display = 'flex';
     setTimeout(() => m.classList.add('active'), 10);
-    tg.HapticFeedback.notificationOccurred('success');
+    tg.HapticFeedback.impactOccurred('medium');
 }
 
 function closeModal() {
@@ -157,16 +167,33 @@ function closeModal() {
     setTimeout(() => m.style.display = 'none', 500);
 }
 
+async function send() {
+    const t = document.getElementById('txt').value;
+    if(!t) return;
+    try {
+        await db.from('posts').insert([{ content: t, username: myName, user_id: myId, parent_id: replyId }]);
+        closeModal(); load();
+        tg.HapticFeedback.notificationOccurred('success');
+    } catch(e) { alert(e.message); }
+}
+
 function switchTab(t, el) {
-    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+    curTab = t;
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
     el.classList.add('active');
-    tg.HapticFeedback.selectionChanged();
     load();
+    tg.HapticFeedback.selectionChanged();
+}
+
+async function del(id) {
+    if(confirm('Delete?')) {
+        await db.from('posts').delete().eq('id', id);
+        load();
+    }
 }
 
 window.onload = () => {
     tg.expand();
-    document.getElementById('app').style.opacity = "1";
     load();
 };
 </script>
