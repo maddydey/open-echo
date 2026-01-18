@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ECHO External Windows</title>
+<title>ECHO Link Master</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -12,7 +12,6 @@
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 160px; }
 
-/* АНИМАЦИЯ ПОЯВЛЕНИЯ */
 @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
 #splash { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; }
@@ -20,42 +19,35 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); color: var
 .header { position: sticky; top: 0; background: var(--bg); padding: 50px 0 20px; z-index: 100; font-size: 32px; font-weight: 900; }
 
 .post-wrap { margin-bottom: 30px; animation: slideUp 0.6s ease forwards; }
-
-/* ОСНОВНОЙ ПОСТ */
 .card { background: var(--glass); backdrop-filter: blur(20px); border-radius: 24px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); position: relative; z-index: 2; }
 
-/* ВНЕШНЕЕ ОКНО ССЫЛКИ (ATTACHMENT) */
+/* ТО САМОЕ ВНЕШНЕЕ ОКНО */
 .external-link-window {
-    margin-top: -10px; /* Наплыв на основной пост */
-    margin-left: 12px;
-    margin-right: 12px;
-    background: rgba(40, 40, 42, 0.9);
-    backdrop-filter: blur(30px);
+    margin-top: -12px;
+    margin-left: 15px;
+    margin-right: 15px;
+    background: #1c1c1e;
     border: 1px solid rgba(255,255,255,0.15);
     border-radius: 0 0 20px 20px;
-    padding: 15px;
+    padding: 14px;
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     position: relative;
     z-index: 1;
-    transition: 0.3s;
 }
-.external-link-window:active { transform: translateY(2px); background: rgba(50, 50, 52, 1); }
 
-.link-icon-box { width: 45px; height: 45px; border-radius: 12px; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: #1a1a1a; }
+.link-icon-box { width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: #2c2c2e; overflow: hidden; }
 .link-info { flex: 1; overflow: hidden; }
 .link-title { font-size: 14px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.link-subtitle { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+.link-subtitle { font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.5px; }
 
-/* СТИЛИ КНОПОК И ТАБОВ */
 .tabs { position: fixed; bottom: 25px; left: 20px; right: 20px; height: 70px; background: rgba(20,20,22,0.95); backdrop-filter: blur(25px); border-radius: 35px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; border: 1px solid rgba(255,255,255,0.1); }
 .tab { color: #555; font-size: 26px; }
 .tab.active { color: #fff; }
 .add-btn { position: fixed; bottom: 110px; right: 25px; width: 64px; height: 64px; background: #fff; border-radius: 50%; border: none; font-size: 34px; z-index: 1100; box-shadow: 0 10px 40px rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; }
 
-/* МОДАЛКА */
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 5000; align-items: flex-end; }
 .modal-content { background: #1c1c1e; width: 100%; border-radius: 30px 30px 0 0; padding: 25px; }
 .c-input { width: 100%; background: #2c2c2e; border: 1px solid #3a3a3c; border-radius: 14px; padding: 15px; color: #fff; margin-top: 10px; outline: none; }
@@ -63,12 +55,11 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); color: var
 </head>
 <body>
 
-<div id="splash"><div style="font-size:32px; font-weight:900; letter-spacing: 2px;">ECHO</div></div>
+<div id="splash"><div style="font-size:32px; font-weight:900;">ECHO</div></div>
 
 <div id="app">
     <div class="header">ECHO</div>
     <div id="feed"></div>
-    
     <div class="tabs">
         <div id="t-all" class="tab active" onclick="switchTab('all')">🏠</div>
         <div id="t-my" class="tab" onclick="switchTab('my')">👤</div>
@@ -78,12 +69,12 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); color: var
 
 <div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
     <div class="modal-content">
-        <textarea id="txt" placeholder="Текст поста..." style="width:100%; background:transparent; border:none; color:#fff; font-size:18px; min-height:100px; outline:none; resize:none;"></textarea>
-        <input id="chanUrl" class="c-input" placeholder="Прикрепить ссылку (YouTube, TG или сайт)">
+        <textarea id="txt" placeholder="Расскажи что-нибудь..." style="width:100%; background:transparent; border:none; color:#fff; font-size:18px; min-height:100px; outline:none; resize:none;"></textarea>
+        <input id="chanUrl" class="c-input" placeholder="Ссылка (YouTube, Сайт или Канал)">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
-             <button onclick="document.getElementById('fInp').click()" style="background:#2c2c2e; border:none; color:#fff; padding:12px 20px; border-radius:14px; font-weight:600;">ФОТО</button>
+             <button onclick="document.getElementById('fInp').click()" style="background:#2c2c2e; border:none; color:#fff; padding:12px 20px; border-radius:14px;">ФОТО</button>
              <input type="file" id="fInp" hidden accept="image/*">
-             <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:12px 30px; border-radius:18px; font-weight:800;">ОПУБЛИКОВАТЬ</button>
+             <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:12px 30px; border-radius:18px; font-weight:800;">ГОТОВО</button>
         </div>
     </div>
 </div>
@@ -98,52 +89,56 @@ const myName = user?.username || user?.first_name || 'Guest';
 let curTab = 'all';
 let replyToId = null;
 
-function openLink(url) {
+// ИСПРАВЛЕННАЯ ФУНКЦИЯ ОТКРЫТИЯ
+function universalOpen(url) {
     if (!url) return;
-    tg.HapticFeedback.selectionChanged();
-    if (url.includes('t.me')) tg.openTelegramLink(url);
-    else tg.openLink(url);
+    tg.HapticFeedback.impactOccurred('medium');
+    
+    // Если это внутренняя ссылка ТГ
+    if (url.includes('t.me')) {
+        tg.openTelegramLink(url);
+    } else {
+        // Пробуем открыть во внешнем браузере
+        tg.openLink(url, { try_instant_view: false });
+    }
 }
 
-// Рендерим внешнее окно ссылки
 function renderExternalWindow(url) {
     if (!url) return '';
     const isTG = url.includes('t.me');
     const isYT = url.includes('youtube.com') || url.includes('youtu.be');
     
-    let iconHtml = '';
-    let title = '';
-    let type = 'External Link';
+    let icon = '🌐';
+    let title = url.split('/')[2] || 'Link';
+    let sub = 'External Website';
 
     if (isTG) {
-        const username = url.split('/').pop().replace('@', '');
-        iconHtml = `<img src="https://t.me/i/userpic/320/${username}.jpg" onerror="this.src='https://ui-avatars.com/api/?name=TG&background=0a84ff&color=fff'" style="width:100%; height:100%; object-fit:cover;">`;
-        title = `@${username}`;
-        type = 'Telegram Channel';
-    } else if (isYT) {
-        iconHtml = `<span style="font-size:20px;">📺</span>`;
-        title = 'YouTube';
-        type = 'Video Content';
-    } else {
-        iconHtml = `<span style="font-size:20px;">🌐</span>`;
-        title = url.replace('https://','').replace('http://','').split('/')[0];
-        type = 'Web Page';
+        const user = url.split('/').pop();
+        return `
+            <div class="external-link-window" onclick="universalOpen('${url}')">
+                <div class="link-icon-box"><img src="https://t.me/i/userpic/320/${user}.jpg" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='🔹'"></div>
+                <div class="link-info">
+                    <div class="link-title">@${user}</div>
+                    <div class="link-subtitle">Telegram Channel</div>
+                </div>
+            </div>`;
     }
+    
+    if (isYT) { icon = '🔴'; title = 'YouTube'; sub = 'Video Content'; }
 
     return `
-        <div class="external-link-window" onclick="openLink('${url}')">
-            <div class="link-icon-box">${iconHtml}</div>
+        <div class="external-link-window" onclick="universalOpen('${url}')">
+            <div class="link-icon-box" style="font-size:20px;">${icon}</div>
             <div class="link-info">
                 <div class="link-title">${title}</div>
-                <div class="link-subtitle">${type}</div>
+                <div class="link-subtitle">${sub}</div>
             </div>
-            <div style="color:var(--accent); font-size:18px;">➔</div>
         </div>`;
 }
 
 async function load() {
-    const { data, error } = await db.from('posts').select('*').order('created_at', { ascending: false });
-    if (!error) render(data);
+    const { data } = await db.from('posts').select('*').order('created_at', { ascending: false });
+    if (data) render(data);
 }
 
 function render(data) {
@@ -155,36 +150,30 @@ function render(data) {
     display.forEach(p => {
         const div = document.createElement('div');
         div.className = 'post-wrap';
-        
-        // Собираем вложения (только одно основное для чистоты дизайна)
-        const attachmentHtml = renderExternalWindow(p.track_url);
-
         div.innerHTML = `
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                    <div style="font-weight:800; color:var(--accent); font-size:14px;">@${p.username}</div>
-                    ${p.user_id === myId ? `<div onclick="deletePost('${p.id}')" style="opacity:0.3; font-size:16px;">🗑</div>` : ''}
+                    <b style="color:var(--accent); font-size:14px;">@${p.username}</b>
+                    ${p.user_id === myId ? `<span onclick="deletePost('${p.id}')" style="opacity:0.3;">🗑</span>` : ''}
                 </div>
-                <div style="font-size:15px; line-height:1.5; white-space: pre-wrap;">${p.content}</div>
+                <div style="font-size:15px; line-height:1.5; white-space:pre-wrap;">${p.content}</div>
                 ${p.image_url ? `<img src="${p.image_url}" style="width:calc(100% + 40px); margin-left:-20px; margin-top:15px; display:block;">` : ''}
-                <div style="margin-top:15px; opacity:0.3; font-size:10px; font-weight:900;" onclick="openModal('${p.id}')">ОТВЕТИТЬ</div>
+                <div style="margin-top:15px; opacity:0.3; font-size:10px; font-weight:800;" onclick="openModal('${p.id}')">ОТВЕТИТЬ</div>
             </div>
-            ${attachmentHtml}`;
-
+            ${renderExternalWindow(p.track_url)}`;
         feed.appendChild(div);
     });
 }
 
 async function deletePost(id) {
     if(confirm("Удалить?")) {
-        await db.from('posts').delete().eq('parent_id', id);
         await db.from('posts').delete().eq('id', id);
         load();
     }
 }
 
 function openModal(id = null) { replyToId = id; document.getElementById('modal').style.display = 'flex'; }
-function closeModal() { document.getElementById('modal').style.display = 'none'; replyToId = null; }
+function closeModal() { document.getElementById('modal').style.display = 'none'; }
 
 function switchTab(t) {
     curTab = t;
@@ -196,16 +185,23 @@ function switchTab(t) {
 async function send() {
     const t = document.getElementById('txt').value;
     let cu = document.getElementById('chanUrl').value.trim();
-    const f = document.getElementById('fInp').files[0];
-    if(!t && !f) return;
+    if(!t && !document.getElementById('fInp').files[0]) return;
 
-    if (cu && !cu.startsWith('http')) cu = 'https://' + cu;
+    // Умная обработка ссылки
+    if (cu) {
+        if (!cu.startsWith('http')) {
+            if (cu.includes('.') && !cu.includes(' ')) cu = 'https://' + cu;
+            else if (!cu.startsWith('@')) cu = 'https://t.me/' + cu;
+            else cu = 'https://t.me/' + cu.replace('@', '');
+        }
+    }
 
     const btn = document.getElementById('sendBtn');
     btn.innerText = "⏳"; btn.disabled = true;
 
     try {
         let iu = null;
+        const f = document.getElementById('fInp').files[0];
         if(f) {
             const n = `img_${Date.now()}.jpg`;
             await db.storage.from('images').upload(n, f);
@@ -214,7 +210,7 @@ async function send() {
         await db.from('posts').insert([{ content: t, username: myName, user_id: myId, track_url: cu, image_url: iu, parent_id: replyToId }]);
         closeModal(); load();
     } catch(e) { alert(e.message); }
-    btn.innerText = "ОПУБЛИКОВАТЬ"; btn.disabled = false;
+    btn.innerText = "ГОТОВО"; btn.disabled = false;
 }
 
 window.onload = () => {
