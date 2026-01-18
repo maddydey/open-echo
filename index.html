@@ -3,73 +3,72 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ECHO Attached Windows</title>
+<title>ECHO External Windows</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root { --bg: #000; --text: #fff; --accent: #0a84ff; --gold: #ffd700; --glass: rgba(255, 255, 255, 0.08); }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 160px; overflow-x: hidden; }
+body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 160px; }
 
-@keyframes premiumGlow {
-    0% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.1); border-color: rgba(255, 215, 0, 0.3); }
-    100% { box-shadow: 0 0 45px rgba(255, 215, 0, 0.3); border-color: rgba(255, 215, 0, 0.9); }
-}
+/* АНИМАЦИЯ ПОЯВЛЕНИЯ */
+@keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
 #splash { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; }
 #app { display: none; opacity: 0; padding: 0 16px; transition: 0.5s; }
 .header { position: sticky; top: 0; background: var(--bg); padding: 50px 0 20px; z-index: 100; font-size: 32px; font-weight: 900; }
 
-.post-wrap { margin-bottom: 25px; opacity: 0; transform: translateY(20px); transition: 0.8s cubic-bezier(0.2, 1, 0.3, 1); }
-.post-wrap.revealed { opacity: 1; transform: translateY(0); }
+.post-wrap { margin-bottom: 30px; animation: slideUp 0.6s ease forwards; }
 
-/* ОСНОВНАЯ КАРТОЧКА */
-.card { background: var(--glass); backdrop-filter: blur(25px); border-radius: 26px; padding: 22px; border: 1px solid rgba(255,255,255,0.1); position: relative; overflow: hidden; }
-.premium-card { animation: premiumGlow 3s infinite alternate ease-in-out; }
+/* ОСНОВНОЙ ПОСТ */
+.card { background: var(--glass); backdrop-filter: blur(20px); border-radius: 24px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); position: relative; z-index: 2; }
 
-/* ПРИЛЕПЛЕННОЕ ОКНО ССЫЛОК */
-.attachment-box { 
-    margin: 15px -22px -22px -22px; /* Расширяем до краев карточки */
-    padding: 15px 22px;
-    background: rgba(255, 255, 255, 0.03); 
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+/* ВНЕШНЕЕ ОКНО ССЫЛКИ (ATTACHMENT) */
+.external-link-window {
+    margin-top: -10px; /* Наплыв на основной пост */
+    margin-left: 12px;
+    margin-right: 12px;
+    background: rgba(40, 40, 42, 0.9);
+    backdrop-filter: blur(30px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 0 0 20px 20px;
+    padding: 15px;
     display: flex;
-    flex-direction: column;
-    gap: 10px;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    position: relative;
+    z-index: 1;
+    transition: 0.3s;
 }
+.external-link-window:active { transform: translateY(2px); background: rgba(50, 50, 52, 1); }
 
-.link-bubble {
-    display: flex; align-items: center; gap: 12px; padding: 8px;
-    background: rgba(255,255,255,0.02); border-radius: 14px; text-decoration: none;
-    border-left: 3px solid var(--accent); cursor: pointer; transition: 0.2s;
-}
-.premium-card .link-bubble { border-left-color: var(--gold); }
-.link-bubble:active { background: rgba(255,255,255,0.08); transform: translateX(5px); }
+.link-icon-box { width: 45px; height: 45px; border-radius: 12px; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: #1a1a1a; }
+.link-info { flex: 1; overflow: hidden; }
+.link-title { font-size: 14px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.link-subtitle { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px; }
 
-.chan-avatar { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; }
-.web-icon { width: 34px; height: 34px; border-radius: 8px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 16px; }
-
-/* ОСТАЛЬНОЕ */
-.re-box { margin-left: 20px; border-left: 2px solid rgba(255,255,255,0.05); padding-left: 15px; margin-top: 12px; }
-.re-item { background: rgba(255,255,255,0.04); padding: 10px 14px; border-radius: 16px; margin-bottom: 8px; font-size: 14px; }
+/* СТИЛИ КНОПОК И ТАБОВ */
 .tabs { position: fixed; bottom: 25px; left: 20px; right: 20px; height: 70px; background: rgba(20,20,22,0.95); backdrop-filter: blur(25px); border-radius: 35px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; border: 1px solid rgba(255,255,255,0.1); }
 .tab { color: #555; font-size: 26px; }
 .tab.active { color: #fff; }
-.add-btn { position: fixed; bottom: 110px; right: 25px; width: 64px; height: 64px; background: #fff; border-radius: 50%; border: none; font-size: 34px; z-index: 1100; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
+.add-btn { position: fixed; bottom: 110px; right: 25px; width: 64px; height: 64px; background: #fff; border-radius: 50%; border: none; font-size: 34px; z-index: 1100; box-shadow: 0 10px 40px rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; }
 
-.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 5000; align-items: flex-end; }
-.modal-content { background: #161618; width: 100%; border-radius: 35px 35px 0 0; padding: 30px 20px 60px; }
-.c-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 16px; color: #fff; margin-top: 12px; outline: none; }
+/* МОДАЛКА */
+.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 5000; align-items: flex-end; }
+.modal-content { background: #1c1c1e; width: 100%; border-radius: 30px 30px 0 0; padding: 25px; }
+.c-input { width: 100%; background: #2c2c2e; border: 1px solid #3a3a3c; border-radius: 14px; padding: 15px; color: #fff; margin-top: 10px; outline: none; }
 </style>
 </head>
 <body>
 
-<div id="splash"><div style="font-size:36px; font-weight:900;">ECHO</div></div>
+<div id="splash"><div style="font-size:32px; font-weight:900; letter-spacing: 2px;">ECHO</div></div>
 
 <div id="app">
     <div class="header">ECHO</div>
     <div id="feed"></div>
+    
     <div class="tabs">
         <div id="t-all" class="tab active" onclick="switchTab('all')">🏠</div>
         <div id="t-my" class="tab" onclick="switchTab('my')">👤</div>
@@ -79,12 +78,12 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); color: var
 
 <div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
     <div class="modal-content">
-        <textarea id="txt" placeholder="Твой текст со ссылками..." style="width:100%; background:transparent; border:none; color:#fff; font-size:18px; min-height:100px; outline:none; resize:none;"></textarea>
-        <input id="chanUrl" class="c-input" placeholder="Канал (t.me/...)">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:25px;">
-             <button onclick="document.getElementById('fInp').click()" style="background:var(--glass); border:none; color:#fff; padding:12px 20px; border-radius:18px;">🖼 ФОТО</button>
+        <textarea id="txt" placeholder="Текст поста..." style="width:100%; background:transparent; border:none; color:#fff; font-size:18px; min-height:100px; outline:none; resize:none;"></textarea>
+        <input id="chanUrl" class="c-input" placeholder="Прикрепить ссылку (YouTube, TG или сайт)">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+             <button onclick="document.getElementById('fInp').click()" style="background:#2c2c2e; border:none; color:#fff; padding:12px 20px; border-radius:14px; font-weight:600;">ФОТО</button>
              <input type="file" id="fInp" hidden accept="image/*">
-             <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:12px 35px; border-radius:22px; font-weight:800;">ГОТОВО</button>
+             <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:12px 30px; border-radius:18px; font-weight:800;">ОПУБЛИКОВАТЬ</button>
         </div>
     </div>
 </div>
@@ -96,48 +95,55 @@ const db = supabase.createClient('https://xddulhzvzemmrhrsjfhb.supabase.co', 'sb
 const user = tg.initDataUnsafe?.user;
 const myId = user?.id?.toString() || 'guest';
 const myName = user?.username || user?.first_name || 'Guest';
-const PREMIUM_USERS = [myId]; 
 let curTab = 'all';
 let replyToId = null;
 
 function openLink(url) {
     if (!url) return;
-    tg.HapticFeedback.impactOccurred('light');
+    tg.HapticFeedback.selectionChanged();
     if (url.includes('t.me')) tg.openTelegramLink(url);
     else tg.openLink(url);
 }
 
-function createAttachment(url) {
+// Рендерим внешнее окно ссылки
+function renderExternalWindow(url) {
     if (!url) return '';
     const isTG = url.includes('t.me');
+    const isYT = url.includes('youtube.com') || url.includes('youtu.be');
+    
+    let iconHtml = '';
+    let title = '';
+    let type = 'External Link';
+
     if (isTG) {
         const username = url.split('/').pop().replace('@', '');
-        return `
-            <div class="link-bubble" onclick="openLink('${url}')">
-                <img src="https://t.me/i/userpic/320/${username}.jpg" onerror="this.src='https://ui-avatars.com/api/?name=TG&background=0a84ff&color=fff'" class="chan-avatar">
-                <div style="flex:1">
-                    <div style="font-size:13px; color:#fff; font-weight:700;">@${username}</div>
-                    <div style="font-size:10px; color:rgba(255,255,255,0.4);">Telegram Channel</div>
-                </div>
-            </div>`;
+        iconHtml = `<img src="https://t.me/i/userpic/320/${username}.jpg" onerror="this.src='https://ui-avatars.com/api/?name=TG&background=0a84ff&color=fff'" style="width:100%; height:100%; object-fit:cover;">`;
+        title = `@${username}`;
+        type = 'Telegram Channel';
+    } else if (isYT) {
+        iconHtml = `<span style="font-size:20px;">📺</span>`;
+        title = 'YouTube';
+        type = 'Video Content';
     } else {
-        const domain = url.replace('https://', '').replace('http://', '').split('/')[0];
-        const icon = url.includes('youtube.com') || url.includes('youtu.be') ? '📺' : '🌐';
-        return `
-            <div class="link-bubble" onclick="openLink('${url}')">
-                <div class="web-icon">${icon}</div>
-                <div style="flex:1">
-                    <div style="font-size:13px; color:#fff; font-weight:700;">${domain}</div>
-                    <div style="font-size:10px; color:rgba(255,255,255,0.4);">External Link</div>
-                </div>
-            </div>`;
+        iconHtml = `<span style="font-size:20px;">🌐</span>`;
+        title = url.replace('https://','').replace('http://','').split('/')[0];
+        type = 'Web Page';
     }
+
+    return `
+        <div class="external-link-window" onclick="openLink('${url}')">
+            <div class="link-icon-box">${iconHtml}</div>
+            <div class="link-info">
+                <div class="link-title">${title}</div>
+                <div class="link-subtitle">${type}</div>
+            </div>
+            <div style="color:var(--accent); font-size:18px;">➔</div>
+        </div>`;
 }
 
 async function load() {
     const { data, error } = await db.from('posts').select('*').order('created_at', { ascending: false });
-    if (error) return;
-    render(data);
+    if (!error) render(data);
 }
 
 function render(data) {
@@ -146,67 +152,46 @@ function render(data) {
     const mains = data.filter(p => !p.parent_id);
     let display = curTab === 'my' ? mains.filter(p => p.user_id === myId) : mains;
 
-    display.forEach((p, i) => {
-        const isPrem = PREMIUM_USERS.includes(p.user_id);
+    display.forEach(p => {
         const div = document.createElement('div');
         div.className = 'post-wrap';
         
-        let attachs = [];
-        if(p.track_url) attachs.push(createAttachment(p.track_url));
-        
-        const urlRegex = /(https?:\/\/[^\s]+|t\.me\/[^\s]+)/g;
-        const foundUrls = p.content.match(urlRegex);
-        if (foundUrls) {
-            foundUrls.forEach(u => {
-                const cleaned = u.startsWith('t.me') ? 'https://' + u : u;
-                if (cleaned !== p.track_url) attachs.push(createAttachment(cleaned));
-            });
-        }
+        // Собираем вложения (только одно основное для чистоты дизайна)
+        const attachmentHtml = renderExternalWindow(p.track_url);
 
-        let html = `
-            <div class="card ${isPrem ? 'premium-card' : ''}">
+        div.innerHTML = `
+            <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                    <div style="font-weight:800; color:${isPrem ? 'var(--gold)' : 'var(--accent)'}; font-size:15px;">@${p.username}</div>
-                    ${p.user_id === myId ? `<div onclick="deletePost('${p.id}')" style="opacity:0.4; font-size:18px;">🗑</div>` : ''}
+                    <div style="font-weight:800; color:var(--accent); font-size:14px;">@${p.username}</div>
+                    ${p.user_id === myId ? `<div onclick="deletePost('${p.id}')" style="opacity:0.3; font-size:16px;">🗑</div>` : ''}
                 </div>
-                <div style="font-size:16px; line-height:1.5; white-space: pre-wrap; margin-bottom:10px;">${p.content}</div>
-                ${p.image_url ? `<img src="${p.image_url}" style="width:calc(100% + 44px); margin-left:-22px; margin-top:10px; display:block;">` : ''}
-                
-                ${attachs.length > 0 ? `<div class="attachment-box">${attachs.join('')}</div>` : ''}
-                
-                <div style="margin-top:15px; opacity:0.3; font-size:11px; font-weight:900; letter-spacing:1px;" onclick="openModal('${p.id}')">REPLY</div>
-            </div>`;
+                <div style="font-size:15px; line-height:1.5; white-space: pre-wrap;">${p.content}</div>
+                ${p.image_url ? `<img src="${p.image_url}" style="width:calc(100% + 40px); margin-left:-20px; margin-top:15px; display:block;">` : ''}
+                <div style="margin-top:15px; opacity:0.3; font-size:10px; font-weight:900;" onclick="openModal('${p.id}')">ОТВЕТИТЬ</div>
+            </div>
+            ${attachmentHtml}`;
 
-        const reps = data.filter(r => r.parent_id === p.id);
-        if (reps.length > 0) {
-            html += `<div class="re-box">`;
-            reps.forEach(r => {
-                html += `<div class="re-item">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                        <b style="color:var(--accent)">@${r.username}</b>
-                        ${r.user_id === myId ? `<span onclick="deletePost('${r.id}')" style="opacity:0.3;">✕</span>` : ''}
-                    </div>
-                    <div>${r.content}</div>
-                </div>`;
-            });
-            html += `</div>`;
-        }
-
-        div.innerHTML = html;
         feed.appendChild(div);
-        setTimeout(() => div.classList.add('revealed'), i * 60);
     });
 }
 
 async function deletePost(id) {
-    if(!confirm("Delete?")) return;
-    await db.from('posts').delete().eq('parent_id', id);
-    await db.from('posts').delete().eq('id', id);
-    load();
+    if(confirm("Удалить?")) {
+        await db.from('posts').delete().eq('parent_id', id);
+        await db.from('posts').delete().eq('id', id);
+        load();
+    }
 }
 
 function openModal(id = null) { replyToId = id; document.getElementById('modal').style.display = 'flex'; }
 function closeModal() { document.getElementById('modal').style.display = 'none'; replyToId = null; }
+
+function switchTab(t) {
+    curTab = t;
+    document.getElementById('t-all').classList.toggle('active', t==='all');
+    document.getElementById('t-my').classList.toggle('active', t==='my');
+    load();
+}
 
 async function send() {
     const t = document.getElementById('txt').value;
@@ -214,9 +199,7 @@ async function send() {
     const f = document.getElementById('fInp').files[0];
     if(!t && !f) return;
 
-    if (cu && !cu.startsWith('http')) {
-        cu = cu.includes('t.me') ? 'https://' + cu.replace('https://', '') : 'https://' + cu;
-    }
+    if (cu && !cu.startsWith('http')) cu = 'https://' + cu;
 
     const btn = document.getElementById('sendBtn');
     btn.innerText = "⏳"; btn.disabled = true;
@@ -231,7 +214,7 @@ async function send() {
         await db.from('posts').insert([{ content: t, username: myName, user_id: myId, track_url: cu, image_url: iu, parent_id: replyToId }]);
         closeModal(); load();
     } catch(e) { alert(e.message); }
-    btn.innerText = "DONE"; btn.disabled = false;
+    btn.innerText = "ОПУБЛИКОВАТЬ"; btn.disabled = false;
 }
 
 window.onload = () => {
