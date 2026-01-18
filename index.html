@@ -3,41 +3,54 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ECHO PREMIUM EDITION</title>
+<title>ECHO MINI OPTIMIZED</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root { --bg: #000; --text: #fff; --accent: #0a84ff; --gold: #ffd700; --glass: rgba(255, 255, 255, 0.08); }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding-bottom: 160px; overflow-x: hidden; }
+body { 
+    font-family: -apple-system, sans-serif; 
+    background: var(--bg); 
+    color: var(--text); 
+    padding-bottom: 140px; 
+    overflow-x: hidden;
+    /* Адаптивный шрифт для маленьких экранов */
+    font-size: clamp(14px, 4vw, 16px);
+}
 
-/* --- АНИМАЦИИ ПРЕМИУМА --- */
+/* --- SMART SCALING (12 MINI) --- */
+@media screen and (max-width: 380px) {
+    #app { padding: 0 12px !important; }
+    .card { padding: 18px !important; border-radius: 22px !important; }
+    .header { font-size: 28px !important; padding: 40px 0 15px !important; }
+    .post-wrap { margin-bottom: 30px !important; }
+    .ext-window { margin: -10px 12px 0 !important; padding: 10px !important; }
+    .re-box { margin-left: 15px !important; padding-left: 12px !important; }
+}
+
+/* --- АНИМАЦИИ --- */
 @keyframes premiumPulse {
     0% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.15); border-color: rgba(255, 215, 0, 0.3); transform: scale(1); }
     50% { box-shadow: 0 0 35px rgba(255, 215, 0, 0.35); border-color: rgba(255, 215, 0, 1); transform: scale(1.005); }
     100% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.15); border-color: rgba(255, 215, 0, 0.3); transform: scale(1); }
 }
 
-@keyframes goldShine {
-    0% { background-position: -200% center; }
-    100% { background-position: 200% center; }
-}
+@keyframes goldShine { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
 
 @keyframes slideUp { 
-    from { opacity: 0; transform: translateY(30px) scale(0.95); } 
-    to { opacity: 1; transform: translateY(0) scale(1); } 
+    from { opacity: 0; transform: translateY(20px); } 
+    to { opacity: 1; transform: translateY(0); } 
 }
 
-#splash { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; transition: 0.5s; }
-#app { display: none; opacity: 0; padding: 0 16px; transition: 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+#splash { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; }
+#app { display: none; opacity: 0; padding: 0 16px; transition: 0.5s; }
 .header { position: sticky; top: 0; background: var(--bg); padding: 50px 0 20px; z-index: 100; font-size: 32px; font-weight: 900; letter-spacing: -1px; }
 
-.post-wrap { margin-bottom: 40px; animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+.post-wrap { margin-bottom: 40px; animation: slideUp 0.5s ease-out forwards; }
 
-/* КАРТОЧКА ПОСТА */
-.card { background: var(--glass); backdrop-filter: blur(25px); border-radius: 26px; padding: 22px; border: 1px solid rgba(255,255,255,0.1); position: relative; z-index: 10; transition: 0.3s; }
-.card:active { transform: scale(0.98); }
+.card { background: var(--glass); backdrop-filter: blur(25px); border-radius: 26px; padding: 22px; border: 1px solid rgba(255,255,255,0.1); position: relative; z-index: 10; }
 
 .premium-card { 
     animation: premiumPulse 4s infinite ease-in-out; 
@@ -48,36 +61,28 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); color: var
 
 .premium-card b.user-nick {
     background: linear-gradient(90deg, #ffd700, #fff, #ffd700);
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     animation: goldShine 3s linear infinite;
 }
 
-/* ВНЕШНИЕ ОКНА ССЫЛОК */
 .ext-window {
     margin: -12px 18px 0; background: #18181a; border: 1px solid rgba(255,255,255,0.1);
     border-radius: 0 0 20px 20px; padding: 14px; display: flex; align-items: center; gap: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative; z-index: 1; transition: 0.3s;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative; z-index: 1; transition: 0.2s;
 }
-.ext-window:active { transform: translateY(5px); filter: brightness(1.2); }
 
-/* ОТВЕТЫ */
 .re-box { margin-left: 20px; border-left: 2px solid var(--accent); padding-left: 15px; margin-top: 15px; }
-.re-item { background: rgba(255,255,255,0.05); padding: 14px; border-radius: 18px; margin-bottom: 10px; font-size: 14px; position: relative; transition: 0.2s; }
-.re-item:active { background: rgba(255,255,255,0.1); }
+.re-item { background: rgba(255,255,255,0.05); padding: 14px; border-radius: 18px; margin-bottom: 10px; font-size: 14px; position: relative; }
 
-/* ИНТЕРФЕЙС */
 .tabs { position: fixed; bottom: 25px; left: 20px; right: 20px; height: 70px; background: rgba(15,15,15,0.9); backdrop-filter: blur(20px); border-radius: 35px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; border: 1px solid rgba(255,255,255,0.1); }
 .tab { color: #555; font-size: 26px; transition: 0.3s; }
-.tab.active { color: #fff; transform: scale(1.2); }
-.add-btn { position: fixed; bottom: 110px; right: 25px; width: 64px; height: 64px; background: #fff; border-radius: 50%; border: none; font-size: 34px; z-index: 1100; box-shadow: 0 10px 40px rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; transition: 0.2s; }
-.add-btn:active { transform: scale(0.9) rotate(90deg); }
+.tab.active { color: #fff; transform: scale(1.1); }
+
+.add-btn { position: fixed; bottom: 110px; right: 25px; width: 60px; height: 60px; background: #fff; border-radius: 50%; border: none; font-size: 32px; z-index: 1100; box-shadow: 0 10px 40px rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; }
 
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 5000; align-items: flex-end; }
-.modal-content { background: #161618; width: 100%; border-radius: 35px 35px 0 0; padding: 30px; padding-bottom: 60px; transform: translateY(100%); transition: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
-.modal.open .modal-content { transform: translateY(0); }
-.c-input { width: 100%; background: #242426; border: 1px solid #333; border-radius: 16px; padding: 18px; color: #fff; margin-top: 12px; outline: none; font-size: 16px; }
+.modal-content { background: #161618; width: 100%; border-radius: 35px 35px 0 0; padding: 25px 25px 50px; }
+.c-input { width: 100%; background: #242426; border: 1px solid #333; border-radius: 16px; padding: 16px; color: #fff; margin-top: 12px; outline: none; font-size: 16px; }
 </style>
 </head>
 <body>
@@ -96,13 +101,12 @@ body { font-family: -apple-system, sans-serif; background: var(--bg); color: var
 
 <div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
     <div class="modal-content">
-        <div id="reply-title" style="color:var(--accent); font-weight:900; font-size:12px; margin-bottom:15px; display:none;">ОТВЕТИТЬ НА СООБЩЕНИЕ</div>
-        <textarea id="txt" placeholder="Напиши что-нибудь..." style="width:100%; background:transparent; border:none; color:#fff; font-size:19px; min-height:120px; outline:none; resize:none;"></textarea>
-        <input id="chanUrl" class="c-input" placeholder="Ссылка (поле)">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:25px;">
-             <button onclick="document.getElementById('fInp').click()" style="background:#242426; border:none; color:#fff; padding:14px 25px; border-radius:18px; font-weight:600;">ФОТО</button>
+        <textarea id="txt" placeholder="Напиши что-нибудь..." style="width:100%; background:transparent; border:none; color:#fff; font-size:18px; min-height:100px; outline:none; resize:none;"></textarea>
+        <input id="chanUrl" class="c-input" placeholder="Ссылка">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+             <button onclick="document.getElementById('fInp').click()" style="background:#242426; border:none; color:#fff; padding:12px 20px; border-radius:15px; font-weight:600;">ФОТО</button>
              <input type="file" id="fInp" hidden accept="image/*">
-             <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:14px 40px; border-radius:20px; font-weight:800; letter-spacing:1px;">POST</button>
+             <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:12px 30px; border-radius:18px; font-weight:800;">POST</button>
         </div>
     </div>
 </div>
@@ -115,7 +119,6 @@ const myId = tg.initDataUnsafe?.user?.id?.toString() || 'guest';
 const myName = tg.initDataUnsafe?.user?.username || tg.initDataUnsafe?.user?.first_name || 'Guest';
 const ADMINS = [myId, '5223391218'];
 
-// ЗВУКОВОЙ ДВИЖОК
 const sounds = {
     open: new Audio('https://www.soundjay.com/buttons/sounds/button-20.mp3'),
     click: new Audio('https://www.soundjay.com/buttons/sounds/button-50.mp3'),
@@ -123,37 +126,27 @@ const sounds = {
     send: new Audio('https://www.soundjay.com/buttons/sounds/button-09.mp3')
 };
 
-function play(sound) {
-    sounds[sound].currentTime = 0;
-    sounds[sound].volume = 0.3;
-    sounds[sound].play().catch(() => {});
-}
+function play(s) { sounds[s].currentTime = 0; sounds[s].volume = 0.2; sounds[s].play().catch(()=>{}); }
 
 function openLink(url) {
     if (!url) return;
     play('click');
     tg.HapticFeedback.impactOccurred('medium');
     if (url.includes('t.me')) tg.openTelegramLink(url);
-    else tg.openLink(url, { try_instant_view: true });
+    else tg.openLink(url);
 }
 
 function getWindowHtml(url) {
     if(!url) return '';
     const isTG = url.includes('t.me');
-    const isYT = url.includes('youtu');
-    const icon = isTG ? '🔹' : (isYT ? '🔴' : '🌐');
+    const icon = isTG ? '🔹' : '🌐';
     let title = 'Source';
-    try {
-        if(isTG) title = '@' + url.split('/').pop();
-        else title = new URL(url).hostname.replace('www.', '');
-    } catch(e) {}
-
+    try { title = isTG ? '@' + url.split('/').pop() : new URL(url).hostname.replace('www.', ''); } catch(e) {}
     return `
         <div class="ext-window" onclick="openLink('${url}')">
-            <div style="width:34px; height:34px; background:#242426; border-radius:10px; display:flex; align-items:center; justify-content:center;">${icon}</div>
+            <div style="width:30px; height:30px; background:#242426; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px;">${icon}</div>
             <div style="flex:1; overflow:hidden;">
-                <div style="font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${title}</div>
-                <div style="font-size:10px; color:rgba(255,255,255,0.3); font-weight:600;">VISIT SOURCE</div>
+                <div style="font-size:12px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${title}</div>
             </div>
         </div>`;
 }
@@ -169,21 +162,16 @@ function render(data) {
     const mains = data.filter(p => !p.parent_id);
     let display = curTab === 'my' ? mains.filter(p => p.user_id === myId) : mains;
 
-    display.forEach((p, index) => {
+    display.forEach((p, idx) => {
         const isPrem = ADMINS.includes(p.user_id);
         const div = document.createElement('div');
         div.className = 'post-wrap';
-        div.style.animationDelay = `${index * 0.1}s`; // Каскадное появление
+        div.style.animationDelay = `${idx * 0.05}s`;
         
         let links = [];
         if (p.track_url) links.push(p.track_url);
         const textLinks = p.content.match(/(https?:\/\/[^\s]+|t\.me\/[^\s]+)/g);
-        if (textLinks) {
-            textLinks.forEach(l => {
-                let clean = l.startsWith('t.me') ? 'https://' + l : l;
-                if (!links.includes(clean) && links.length < 2) links.push(clean);
-            });
-        }
+        if (textLinks) textLinks.forEach(l => { if (links.length < 2 && !links.includes(l)) links.push(l); });
 
         let windows = links.map(l => getWindowHtml(l)).join('');
         let repsHtml = '';
@@ -192,10 +180,9 @@ function render(data) {
             repsHtml = '<div class="re-box">';
             reps.forEach(r => {
                 repsHtml += `
-                    <div class="re-item" onclick="play('click'); tg.HapticFeedback.impactOccurred('light')">
+                    <div class="re-item">
                         <b style="color:var(--accent); font-size:12px;">@${r.username}</b>
                         <div style="margin-top:4px; line-height:1.4;">${r.content}</div>
-                        ${r.user_id === myId ? `<span onclick="event.stopPropagation(); del('${r.id}')" style="position:absolute; right:12px; top:12px; opacity:0.2;">✕</span>` : ''}
                     </div>`;
             });
             repsHtml += '</div>';
@@ -203,83 +190,54 @@ function render(data) {
 
         div.innerHTML = `
             <div class="card ${isPrem ? 'premium-card' : ''}" onclick="play('pop'); tg.HapticFeedback.impactOccurred('light')">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-                    <b class="user-nick" style="font-size:14px; font-weight:800; color:var(--accent)">@${p.username}</b>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <b class="user-nick" style="font-size:13px; color:var(--accent)">@${p.username}</b>
                     ${p.user_id === myId ? `<span onclick="event.stopPropagation(); del('${p.id}')" style="opacity:0.2;">🗑</span>` : ''}
                 </div>
-                <div style="font-size:16px; line-height:1.5; white-space:pre-wrap;">${p.content}</div>
-                ${p.image_url ? `<img src="${p.image_url}" style="width:calc(100% + 44px); margin-left:-22px; margin-top:18px; display:block;">` : ''}
-                <div style="margin-top:18px; display:flex; gap:15px;">
-                    <span style="opacity:0.4; font-size:11px; font-weight:900; letter-spacing:1px;" onclick="event.stopPropagation(); openModal('${p.id}')">REPLY</span>
-                </div>
+                <div style="font-size:15px; line-height:1.4;">${p.content}</div>
+                ${p.image_url ? `<img src="${p.image_url}" style="width:calc(100% + 44px); margin-left:-22px; margin-top:15px; display:block;">` : ''}
+                <div style="margin-top:15px; opacity:0.4; font-size:10px; font-weight:900;" onclick="event.stopPropagation(); openModal('${p.id}')">REPLY</div>
             </div>
-            ${windows}
-            ${repsHtml}`;
+            ${windows}${repsHtml}`;
         feed.appendChild(div);
     });
 }
 
-async function del(id) {
-    if(confirm("Удалить?")) {
-        play('click');
-        await db.from('posts').delete().eq('id', id);
-        load();
-    }
-}
+async function del(id) { if(confirm("Удалить?")) { await db.from('posts').delete().eq('id', id); load(); } }
 
 function openModal(id = null) { 
-    replyToId = id; 
-    play('pop');
-    tg.HapticFeedback.impactOccurred('medium');
-    document.getElementById('reply-title').style.display = id ? 'block' : 'none';
-    const m = document.getElementById('modal');
-    m.style.display = 'flex';
-    setTimeout(() => m.classList.add('open'), 10);
+    replyToId = id; play('pop'); tg.HapticFeedback.impactOccurred('medium');
+    document.getElementById('modal').style.display = 'flex'; 
 }
 
-function closeModal() { 
-    const m = document.getElementById('modal');
-    m.classList.remove('open');
-    play('click');
-    setTimeout(() => { m.style.display = 'none'; replyToId = null; }, 400);
-}
+function closeModal() { play('click'); document.getElementById('modal').style.display = 'none'; }
 
-function switchTab(t) {
-    curTab = t;
-    play('click');
-    tg.HapticFeedback.selectionChanged();
+function switchTab(t) { 
+    curTab = t; play('click'); tg.HapticFeedback.selectionChanged();
     document.getElementById('t-all').classList.toggle('active', t==='all');
     document.getElementById('t-my').classList.toggle('active', t==='my');
-    load();
+    load(); 
 }
 
 async function send() {
     const t = document.getElementById('txt').value;
-    let cu = document.getElementById('chanUrl').value.trim();
     if(!t && !document.getElementById('fInp').files[0]) return;
-
-    const btn = document.getElementById('sendBtn');
-    btn.innerText = "..."; btn.disabled = true;
-    play('send');
-    tg.HapticFeedback.notificationOccurred('success');
-
+    const btn = document.getElementById('sendBtn'); btn.disabled = true; play('send');
     try {
-        let iu = null;
-        const f = document.getElementById('fInp').files[0];
+        let iu = null; const f = document.getElementById('fInp').files[0];
         if(f) {
             const n = `img_${Date.now()}.jpg`;
             await db.storage.from('images').upload(n, f);
             iu = db.storage.from('images').getPublicUrl(n).data.publicUrl;
         }
-        await db.from('posts').insert([{ content: t, username: myName, user_id: myId, track_url: cu, image_url: iu, parent_id: replyToId }]);
+        await db.from('posts').insert([{ content: t, username: myName, user_id: myId, track_url: document.getElementById('chanUrl').value, image_url: iu, parent_id: replyToId }]);
         closeModal(); load();
     } catch(e) { alert(e.message); }
-    btn.innerText = "POST"; btn.disabled = false;
+    btn.disabled = false;
 }
 
 window.onload = () => {
-    tg.expand();
-    play('open');
+    tg.expand(); play('open');
     document.getElementById('app').style.display = "block";
     document.getElementById('app').style.opacity = "1";
     setTimeout(() => { document.getElementById('splash').style.display = 'none'; load(); }, 800);
