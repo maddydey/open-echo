@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ECHO LIQUID FINAL</title>
+<title>ECHO PREMIUM LIQUID</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -12,8 +12,14 @@
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
 body { 
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background: var(--bg); color: var(--text); overflow: hidden; height: 100vh;
+}
+
+/* --- АНИМАЦИЯ ПОЯВЛЕНИЯ ПОСТОВ --- */
+@keyframes postFlyIn {
+    0% { opacity: 0; transform: translateY(50px) scale(0.9); filter: blur(10px); }
+    100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
 }
 
 /* --- ЭФФЕКТ ЖИДКОЙ СРЕДЫ --- */
@@ -22,84 +28,84 @@ body {
     padding: 0 16px 220px; transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.8s;
 }
 
-body.modal-open #app { transform: scale(0.85) translateY(50px); filter: blur(20px) brightness(0.5); pointer-events: none; }
-
-@keyframes waterDrift {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-15px) rotate(0.8deg); }
-}
+body.modal-open #app { transform: scale(0.88) translateY(60px); filter: blur(25px) brightness(0.4); pointer-events: none; }
 
 .post-wrap { 
-    margin-bottom: 50px; animation: waterDrift 7s ease-in-out infinite; 
-    will-change: transform;
+    margin-bottom: 40px; 
+    animation: postFlyIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+    position: relative;
 }
 
 /* --- КАРТОЧКА --- */
 .card { 
     background: var(--glass); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
-    border-radius: 35px; padding: 25px; border: 1px solid rgba(255,255,255,0.12);
-    position: relative; z-index: 10; box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    border-radius: 30px; padding: 22px; border: 1px solid rgba(255,255,255,0.1);
+    position: relative; z-index: 10;
 }
 
-/* --- АВАТАРКИ --- */
+/* --- АВАТАРКИ И ПРЕМКА --- */
 .avatar {
-    width: 52px; height: 52px; border-radius: 50%; background: #1a1a1a;
+    width: 48px; height: 48px; border-radius: 50%; background: #1a1a1a;
     display: flex; align-items: center; justify-content: center;
-    font-weight: 900; font-size: 20px; margin-right: 15px; flex-shrink: 0;
-    border: 1px solid rgba(255,255,255,0.1); overflow: hidden;
+    font-weight: 900; font-size: 18px; margin-right: 12px; flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.1);
 }
 .premium-avatar {
     border: 2px solid var(--gold) !important;
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
 }
-
 .premium-nick {
     background: linear-gradient(90deg, #ffd700, #fff, #ffd700);
     background-size: 200% auto; -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent; animation: goldMove 3s linear infinite;
+    -webkit-text-fill-color: transparent; animation: goldFlow 3s linear infinite;
 }
-@keyframes goldMove { to { background-position: 200% center; } }
+@keyframes goldFlow { to { background-position: 200% center; } }
+
+/* --- ОТВЕТЫ С ПРЕВЬЮ --- */
+.replies-box { margin-left: 20px; margin-top: 15px; border-left: 2px solid rgba(10, 132, 255, 0.3); padding-left: 15px; }
+.reply-card { 
+    background: rgba(255,255,255,0.04); border-radius: 20px; padding: 15px; 
+    margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.05);
+}
+.quote-preview {
+    background: rgba(255,255,255,0.05); border-left: 3px solid var(--accent);
+    padding: 8px 12px; border-radius: 8px; font-size: 12px; margin-bottom: 10px;
+    opacity: 0.7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 
 /* --- БАБЛЫ ССЫЛОК --- */
-.bubble-container { display: flex; flex-direction: column; gap: 5px; margin-top: -15px; }
-.link-bubble {
-    margin: 0 25px; padding: 15px 20px; display: flex; align-items: center; gap: 12px;
-    background: rgba(20, 20, 22, 0.98); border: 1px solid rgba(255,255,255,0.15);
-    position: relative; z-index: 5; box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+.bubble-stack { display: flex; flex-direction: column; gap: 4px; margin-top: -12px; }
+.link-b {
+    margin: 0 22px; padding: 12px 18px; display: flex; align-items: center; gap: 10px;
+    background: rgba(20, 20, 22, 0.95); border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
 }
-.link-bubble:first-child { border-radius: 0; }
-.link-bubble:last-child { border-radius: 0 0 25px 25px; }
-.link-bubble:only-child { border-radius: 0 0 25px 25px; }
-
-/* --- ОТВЕТЫ --- */
-.replies-area { margin-left: 20px; border-left: 2px solid var(--accent); padding-left: 15px; margin-top: 20px; }
-.reply-item { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 20px; margin-bottom: 10px; }
+.link-b:last-child { border-radius: 0 0 25px 25px; }
 
 /* --- ИНТЕРФЕЙС --- */
 .tabs { 
-    position: fixed; bottom: 35px; left: 25px; right: 25px; height: 76px; 
-    background: rgba(10,10,10,0.85); backdrop-filter: blur(25px);
-    border-radius: 38px; display: flex; justify-content: space-around; align-items: center; 
+    position: fixed; bottom: 30px; left: 20px; right: 20px; height: 74px; 
+    background: rgba(10,10,10,0.8); backdrop-filter: blur(25px);
+    border-radius: 37px; display: flex; justify-content: space-around; align-items: center; 
     z-index: 1000; border: 1px solid rgba(255,255,255,0.1); 
 }
-.tab { color: #444; font-size: 30px; transition: 0.3s; }
-.tab.active { color: #fff; transform: scale(1.25); filter: drop-shadow(0 0 10px #fff); }
+.tab { color: #444; font-size: 28px; transition: 0.3s; }
+.tab.active { color: #fff; transform: scale(1.2); }
 
 .add-btn { 
-    position: fixed; bottom: 130px; right: 25px; width: 70px; height: 70px; 
-    background: #fff; border-radius: 50%; border: none; font-size: 40px; 
-    z-index: 1100; box-shadow: 0 20px 40px rgba(0,0,0,0.6); transition: 0.3s;
+    position: fixed; bottom: 120px; right: 25px; width: 68px; height: 68px; 
+    background: #fff; border-radius: 50%; border: none; font-size: 38px; 
+    z-index: 1100; box-shadow: 0 15px 35px rgba(0,0,0,0.5);
 }
-.add-btn:active { transform: scale(0.9); }
 
 .modal { display: none; position: fixed; inset: 0; z-index: 5000; align-items: flex-end; }
 .modal-content { 
-    background: #0d0d0f; width: 100%; border-radius: 45px 45px 0 0; 
-    padding: 35px 35px 60px; transform: translateY(100%); transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    background: #0d0d0f; width: 100%; border-radius: 40px 40px 0 0; padding: 30px 30px 60px;
+    transform: translateY(100%); transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .modal.open .modal-content { transform: translateY(0); }
 
-.header { padding: 60px 0 25px; font-size: 40px; font-weight: 900; letter-spacing: -2px; }
+.header { padding: 50px 0 20px; font-size: 34px; font-weight: 900; }
 </style>
 </head>
 <body id="body">
@@ -117,12 +123,12 @@ body.modal-open #app { transform: scale(0.85) translateY(50px); filter: blur(20p
 
 <div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
     <div class="modal-content">
-        <textarea id="txt" placeholder="Что происходит?" style="width:100%; background:transparent; border:none; color:#fff; font-size:20px; min-height:160px; outline:none; resize:none;"></textarea>
-        <input id="chanUrl" placeholder="Ссылка (ТГ или сайт)" style="width:100%; background:#1a1a1c; border:none; border-radius:18px; padding:20px; color:#fff; margin-bottom:20px; outline:none;">
+        <textarea id="txt" placeholder="Твой ответ..." style="width:100%; background:transparent; border:none; color:#fff; font-size:19px; min-height:140px; outline:none; resize:none;"></textarea>
+        <input id="chanUrl" placeholder="Ссылка" style="width:100%; background:#1a1a1c; border:none; border-radius:15px; padding:18px; color:#fff; margin-bottom:20px; outline:none;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-             <button onclick="document.getElementById('fInp').click()" style="background:#1a1a1c; color:#fff; border:none; padding:18px 35px; border-radius:22px; font-weight:700;">ФОТО</button>
+             <button onclick="document.getElementById('fInp').click()" style="background:#1a1a1c; color:#fff; border:none; padding:15px 30px; border-radius:18px;">ФОТО</button>
              <input type="file" id="fInp" hidden accept="image/*">
-             <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:18px 60px; border-radius:24px; font-weight:900;">POST</button>
+             <button id="sendBtn" onclick="send()" style="background:var(--accent); color:#fff; border:none; padding:15px 50px; border-radius:20px; font-weight:900;">POST</button>
         </div>
     </div>
 </div>
@@ -135,29 +141,27 @@ const myId = tg.initDataUnsafe?.user?.id?.toString() || 'guest';
 const myName = tg.initDataUnsafe?.user?.username || 'Guest';
 const ADMINS = [myId, '5223391218'];
 
-function play(type) {
+function play(t) {
     const s = { pop: 'button-16', click: 'button-50', send: 'button-09' };
-    new Audio(`https://www.soundjay.com/buttons/sounds/${s[type]}.mp3`).play().catch(()=>{});
+    new Audio(`https://www.soundjay.com/buttons/sounds/${s[t]}.mp3`).play().catch(()=>{});
 }
 
-function openLink(url) {
+function openL(url) {
     play('click');
-    tg.HapticFeedback.impactOccurred('medium');
     let l = url.trim();
     if(!l.startsWith('http')) l = 'https://' + l;
     l.includes('t.me') ? tg.openTelegramLink(l) : tg.openLink(l);
 }
 
-function buildBubble(url) {
-    const isTG = url.includes('t.me');
-    return `
-        <div class="link-bubble" onclick="event.stopPropagation(); openLink('${url}')">
-            <div style="font-size:22px;">${isTG ? '🔹' : '🌐'}</div>
-            <div style="overflow:hidden;">
-                <div style="font-size:14px; font-weight:800; color:${isTG?'var(--accent)':'#fff'}">${isTG?'Telegram Channel':'Open Website'}</div>
-                <div style="font-size:11px; opacity:0.4; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${url}</div>
-            </div>
-        </div>`;
+function getBubble(url) {
+    const isT = url.includes('t.me');
+    return `<div class="link-b" onclick="event.stopPropagation(); openL('${url}')">
+        <div style="font-size:20px;">${isT?'🔹':'🌐'}</div>
+        <div style="overflow:hidden;">
+            <div style="font-size:13px; font-weight:800; color:${isT?'var(--accent)':'#fff'}">${isT?'Telegram':'Website'}</div>
+            <div style="font-size:10px; opacity:0.4; overflow:hidden; text-overflow:ellipsis;">${url}</div>
+        </div>
+    </div>`;
 }
 
 let curTab = 'all';
@@ -172,51 +176,42 @@ function render(data) {
     const feed = document.getElementById('feed');
     feed.innerHTML = '';
     
-    // Сначала берем только основные посты (без парента)
     const mains = data.filter(p => !p.parent_id);
-    let display = curTab === 'my' ? mains.filter(p => p.user_id === myId) : mains;
+    const display = curTab === 'my' ? mains.filter(p => p.user_id === myId) : mains;
 
     display.forEach((p, idx) => {
         const isPrem = ADMINS.includes(p.user_id);
         const wrap = document.createElement('div');
         wrap.className = 'post-wrap';
-        wrap.style.animationDelay = `${idx * -0.6}s`;
+        wrap.style.animationDelay = `${idx * 0.1}s`;
 
-        // ССЫЛКИ
+        // Детектор ссылок
         let links = new Set();
         if (p.track_url) links.add(p.track_url);
         const found = p.content.match(/(https?:\/\/[^\s]+|t\.me\/[^\s]+)/g);
         if (found) found.forEach(l => links.add(l));
+        let bHtml = Array.from(links).length ? `<div class="bubble-stack">${Array.from(links).slice(0,2).map(l => getBubble(l)).join('')}</div>` : '';
 
-        let tgL = Array.from(links).find(l => l.includes('t.me'));
-        let webL = Array.from(links).find(l => !l.includes('t.me'));
-
-        let bHtml = '';
-        if(tgL || webL) {
-            bHtml = '<div class="bubble-container">';
-            if(tgL) bHtml += buildBubble(tgL);
-            if(webL) bHtml += buildBubble(webL);
-            bHtml += '</div>';
-        }
-
-        // ОТВЕТЫ (КОММЕНТАРИИ)
+        // Ответы с превью
         const replies = data.filter(r => r.parent_id === p.id);
-        let repsHtml = replies.length ? `<div class="replies-area">${replies.map(r => `
-            <div class="reply-item">
-                <b style="color:var(--accent); font-size:13px;">@${r.username}</b>
-                <div style="margin-top:5px; font-size:15px;">${r.content}</div>
+        let repsHtml = replies.length ? `<div class="replies-box">${replies.map(r => `
+            <div class="reply-card">
+                <div class="quote-preview">Ответ на: ${p.content.substring(0,40)}...</div>
+                <div style="display:flex; align-items:center; margin-bottom:8px;">
+                    <b style="color:var(--accent); font-size:13px;">@${r.username}</b>
+                </div>
+                <div style="font-size:15px;">${r.content}</div>
             </div>`).join('')}</div>` : '';
 
         wrap.innerHTML = `
             <div class="card" onclick="openModal('${p.id}')">
-                <div style="display:flex; align-items:center; margin-bottom:20px;">
+                <div style="display:flex; align-items:center; margin-bottom:15px;">
                     <div class="avatar ${isPrem ? 'premium-avatar' : ''}">${p.username[0].toUpperCase()}</div>
-                    <b class="${isPrem ? 'premium-nick' : ''}" style="color:var(--accent); font-size:17px;">@${p.username}</b>
+                    <b class="${isPrem ? 'premium-nick' : ''}" style="color:var(--accent); font-size:15px;">@${p.username}</b>
                     ${p.user_id === myId ? `<span onclick="event.stopPropagation(); del('${p.id}')" style="margin-left:auto; opacity:0.2;">✕</span>` : ''}
                 </div>
-                <div style="line-height:1.6; font-size:18px; white-space:pre-wrap;">${p.content}</div>
-                ${p.image_url ? `<img src="${p.image_url}" style="width:calc(100% + 50px); margin-left:-25px; margin-top:20px; display:block; border-radius:0;">` : ''}
-                <div style="margin-top:20px; opacity:0.3; font-size:12px; font-weight:900;">ОТВЕТИТЬ</div>
+                <div style="line-height:1.5; font-size:17px; white-space:pre-wrap;">${p.content}</div>
+                ${p.image_url ? `<img src="${p.image_url}" style="width:calc(100% + 44px); margin-left:-22px; margin-top:15px; display:block;">` : ''}
             </div>
             ${bHtml}
             ${repsHtml}`;
@@ -237,7 +232,7 @@ function closeModal() {
     const m = document.getElementById('modal');
     m.classList.remove('open');
     play('click');
-    setTimeout(() => { m.style.display = 'none'; replyToId = null; }, 500);
+    setTimeout(() => { m.style.display = 'none'; replyToId = null; }, 400);
 }
 
 async function send() {
@@ -245,10 +240,7 @@ async function send() {
     const f = document.getElementById('fInp').files[0];
     const url = document.getElementById('chanUrl').value;
     if(!t && !f) return;
-    
     play('send');
-    tg.HapticFeedback.notificationOccurred('success');
-    
     let iu = null;
     if(f) {
         const n = `img_${Date.now()}.jpg`;
