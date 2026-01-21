@@ -3,163 +3,176 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ECHO MATTE EDITION</title>
+<title>ECHO MATTE ULTIMATE</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root { 
     --bg: #000000;
-    --glass: rgba(255, 255, 255, 0.04);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --accent: #0a84ff;
+    --glass: rgba(255, 255, 255, 0.06);
+    --glass-deep: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --accent: #007aff;
     --text: #ffffff;
-    --text-dim: #8e8e93;
-    --spring: cubic-bezier(0.3, 0.8, 0.2, 1);
+    --spring: cubic-bezier(0.3, 0.8, 0.2, 1.1); /* Пружинистая физика */
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { 
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; 
     background: var(--bg); color: var(--text); overflow: hidden; height: 100vh;
+    -webkit-font-smoothing: antialiased;
 }
 
-/* --- МОУШН БЛЮР ФОНА --- */
+/* --- МОУШН БЛЮР КОНТЕЙНЕРА --- */
 #app { 
     height: 100vh; overflow-y: scroll; padding: 0 16px 280px; 
     transition: transform 0.6s var(--spring), filter 0.8s ease; 
-    will-change: transform, filter;
+    will-change: transform, filter; scrollbar-width: none;
 }
 #app::-webkit-scrollbar { display: none; }
 
 body.modal-open #app { 
-    transform: scale(0.94) translateY(10px); 
-    filter: blur(20px) brightness(0.7); 
+    transform: scale(0.93) translateY(15px); 
+    filter: blur(25px) brightness(0.6) saturate(180%); 
 }
 
-/* --- АНИМАЦИИ ПОЯВЛЕНИЯ ПОСТОВ --- */
-@keyframes slideUpFade {
-    0% { opacity: 0; transform: translateY(40px) scale(0.95); filter: blur(10px); }
+/* --- АНИМАЦИИ ПОЯВЛЕНИЯ --- */
+@keyframes glassIn {
+    0% { opacity: 0; transform: translateY(50px) scale(0.9); filter: blur(15px); }
     100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
 }
 
-.post-wrap { 
-    margin-bottom: 20px; 
-    animation: slideUpFade 0.7s var(--spring) backwards;
+.post-container { 
+    margin-bottom: 25px; 
+    animation: glassIn 0.8s var(--spring) backwards;
 }
 
-/* --- МАТОВОЕ СТЕКЛО --- */
+/* --- МАТОВЫЙ СТЕКЛЯННЫЙ ПОСТ --- */
 .card { 
     background: var(--glass);
-    backdrop-filter: blur(40px) saturate(150%); -webkit-backdrop-filter: blur(40px) saturate(150%);
+    backdrop-filter: blur(50px) saturate(180%); -webkit-backdrop-filter: blur(50px) saturate(180%);
     border: 1px solid var(--glass-border);
-    border-radius: 28px; padding: 20px;
-    position: relative; transition: transform 0.3s var(--spring);
+    border-radius: 30px; padding: 22px;
+    position: relative; z-index: 2;
 }
-.card:active { transform: scale(0.97); background: rgba(255,255,255,0.07); }
+.card:active { transform: scale(0.98); }
 
-.ava { width: 42px; height: 42px; border-radius: 50%; background: #1c1c1e; border: 1px solid var(--glass-border); overflow: hidden; flex-shrink: 0; }
+.ava { width: 44px; height: 44px; border-radius: 50%; background: #1c1c1e; border: 1px solid var(--glass-border); overflow: hidden; }
 .ava img { width: 100%; height: 100%; object-fit: cover; }
 
-/* Источник и ссылка */
-.meta-tag { 
-    display: inline-flex; align-items: center; gap: 4px;
-    background: rgba(10, 132, 255, 0.15); color: var(--accent);
-    padding: 6px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;
-    margin-bottom: 12px; border: 1px solid rgba(10, 132, 255, 0.2);
+/* Тег источника */
+.source-tag { 
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(255, 255, 255, 0.1); color: #fff;
+    padding: 6px 14px; border-radius: 14px; font-size: 12px; font-weight: 600;
+    margin-bottom: 14px; border: 1px solid var(--glass-border);
+    backdrop-filter: blur(10px);
 }
 
-.link-btn {
-    margin-top: 14px; background: rgba(255,255,255,0.05);
-    border: 1px solid var(--glass-border); border-radius: 18px;
-    padding: 12px 16px; display: flex; align-items: center; gap: 12px;
-    transition: 0.2s;
-}
-.link-btn:active { background: rgba(255,255,255,0.1); transform: translateY(2px); }
+/* --- СЛОИСТЫЕ ССЫЛКИ --- */
+.link-stack { margin-top: -15px; padding: 0 10px; display: flex; flex-direction: column; gap: 6px; position: relative; z-index: 3; }
 
-/* --- НАВИГАЦИЯ --- */
-.nav { 
+.glass-link {
+    background: rgba(40, 40, 40, 0.6);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px; padding: 14px 18px; 
+    display: flex; align-items: center; gap: 14px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    transition: 0.3s var(--spring);
+}
+.glass-link:active { transform: scale(0.95) translateY(5px); background: rgba(60, 60, 60, 0.8); }
+.link-icon { width: 34px; height: 34px; border-radius: 10px; background: #333; flex-shrink: 0; }
+.link-info { flex: 1; min-width: 0; }
+.link-title { color: #fff; font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* --- ИНТЕРФЕЙС --- */
+.nav-bar { 
     position: fixed; bottom: 35px; left: 50%; transform: translateX(-50%);
-    background: rgba(25, 25, 25, 0.6); backdrop-filter: blur(30px);
-    border-radius: 100px; padding: 6px; display: flex; gap: 5px; 
+    background: rgba(30, 30, 30, 0.5); backdrop-filter: blur(40px);
+    border-radius: 100px; padding: 8px; display: flex; gap: 8px; 
     border: 1px solid var(--glass-border); z-index: 1000;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.4);
 }
-.nav-item { 
+.nav-btn { 
     width: 60px; height: 50px; display: flex; align-items: center; justify-content: center;
-    border-radius: 30px; font-size: 22px; opacity: 0.4; transition: 0.3s;
+    border-radius: 30px; font-size: 22px; opacity: 0.3; transition: 0.3s;
 }
-.nav-item.active { opacity: 1; background: rgba(255,255,255,0.1); }
+.nav-btn.active { opacity: 1; background: rgba(255,255,255,0.15); }
 
-.add-fab {
-    position: fixed; bottom: 120px; right: 25px; width: 64px; height: 64px;
+.fab {
+    position: fixed; bottom: 120px; right: 25px; width: 66px; height: 66px;
     background: #fff; color: #000; border-radius: 50%; border: none;
-    font-size: 32px; display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 10px 40px rgba(255,255,255,0.15); z-index: 1100;
-    transition: transform 0.5s var(--spring); padding-bottom: 4px;
+    font-size: 36px; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 10px 40px rgba(255,255,255,0.2); z-index: 1100;
+    transition: transform 0.5s var(--spring);
 }
-.add-fab:active { transform: scale(0.85) rotate(90deg); }
+.fab:active { transform: scale(0.85) rotate(90deg); }
 
-/* --- МОДАЛЬНЫЙ ЛИСТ --- */
-.modal { 
+/* --- ШТОРКА (SHEET) --- */
+.modal-overlay { 
     display: none; position: fixed; inset: 0; z-index: 5000; align-items: flex-end;
-    background: rgba(0,0,0,0); transition: background 0.5s;
+    background: rgba(0,0,0,0); transition: background 0.6s ease;
 }
-.modal.open { background: rgba(0,0,0,0.5); }
+.modal-overlay.open { background: rgba(0,0,0,0.5); }
 
 .sheet { 
-    width: 100%; background: rgba(20, 20, 22, 0.8); backdrop-filter: blur(50px);
-    border-radius: 35px 35px 0 0; padding: 12px 24px 45px;
+    width: 100%; background: rgba(25, 25, 25, 0.85); backdrop-filter: blur(60px) saturate(180%);
+    border-radius: 40px 40px 0 0; padding: 12px 24px 50px;
     transform: translateY(110%); transition: transform 0.6s var(--spring);
     border-top: 1px solid var(--glass-border);
+    box-shadow: 0 -20px 60px rgba(0,0,0,0.5);
 }
-.modal.open .sheet { transform: translateY(0); }
+.modal-overlay.open .sheet { transform: translateY(0); }
 
-.handle { width: 40px; height: 5px; background: rgba(255,255,255,0.2); border-radius: 10px; margin: 0 auto 25px; }
+.handle { width: 40px; height: 5px; background: rgba(255,255,255,0.15); border-radius: 10px; margin: 0 auto 25px; }
 
-.inp { 
-    width: 100%; background: rgba(255,255,255,0.06); border: 1px solid transparent;
-    border-radius: 20px; padding: 16px; color: #fff; font-size: 17px; margin-bottom: 12px;
+.inp-glass { 
+    width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+    border-radius: 22px; padding: 18px; color: #fff; font-size: 17px; margin-bottom: 12px;
     transition: 0.3s;
 }
-.inp:focus { border-color: var(--accent); background: rgba(255,255,255,0.1); }
+.inp-glass:focus { background: rgba(255,255,255,0.1); border-color: var(--accent); }
 
-.send-btn { 
-    background: var(--accent); color: #fff; border: none; width: 100%;
-    padding: 18px; border-radius: 20px; font-weight: 700; font-size: 17px;
+.post-btn { 
+    background: #fff; color: #000; border: none; width: 100%;
+    padding: 20px; border-radius: 22px; font-weight: 700; font-size: 17px;
     margin-top: 10px; transition: 0.3s var(--spring);
 }
-.send-btn:active { transform: scale(0.96); opacity: 0.9; }
+.post-btn:active { transform: scale(0.96); opacity: 0.8; }
 
 /* ОТВЕТЫ */
-.reply-box { margin-left: 20px; border-left: 2px solid rgba(255,255,255,0.1); padding-left: 15px; margin-top: 10px; }
-.reply-item { padding: 8px 0; font-size: 15px; color: rgba(255,255,255,0.8); }
+.replies { margin-left: 15px; margin-top: 15px; border-left: 2px solid rgba(255,255,255,0.08); padding-left: 15px; }
+.reply { padding: 8px 0; font-size: 15px; color: rgba(255,255,255,0.7); animation: glassIn 0.5s ease; }
 </style>
 </head>
 <body id="body">
 
 <div id="app">
-    <div style="padding: 60px 5px 30px; font-size: 34px; font-weight: 800; letter-spacing: -1.5px;">ECHO</div>
+    <div style="padding: 60px 5px 30px; font-size: 38px; font-weight: 900; letter-spacing: -2px;">ECHO</div>
     <div id="feed"></div>
 </div>
 
-<div class="nav">
-    <div class="nav-item active" id="tab-all" onclick="switchTab('all')">🏠</div>
-    <div class="nav-item" id="tab-my" onclick="switchTab('my')">👤</div>
+<div class="nav-bar">
+    <div class="nav-btn active" id="tab-all" onclick="switchTab('all')">🏠</div>
+    <div class="nav-btn" id="tab-my" onclick="switchTab('my')">👤</div>
 </div>
 
-<button class="add-fab" onclick="openM()">+</button>
+<button class="fab" onclick="openM()">+</button>
 
-<div id="modal" class="modal" onclick="if(event.target==this) closeM()">
+<div id="modal" class="modal-overlay" onclick="if(event.target==this) closeM()">
     <div class="sheet">
         <div class="handle"></div>
-        <textarea id="txt" class="inp" placeholder="О чем вы думаете?" style="min-height: 150px; resize: none;"></textarea>
-        <input id="linkInp" class="inp" placeholder="Ссылка (URL)">
-        <input id="srcInp" class="inp" placeholder="Источник (Название)">
+        <textarea id="txt" class="inp-glass" placeholder="Поток мыслей..." style="min-height: 160px; resize: none;"></textarea>
+        <input id="linkInp" class="inp-glass" placeholder="Ссылка (https://...)">
+        <input id="srcInp" class="inp-glass" placeholder="Источник">
         
-        <div style="display:flex; gap:10px;">
-             <button onclick="vibe('light'); document.getElementById('fInp').click()" style="background:rgba(255,255,255,0.1); border:none; border-radius:20px; width:60px; color:#fff;">📷</button>
+        <div style="display:flex; gap:12px;">
+             <button onclick="vibe('light'); document.getElementById('fInp').click()" style="background:rgba(255,255,255,0.1); border:none; border-radius:22px; width:70px; color:#fff; font-size:20px;">📷</button>
              <input type="file" id="fInp" hidden accept="image/*">
-             <button id="sendBtn" class="send-btn" onclick="send()">Опубликовать</button>
+             <button id="sendBtn" class="post-btn" onclick="send()">Опубликовать</button>
         </div>
     </div>
 </div>
@@ -175,15 +188,37 @@ const ADMINS = [myId, '5223391218'];
 
 function vibe(type) { if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred(type); }
 
-function getRichLink(url) {
+// ФУНКЦИЯ СОЗДАНИЯ ССЫЛКИ
+function createLinkElement(url) {
     if(!url) return "";
-    let title = url.replace(/^https?:\/\//, '').split('/')[0];
-    const isTg = url.includes('t.me');
-    let icon = isTg ? `https://t.me/i/userpic/320/${url.split('t.me/')[1]?.split('/')[0]}.jpg` : `https://www.google.com/s2/favicons?domain=${title}&sz=128`;
+    let cleanUrl = url.trim();
+    if (!cleanUrl.startsWith('http')) cleanUrl = 'https://' + cleanUrl;
     
-    return `<div class="link-btn" onclick="event.stopImmediatePropagation(); vibe('medium'); ${isTg ? `tg.openTelegramLink('${url}')` : `tg.openLink('${url}')`}">
-        <img src="${icon}" style="width:32px; height:32px; border-radius:10px;" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1006/1006771.png'">
-        <div style="flex:1; min-width:0;"><div style="font-weight:600; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${isTg ? 'Открыть в Telegram' : title}</div></div>
+    let title = "Открыть ссылку", icon = "https://cdn-icons-png.flaticon.com/512/1006/1006771.png";
+    const isTg = cleanUrl.includes('t.me');
+    
+    if (isTg) {
+        const parts = cleanUrl.split('t.me/')[1];
+        if(parts) { 
+            const name = parts.split('/')[0].replace('@',''); 
+            title = '@' + name; 
+            icon = `https://t.me/i/userpic/320/${name}.jpg`; 
+        }
+    } else {
+        try {
+            const domain = new URL(cleanUrl).hostname;
+            title = domain;
+            icon = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+        } catch(e) { title = "Веб-сайт"; }
+    }
+    
+    return `
+    <div class="glass-link" onclick="event.stopImmediatePropagation(); vibe('medium'); ${isTg ? `tg.openTelegramLink('${cleanUrl}')` : `tg.openLink('${cleanUrl}')`}">
+        <img src="${icon}" class="link-icon" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1006/1006771.png'">
+        <div class="link-info">
+            <div class="link-title">${title}</div>
+            <div style="font-size:11px; opacity:0.5;">Нажмите, чтобы перейти</div>
+        </div>
         <div style="opacity:0.3;">→</div>
     </div>`;
 }
@@ -200,44 +235,54 @@ function render(data) {
 
     display.forEach((p, idx) => {
         const isPrem = ADMINS.includes(p.user_id);
-        const wrap = document.createElement('div');
-        wrap.className = 'post-wrap';
-        wrap.style.animationDelay = `${idx * 0.05}s`;
+        const container = document.createElement('div');
+        container.className = 'post-container';
+        container.style.animationDelay = `${idx * 0.06}s`;
 
-        let txt = p.content, sourceHtml = "";
-        if(txt.includes("||SRC||")) {
-            const parts = txt.split("||SRC||");
-            txt = parts[0].trim();
-            sourceHtml = `<div class="meta-tag">🔗 ${parts[1].trim()}</div>`;
+        let contentText = p.content, sourceHtml = "";
+        if(contentText.includes("||SRC||")) {
+            const parts = contentText.split("||SRC||");
+            contentText = parts[0].trim();
+            sourceHtml = `<div class="source-tag">🔗 ${parts[1].trim()}</div>`;
         }
 
+        // ПОИСК ВСЕХ ССЫЛОК
+        let linksSet = new Set();
+        if(p.track_url) linksSet.add(p.track_url);
+        const matches = contentText.match(/(https?:\/\/[^\s]+|t\.me\/[^\s]+)/g);
+        if(matches) matches.forEach(m => linksSet.add(m));
+
+        let linksHtml = "";
+        linksSet.forEach(url => { linksHtml += createLinkElement(url); });
+
         const reps = data.filter(r => r.parent_id === p.id);
-        let rHtml = reps.length ? `<div class="reply-box">${reps.map(r => `
-            <div class="reply-item">
-                <b style="color:var(--accent); font-size:13px;">@${r.username}:</b> ${r.content.split('||SRC||')[0]}
+        let rHtml = reps.length ? `<div class="replies">${reps.map(r => `
+            <div class="reply">
+                <b style="color:var(--accent);">@${r.username}:</b> ${r.content.split('||SRC||')[0]}
             </div>`).join('')}</div>` : '';
 
-        wrap.innerHTML = `
+        container.innerHTML = `
             <div class="card" onclick="openM('${p.id}'); vibe('light');">
-                <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
-                    <div class="ava">${p.avatar_url ? `<img src="${p.avatar_url}">` : `<div style="display:flex;height:100%;align-items:center;justify-content:center;color:#555;">${p.username[0]}</div>`}</div>
+                <div style="display:flex; align-items:center; gap:14px; margin-bottom:18px;">
+                    <div class="ava">${p.avatar_url ? `<img src="${p.avatar_url}">` : `<div style="display:flex;height:100%;align-items:center;justify-content:center;color:#666;font-weight:700;">${p.username[0]}</div>`}</div>
                     <div style="flex:1;">
-                        <div style="font-weight:700; font-size:16px; ${isPrem?'color:#ffd700':''}">@${p.username}</div>
-                        <div style="font-size:12px; opacity:0.4;">${isPrem?'Premium':'User'}</div>
+                        <div style="font-weight:800; font-size:17px; ${isPrem?'color:#ffd700':''}">@${p.username}</div>
+                        <div style="font-size:11px; opacity:0.4; letter-spacing:1px;">${isPrem?'PREMIUM':'MEMBER'}</div>
                     </div>
-                    ${p.user_id===myId?'<div onclick="event.stopPropagation(); del(\''+p.id+'\')" style="opacity:0.2; padding:10px;">✕</div>':''}
+                    ${p.user_id===myId?'<div onclick="event.stopPropagation(); del(\''+p.id+'\')" style="opacity:0.2; padding:10px; font-size:18px;">✕</div>':''}
                 </div>
                 ${sourceHtml}
-                <div style="font-size:17px; line-height:1.5; white-space:pre-wrap;">${txt}</div>
-                ${p.image_url ? `<img src="${p.image_url}" style="width:calc(100% + 40px); margin-left:-20px; margin-top:20px; display:block; border-radius:0 0 28px 28px;">` : ''}
-                ${getRichLink(p.track_url)}
-                ${rHtml}
+                <div style="font-size:18px; line-height:1.55; white-space:pre-wrap; color:rgba(255,255,255,0.94);">${contentText}</div>
+                ${p.image_url ? `<img src="${p.image_url}" style="width:calc(100% + 44px); margin-left:-22px; margin-top:22px; display:block; border-radius: 0 0 30px 30px; border-top: 1px solid var(--glass-border);">` : ''}
             </div>
+            <div class="link-stack">${linksHtml}</div>
+            ${rHtml}
         `;
-        feed.appendChild(wrap);
+        feed.appendChild(container);
     });
 }
 
+// --- ЛОГИКА ОКИН ---
 let replyId = null; let curTab = 'all';
 
 function openM(id=null) { 
@@ -256,23 +301,28 @@ function closeM() {
 
 async function send() {
     vibe('heavy');
-    const b = document.getElementById('sendBtn'); b.disabled=true;
+    const b = document.getElementById('sendBtn'); b.disabled=true; b.style.opacity = '0.5';
     let t = document.getElementById('txt').value, f = document.getElementById('fInp').files[0], s = document.getElementById('srcInp').value, l = document.getElementById('linkInp').value;
     
-    if(!t && !f) { b.disabled=false; return; }
+    if(!t && !f) { b.disabled=false; b.style.opacity='1'; return; }
     if(s) t += " ||SRC|| " + s;
     
     let iu = null;
-    if(f) { const n = `img_${Date.now()}.jpg`; await db.storage.from('images').upload(n, f); iu = db.storage.from('images').getPublicUrl(n).data.publicUrl; }
+    if(f) { 
+        const n = `img_${Date.now()}.jpg`; 
+        const { data } = await db.storage.from('images').upload(n, f); 
+        iu = db.storage.from('images').getPublicUrl(n).data.publicUrl; 
+    }
     
     await db.from('posts').insert([{ content: t, username: myName, user_id: myId, parent_id: replyId, image_url: iu, track_url: l, avatar_url: myAvatar }]);
     
-    closeM(); load(); b.disabled=false;
+    closeM(); load(); b.disabled=false; b.style.opacity='1';
     document.getElementById('txt').value=''; document.getElementById('linkInp').value=''; document.getElementById('srcInp').value='';
 }
 
-function switchTab(t) { vibe('light'); curTab=t; load(); document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active')); document.getElementById('tab-'+t).classList.add('active'); }
-async function del(id) { if(confirm('Удалить?')) { await db.from('posts').delete().eq('id', id); load(); } }
+function switchTab(t) { vibe('light'); curTab=t; load(); document.querySelectorAll('.nav-btn').forEach(e=>e.classList.remove('active')); document.getElementById('tab-'+t).classList.add('active'); }
+async function del(id) { vibe('warning'); if(confirm('Удалить пост?')) { await db.from('posts').delete().eq('id', id); load(); } }
+
 window.onload = () => { tg.expand(); load(); };
 </script>
 </body>
