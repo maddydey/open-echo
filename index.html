@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ECHO Social - Aperture Portal</title>
+<title>ECHO Social</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -11,92 +11,62 @@
 :root { 
     --bg: #000; --glass: rgba(255,255,255,0.06); --glass-border: rgba(255,255,255,0.12);
     --accent: #0a84ff; --spring: cubic-bezier(0.3, 0.8, 0.2, 1.15);
-    --gold: #ffd700; --aperture-gray: #2b2b2b;
+    --gold: #ffd700;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; outline: none; }
-body { 
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; 
-    background: var(--bg); color: #fff; overflow: hidden; height: 100vh;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; background: var(--bg); color: #fff; overflow: hidden; height: 100vh; }
 
-#app { 
-    height: 100vh; overflow-y: scroll; padding: 0 16px 220px; 
-    transition: transform 0.6s var(--spring), filter 0.8s ease, opacity 0.5s ease;
-    scrollbar-width: none;
-}
+#app { height: 100vh; overflow-y: scroll; padding: 0 16px 220px; transition: 0.5s ease; scrollbar-width: none; }
 #app::-webkit-scrollbar { display: none; }
 
-/* РЕЖИМ ПОГРУЖЕНИЯ */
-body.reading-mode #header, body.reading-mode #ui-elements, body.reading-mode .post-container:not(.active-focus) { 
-    opacity: 0; filter: blur(20px); pointer-events: none; 
-}
-body.reading-mode .active-focus { transform: scale(1.02); z-index: 10000; }
+/* КАРТОЧКА И ПОДЛОЖКА */
+.post-container { margin-bottom: 30px; position: relative; transition: 0.5s var(--spring); }
 
-/* СТИЛЬ ПЛИТЫ PORTAL */
-.post-container { margin-bottom: 40px; position: relative; transition: 0.5s var(--spring); }
-.portal-plate {
-    background: #111;
-    border-left: 6px solid var(--aperture-gray);
-    border-radius: 4px 25px 25px 4px;
-    position: relative; overflow: hidden;
-    box-shadow: 10px 10px 30px rgba(0,0,0,0.5);
+/* Основная карточка */
+.card { 
+    background: var(--glass); backdrop-filter: blur(40px) saturate(180%); -webkit-backdrop-filter: blur(40px);
+    border: 1px solid var(--glass-border); border-radius: 30px; padding: 24px; position: relative; z-index: 2;
 }
 
-.card { padding: 24px; position: relative; z-index: 2; }
-
-/* ПОДЛОЖКА (Hazard Bar) */
+/* ТА САМАЯ ПОДЛОЖКА (ПЛАШКА ПОД ПОСТОМ) */
 .substrate {
-    height: 14px;
-    background: repeating-linear-gradient(45deg, #222, #222 10px, #333 10px, #333 20px);
-    border-top: 1px solid rgba(255,255,255,0.05);
+    position: absolute; bottom: -12px; left: 15px; right: 15px; height: 40px;
+    background: rgba(255,255,255,0.03); backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.08); border-top: none;
+    border-radius: 0 0 25px 25px; z-index: 1;
+    display: flex; align-items: flex-end; padding: 0 20px 8px;
+    font-size: 9px; font-weight: 800; color: rgba(255,255,255,0.2); letter-spacing: 1px;
 }
 
-/* ЗОЛОТЫЕ ПРИВИЛЕГИИ ДЛЯ @sqwozzpapp */
-.gold-status .portal-plate { 
-    border-left: 6px solid var(--gold); 
-    box-shadow: 0 0 30px rgba(255,215,0,0.15);
+/* ЗОЛОТОЙ ПРЕМИУМ ДЛЯ @sqwozzpapp */
+.gold-status .card {
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.08);
 }
 .gold-status .substrate {
-    background: repeating-linear-gradient(45deg, var(--gold), var(--gold) 10px, #000 10px, #000 20px);
-}
-.gold-badge {
-    position: absolute; top: 12px; right: 60px;
-    background: var(--gold); color: #000; padding: 2px 8px;
-    font-size: 9px; font-weight: 900; border-radius: 4px; text-transform: uppercase;
+    background: linear-gradient(to bottom, rgba(255, 215, 0, 0.05), rgba(255, 215, 0, 0.1));
+    border-color: rgba(255, 215, 0, 0.2);
+    color: var(--gold);
 }
 
-/* УМНЫЕ ССЫЛКИ */
-.link-stack { margin-top: 8px; padding: 0 12px; display: flex; flex-direction: column; gap: 8px; }
-.glass-link {
-    background: rgba(35, 35, 38, 0.8); backdrop-filter: blur(25px); border: 1px solid var(--glass-border);
-    border-radius: 18px; padding: 10px 14px; display: flex; align-items: center; gap: 12px;
-}
-.glass-link img { width: 24px; height: 24px; border-radius: 6px; }
-.link-info .dom { font-size: 13px; font-weight: 700; color: #fff; display: block; }
-.link-info .path { font-size: 10px; color: rgba(255,255,255,0.4); }
-
-/* UI ЭЛЕМЕНТЫ */
-.nav { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(20,20,20,0.8); backdrop-filter: blur(40px); padding: 8px; border-radius: 100px; display: flex; border: 1px solid var(--glass-border); z-index: 1000; }
+/* Остальные стили (навигация, кнопки и т.д.) */
+.link-stack { margin-top: 15px; padding: 0 12px; display: flex; flex-direction: column; gap: 8px; }
+.glass-link { background: rgba(35, 35, 38, 0.6); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 12px; display: flex; align-items: center; gap: 12px; }
+.nav { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(20,20,20,0.6); backdrop-filter: blur(40px); padding: 8px; border-radius: 100px; display: flex; border: 1px solid var(--glass-border); z-index: 1000; }
 .nav-item { width: 60px; height: 50px; display: flex; align-items: center; justify-content: center; opacity: 0.3; }
 .nav-item.active { opacity: 1; background: rgba(255,255,255,0.1); border-radius: 30px; }
-.fab { position: fixed; bottom: 115px; right: 25px; width: 64px; height: 64px; background: #fff; border-radius: 50%; border: none; font-size: 32px; z-index: 1100; box-shadow: 0 10px 30px rgba(255,255,255,0.2); }
+.fab { position: fixed; bottom: 115px; right: 25px; width: 64px; height: 64px; background: #fff; border-radius: 50%; border: none; font-size: 32px; z-index: 1100; }
 
 /* MODAL */
 .modal { display: none; position: fixed; inset: 0; align-items: flex-end; z-index: 5000; background: rgba(0,0,0,0.6); }
-.sheet { width: 100%; background: #121214; border-radius: 30px 30px 0 0; padding: 20px 24px 50px; transform: translateY(100%); transition: 0.5s var(--spring); border-top: 1px solid var(--glass-border); }
+.sheet { width: 100%; background: #121214; border-radius: 30px 30px 0 0; padding: 20px 24px 50px; transform: translateY(100%); transition: 0.5s var(--spring); }
 .modal.open { display: flex; }
 .modal.open .sheet { transform: translateY(0); }
-.inp { width: 100%; background: #1c1c1e; border: 1px solid var(--glass-border); border-radius: 18px; padding: 15px; color: #fff; margin-bottom: 10px; font-size: 16px; }
-
-.replies { margin: 10px 0 0 20px; border-left: 2px solid #222; padding-left: 15px; }
-.toast { position: fixed; top: 40px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #fff; color: #000; padding: 12px 25px; border-radius: 100px; font-weight: 800; transition: 0.5s; z-index: 9999; }
-.toast.show { transform: translateX(-50%) translateY(0); }
+.inp { width: 100%; background: #1c1c1e; border: 1px solid var(--glass-border); border-radius: 18px; padding: 15px; color: #fff; margin-bottom: 10px; }
 </style>
 </head>
 <body id="body">
-
-<div id="toast" class="toast">PORTAL COPIED 🌀</div>
 
 <div id="app">
     <div id="header" style="padding: 60px 0 20px; font-size: 40px; font-weight: 900; letter-spacing: -2px;">ECHO</div>
@@ -113,15 +83,10 @@ body.reading-mode .active-focus { transform: scale(1.02); z-index: 10000; }
 
 <div id="modal" class="modal" onclick="if(event.target==this) closeM()">
     <div class="sheet">
-        <div style="width:40px;height:4px;background:rgba(255,255,255,0.1);border-radius:10px;margin:0 auto 20px;"></div>
-        <textarea id="txt" class="inp" placeholder="Введите сообщение..." style="min-height:120px;resize:none;"></textarea>
-        <input id="linkInp" class="inp" placeholder="Ссылка (опционально)">
+        <textarea id="txt" class="inp" placeholder="О чем вы думаете?" style="min-height:140px;resize:none;"></textarea>
+        <input id="linkInp" class="inp" placeholder="Ссылка">
         <input id="srcInp" class="inp" placeholder="Источник">
-        <div style="display:flex; gap:10px;">
-            <button onclick="document.getElementById('fInp').click()" style="background:#222; border:none; border-radius:18px; width:60px; color:#fff; font-size:20px;">📷</button>
-            <input type="file" id="fInp" hidden accept="image/*">
-            <button id="sendBtn" style="flex:1; padding:18px; border-radius:18px; border:none; background:#fff; font-weight:900;" onclick="send()">PUBLISH</button>
-        </div>
+        <button id="sendBtn" style="width:100%; padding:20px; border-radius:18px; border:none; background:#fff; font-weight:900;" onclick="send()">PUBLISH</button>
     </div>
 </div>
 
@@ -131,23 +96,9 @@ const db = supabase.createClient('https://xddulhzvzemmrhrsjfhb.supabase.co', 'sb
 
 const myId = tg.initDataUnsafe?.user?.id?.toString() || 'guest';
 const myName = tg.initDataUnsafe?.user?.username || 'Guest';
-const myAvatar = tg.initDataUnsafe?.user?.photo_url || null;
 
-// ТВОЙ ID ДЛЯ ПРИВИЛЕГИЙ
+// ТВОЙ НИК ДЛЯ ЗОЛОТОГО ПРЕМИУМА
 const MASTER_USER = "sqwozzpapp";
-
-function vibe(t) { if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred(t); }
-
-function createSmartLink(url) {
-    if(!url) return "";
-    let clean = url.trim(); if(!clean.startsWith('http')) clean = 'https://' + clean;
-    let dom = "Link"; try { dom = new URL(clean).hostname.replace('www.', ''); } catch(e) {}
-    const icon = `https://www.google.com/s2/favicons?domain=${dom}&sz=128`;
-    return `<div class="glass-link" onclick="event.stopPropagation(); tg.openLink('${clean}')">
-        <img src="${icon}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1006/1006771.png'">
-        <div class="link-info"><span class="dom">${dom}</span><span class="path">Open resource</span></div>
-    </div>`;
-}
 
 async function load() {
     let { data } = await db.from('posts').select('*').order('created_at', { ascending: false });
@@ -156,86 +107,57 @@ async function load() {
 
 function render(data) {
     const feed = document.getElementById('feed'); feed.innerHTML = '';
-    const mains = data.filter(p => !p.parent_id);
-    const display = curTab === 'my' ? mains.filter(p => p.user_id === myId) : mains;
-
-    display.forEach(p => {
-        const wrap = document.createElement('div');
+    
+    data.filter(p => !p.parent_id).forEach(p => {
         const isMaster = p.username === MASTER_USER;
+        const wrap = document.createElement('div');
         wrap.className = `post-container ${isMaster ? 'gold-status' : ''}`;
 
-        let txt = p.content, sTag = "";
-        if(txt.includes("||SRC||")) { 
-            const pts = txt.split("||SRC||"); txt = pts[0]; 
-            sTag = `<div style="color:var(--accent); font-size:10px; font-weight:800; margin-bottom:8px;">SOURCE: ${pts[1].toUpperCase()}</div>`;
-        }
-
-        let lHtml = createSmartLink(p.track_url);
-        const reps = data.filter(r => r.parent_id === p.id);
-        let rHtml = reps.length ? `<div class="replies">${reps.map(r => `<div style="font-size:13px; margin-bottom:5px; opacity:0.6;"><b>@${r.username}:</b> ${r.content.split('||SRC||')[0]}</div>`).join('')}</div>` : '';
-
+        let txt = p.content.split("||SRC||")[0];
+        
         wrap.innerHTML = `
-            <div class="portal-plate" onclick="openM('${p.id}')">
-                ${isMaster ? '<div class="gold-badge">ADMIN ACCESS</div>' : ''}
-                <div class="card">
-                    <div style="position:absolute; top:20px; right:20px; display:flex; gap:12px; z-index:10;">
-                        <div onclick="event.stopPropagation(); copyPortal('${p.id}')" style="opacity:0.3;">🌀</div>
-                        ${p.user_id === myId ? `<div onclick="event.stopPropagation(); del('${p.id}')" style="opacity:0.3;">✕</div>` : ''}
-                    </div>
-                    <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
-                        <div style="width:38px; height:38px; border-radius:50%; background:#222; overflow:hidden; border:1px solid rgba(255,255,255,0.1);">
-                            ${p.avatar_url ? `<img src="${p.avatar_url}" style="width:100%;height:100%;object-fit:cover;">` : ''}
-                        </div>
-                        <div>
-                            <div style="font-weight:800; font-size:15px; color:${isMaster ? 'var(--gold)' : '#fff'}">@${p.username}</div>
-                            <div style="font-size:9px; opacity:0.4;">PORTAL-LOG #${p.id.slice(0,5)}</div>
-                        </div>
-                    </div>
-                    ${sTag}
-                    <div style="font-size:16px; line-height:1.5; color:rgba(255,255,255,0.9);">${txt}</div>
-                    ${p.image_url ? `<img src="${p.image_url}" style="width:calc(100% + 48px); margin: 20px -24px -24px; display:block;">` : ''}
+            <div class="card" onclick="openM('${p.id}')">
+                <div style="position:absolute; top:24px; right:24px; display:flex; gap:12px;">
+                    ${p.user_id === myId ? `<div onclick="event.stopPropagation(); del('${p.id}')" style="opacity:0.2;">✕</div>` : ''}
                 </div>
-                <div class="substrate"></div>
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
+                    <div style="width:40px; height:40px; border-radius:50%; background:#222; border:1px solid var(--glass-border); overflow:hidden;">
+                        ${p.avatar_url ? `<img src="${p.avatar_url}" style="width:100%;height:100%;object-fit:cover;">` : ''}
+                    </div>
+                    <div>
+                        <div style="font-weight:800; color:${isMaster ? 'var(--gold)' : '#fff'}">@${p.username}</div>
+                        <div style="font-size:10px; opacity:0.4;">${isMaster ? 'PREMIUM ACCESS' : 'MEMBER'}</div>
+                    </div>
+                </div>
+                <div style="font-size:16px; line-height:1.5;">${txt}</div>
+                ${p.image_url ? `<img src="${p.image_url}" style="width:calc(100% + 48px); margin: 20px -24px -24px; border-radius:0 0 30px 30px;">` : ''}
             </div>
-            <div class="link-stack">${lHtml}</div>
-            ${rHtml}
+            
+            <div class="substrate">
+                ${isMaster ? 'APERTURE GOLD PRIVILEGE' : 'ECHO PROTOCOL'}
+            </div>
+            
+            <div class="link-stack">
+                ${p.track_url ? `<div class="glass-link">🔗 ${p.track_url}</div>` : ''}
+            </div>
         `;
-        setupReadingMode(wrap.querySelector('.portal-plate'));
         feed.appendChild(wrap);
     });
 }
 
-function setupReadingMode(el) {
-    let t;
-    el.ontouchstart = () => { t = setTimeout(() => { vibe('medium'); document.body.classList.add('reading-mode'); el.parentElement.classList.add('active-focus'); }, 600); };
-    el.ontouchend = el.ontouchend = () => { clearTimeout(t); document.body.classList.remove('reading-mode'); document.querySelectorAll('.post-container').forEach(c => c.classList.remove('active-focus')); };
-}
-
-function copyPortal(id) {
-    const url = window.location.origin + window.location.pathname + '?p=' + id;
-    navigator.clipboard.writeText(url); vibe('heavy');
-    const t = document.getElementById('toast'); t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2000);
-}
-
-let replyId = null; let curTab = 'all';
-function openM(id=null) { replyId=id; document.getElementById('modal').style.display='flex'; setTimeout(()=>document.getElementById('modal').classList.add('open'),10); }
+function openM(id=null) { document.getElementById('modal').style.display='flex'; setTimeout(()=>document.getElementById('modal').classList.add('open'),10); }
 function closeM() { document.getElementById('modal').classList.remove('open'); setTimeout(()=>document.getElementById('modal').style.display='none',500); }
 
 async function send() {
-    vibe('medium'); const b = document.getElementById('sendBtn'); b.disabled = true;
-    let t = document.getElementById('txt').value, f = document.getElementById('fInp').files[0], s = document.getElementById('srcInp').value, l = document.getElementById('linkInp').value;
-    if(!t && !f) { b.disabled=false; return; }
-    if(s) t += " ||SRC|| " + s;
-    let iu = null;
-    if(f) { const n = `img_${Date.now()}.jpg`; await db.storage.from('images').upload(n, f); iu = db.storage.from('images').getPublicUrl(n).data.publicUrl; }
-    await db.from('posts').insert([{ content: t, username: myName, user_id: myId, parent_id: replyId, image_url: iu, track_url: l, avatar_url: myAvatar }]);
-    closeM(); load(); b.disabled = false;
-    document.getElementById('txt').value=''; document.getElementById('linkInp').value=''; document.getElementById('srcInp').value='';
+    let t = document.getElementById('txt').value;
+    if(!t) return;
+    await db.from('posts').insert([{ content: t, username: myName, user_id: myId }]);
+    closeM(); load();
 }
 
-function switchTab(t) { vibe('light'); curTab=t; document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active')); document.getElementById('tab-'+t).classList.add('active'); load(); }
-async function del(id) { if(confirm('Delete?')) { await db.from('posts').delete().eq('id', id); load(); } }
+let curTab = 'all';
+function switchTab(t) { curTab=t; load(); }
+async function del(id) { if(confirm('Удалить?')) { await db.from('posts').delete().eq('id', id); load(); } }
 
 window.onload = () => { tg.expand(); load(); };
 </script>
