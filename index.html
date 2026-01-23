@@ -3,118 +3,83 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ECHO - Cloudy Portal</title>
+<title>ECHO Social</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root { 
-    --bg: #0a0a0b; 
-    --cloud-bg: rgba(255, 255, 255, 0.07);
-    --cloud-border: rgba(255, 255, 255, 0.12);
-    --gold-sun: #ffd700;
-    --spring: cubic-bezier(0.4, 0, 0.2, 1);
+    --bg: #000; 
+    --glass: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --gold: #ffd700;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { 
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; 
-    background: var(--bg); color: #fff; overflow: hidden; height: 100vh;
-}
+body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: #fff; overflow: hidden; }
 
-/* Фон с легким градиентом как ночное небо */
-body::before {
-    content: ''; position: fixed; inset: 0;
-    background: radial-gradient(circle at 50% -20%, #1a1a2e 0%, #000 70%);
-    z-index: -1;
-}
-
-#app { height: 100vh; overflow-y: scroll; padding: 0 16px 220px; scrollbar-width: none; }
+#app { height: 100vh; overflow-y: scroll; padding: 0 16px 200px; scrollbar-width: none; }
 #app::-webkit-scrollbar { display: none; }
 
-/* КОНТЕЙНЕР "ОБЛАКО" */
-.post-container { margin-bottom: 40px; position: relative; }
+/* КОНТЕЙНЕР */
+.post-container { margin-bottom: 35px; position: relative; }
 
-/* НИЖНЯЯ ПОДЛОЖКА (МЯГКАЯ ТЕНЬ/ОСНОВА) */
-.cloud-substrate {
-    position: absolute; bottom: -12px; left: 10%; right: 10%; height: 50px;
-    background: rgba(255, 255, 255, 0.03);
-    filter: blur(15px); border-radius: 50%; z-index: 1;
-}
-
-/* КАРТОЧКА-ОБЛАКО */
+/* ОСНОВНАЯ КАРТОЧКА */
 .card { 
-    background: var(--cloud-bg);
-    backdrop-filter: blur(30px) saturate(150%);
-    -webkit-backdrop-filter: blur(30px);
-    border: 1px solid var(--cloud-border);
-    /* Мягкие "облачные" углы */
-    border-radius: 40px 40px 40px 15px; 
-    padding: 24px; position: relative; z-index: 2;
-    transition: transform 0.3s var(--spring);
+    background: rgba(20, 20, 22, 0.7); 
+    backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+    border: 1px solid var(--glass-border); 
+    border-radius: 28px; padding: 22px; 
+    position: relative; z-index: 2;
 }
 
-/* ЗОЛОТОЙ ПРЕМИУМ (СОЛНЕЧНОЕ ОБЛАКО) */
-.is-master .card {
-    border-color: rgba(255, 215, 0, 0.3);
-    background: linear-gradient(135deg, rgba(255,215,0,0.05) 0%, rgba(255,255,255,0.07) 100%);
-    box-shadow: 0 0 30px rgba(255, 215, 0, 0.1);
+/* МИНИМАЛИСТИЧНАЯ ПОДЛОЖКА */
+.substrate {
+    position: absolute; bottom: -12px; left: 20px; right: 20px; height: 30px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0 0 20px 20px; z-index: 1;
 }
-.is-master .cloud-substrate {
-    background: rgba(255, 215, 0, 0.15);
-    filter: blur(20px);
-}
-.is-master .username { color: var(--gold-sun); text-shadow: 0 0 8px rgba(255,215,0,0.3); }
 
-/* ВНУТРЕННИЕ ЭЛЕМЕНТЫ */
-.user-block { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
-.avatar { 
-    width: 44px; height: 44px; border-radius: 18px; /* Квадрат со скруглением */
-    background: #222; border: 1px solid var(--cloud-border);
-}
-.username { font-weight: 800; font-size: 17px; }
-.content { font-size: 17px; line-height: 1.6; color: rgba(255,255,255,0.9); }
+/* ПРЕМИУМ ДЛЯ @sqwozzpapp */
+.gold-status .card { border-color: rgba(255, 215, 0, 0.2); }
+.gold-status .substrate { background: rgba(255, 215, 0, 0.05); border-color: rgba(255, 215, 0, 0.2); }
+.gold-status .username { color: var(--gold); }
+
+.user-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.avatar { width: 40px; height: 40px; border-radius: 50%; background: #1a1a1a; border: 1px solid var(--glass-border); object-fit: cover; }
+.username { font-weight: 700; font-size: 16px; }
+
+.content { font-size: 17px; line-height: 1.5; color: rgba(255,255,255,0.9); }
+.post-img { width: calc(100% + 44px); margin: 18px -22px -22px; display: block; border-radius: 0 0 28px 28px; }
 
 /* КНОПКИ */
-.actions { position: absolute; top: 24px; right: 24px; display: flex; gap: 12px; opacity: 0.4; }
-
-/* УМНЫЕ ССЫЛКИ (БАБЛЫ) */
-.link-stack { margin-top: 10px; padding: 0 10px; display: flex; flex-direction: column; gap: 6px; }
-.cloud-link {
-    background: rgba(255,255,255,0.05); border: 1px solid var(--cloud-border);
-    border-radius: 20px; padding: 12px 18px; font-size: 14px;
-    display: flex; align-items: center; gap: 10px;
-}
-
-/* UI КНОПКИ */
-.nav { position: fixed; bottom: 35px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.08); backdrop-filter: blur(25px); padding: 6px; border-radius: 100px; display: flex; border: 1px solid var(--cloud-border); z-index: 1000; }
-.nav-item { width: 55px; height: 45px; display: flex; align-items: center; justify-content: center; opacity: 0.4; font-size: 20px; }
-.nav-item.active { opacity: 1; background: rgba(255,255,255,0.1); border-radius: 100px; }
-.fab { position: fixed; bottom: 120px; right: 25px; width: 64px; height: 64px; background: #fff; color: #000; border-radius: 24px; border: none; font-size: 32px; font-weight: bold; z-index: 1100; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+.nav { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(20,20,20,0.8); backdrop-filter: blur(30px); padding: 8px; border-radius: 100px; display: flex; border: 1px solid var(--glass-border); z-index: 1000; }
+.nav-item { width: 50px; height: 45px; display: flex; align-items: center; justify-content: center; opacity: 0.3; }
+.nav-item.active { opacity: 1; }
+.fab { position: fixed; bottom: 105px; right: 20px; width: 60px; height: 60px; background: #fff; color: #000; border-radius: 50%; border: none; font-size: 28px; z-index: 1100; font-weight: bold; }
 </style>
 </head>
 <body>
 
 <div id="app">
-    <div id="header" style="padding: 60px 0 20px; font-size: 38px; font-weight: 900; letter-spacing: -1.5px; text-align: center;">echo</div>
+    <div id="header" style="padding: 60px 0 20px; font-size: 34px; font-weight: 800; text-align: center; letter-spacing: -1px;">ECHO</div>
     <div id="feed"></div>
 </div>
 
 <div id="ui-elements">
     <div class="nav">
-        <div class="nav-item active" id="tab-all" onclick="switchTab('all')">🏠</div>
-        <div class="nav-item" id="tab-my" onclick="switchTab('my')">👤</div>
+        <div class="nav-item active" onclick="switchTab('all')">🏠</div>
+        <div class="nav-item" onclick="switchTab('my')">👤</div>
     </div>
     <button class="fab" onclick="openM()">+</button>
 </div>
 
-<div id="modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(10px); z-index:5000; align-items:center; justify-content:center; padding:20px;">
-    <div style="width:100%; max-width:400px; background:#1a1a1c; border-radius:40px; padding:30px; border:1px solid var(--cloud-border);">
-        <textarea id="txt" style="width:100%; height:120px; background:transparent; border:none; color:#fff; font-size:18px; resize:none;" placeholder="Напишите что-нибудь..."></textarea>
-        <div style="display:flex; gap:10px; margin-top:20px;">
-            <button id="sendBtn" style="flex:1; padding:18px; border-radius:25px; border:none; background:#fff; font-weight:900;" onclick="send()">Опубликовать</button>
-            <button style="padding:18px; background:rgba(255,255,255,0.1); color:#fff; border:none; border-radius:25px;" onclick="closeM()">✕</button>
-        </div>
+<div id="modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:5000; align-items:flex-end;">
+    <div style="width:100%; background:#111; border-radius:30px 30px 0 0; padding:25px; border-top:1px solid var(--glass-border);">
+        <textarea id="txt" style="width:100%; height:120px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:20px; color:#fff; padding:15px; margin-bottom:15px; font-size:17px; outline:none;" placeholder="Что нового?"></textarea>
+        <button id="sendBtn" style="width:100%; padding:18px; border-radius:18px; border:none; background:#fff; font-weight:800;" onclick="send()">Опубликовать</button>
+        <button style="width:100%; padding:15px; margin-top:5px; background:transparent; color:#555; border:none;" onclick="closeM()">Закрыть</button>
     </div>
 </div>
 
@@ -140,27 +105,21 @@ function render(data) {
     data.filter(p => !p.parent_id).forEach(p => {
         const isMaster = p.username === MASTER_USER;
         const wrap = document.createElement('div');
-        wrap.className = `post-container ${isMaster ? 'is-master' : ''}`;
+        wrap.className = `post-container ${isMaster ? 'gold-status' : ''}`;
 
         wrap.innerHTML = `
-            <div class="cloud-substrate"></div>
             <div class="card">
-                <div class="actions">
-                    <div onclick="event.stopPropagation(); del('${p.id}')">${p.user_id === myId ? '✕' : ''}</div>
+                <div style="position:absolute; top:22px; right:22px;">
+                    ${p.user_id === myId ? `<span onclick="del('${p.id}')" style="opacity:0.2;">✕</span>` : ''}
                 </div>
-                <div class="user-block">
+                <div class="user-header">
                     <img src="${p.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="avatar">
-                    <div>
-                        <div class="username">@${p.username}</div>
-                        <div style="font-size:10px; opacity:0.4;">${isMaster ? '⭐ Gold Status' : 'Cloud Member'}</div>
-                    </div>
+                    <div class="username">@${p.username}</div>
                 </div>
                 <div class="content">${p.content.split('||SRC||')[0]}</div>
-                ${p.image_url ? `<img src="${p.image_url}" style="width:calc(100% + 48px); margin: 20px -24px -24px; border-radius:0 0 40px 15px;">` : ''}
+                ${p.image_url ? `<img src="${p.image_url}" class="post-img">` : ''}
             </div>
-            <div class="link-stack">
-                ${p.track_url ? `<div class="cloud-link">☁️ ${p.track_url}</div>` : ''}
-            </div>
+            <div class="substrate"></div>
         `;
         feed.appendChild(wrap);
     });
@@ -178,8 +137,7 @@ async function send() {
 }
 
 async function del(id) { if(confirm('Удалить?')) { await db.from('posts').delete().eq('id', id); load(); } }
-let curTab = 'all';
-function switchTab(t) { curTab=t; load(); }
+function switchTab(t) { load(); }
 
 window.onload = () => { tg.expand(); load(); };
 </script>
