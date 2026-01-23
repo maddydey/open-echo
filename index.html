@@ -3,73 +3,89 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ECHO Social</title>
+<title>ECHO - Portal Edition</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root { 
-    --bg: #000; --glass: rgba(255,255,255,0.06); --glass-border: rgba(255,255,255,0.12);
-    --accent: #0a84ff; --spring: cubic-bezier(0.3, 0.8, 0.2, 1.15);
+    --bg: #050505; 
+    --glass: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --accent-blue: #00d2ff;
+    --accent-orange: #ff9d00;
     --gold: #ffd700;
+    --spring: cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; background: var(--bg); color: #fff; overflow: hidden; height: 100vh; }
 
-#app { height: 100vh; overflow-y: scroll; padding: 0 16px 220px; transition: 0.5s ease; scrollbar-width: none; }
+#app { height: 100vh; overflow-y: scroll; padding: 0 16px 220px; scrollbar-width: none; perspective: 1000px; }
 #app::-webkit-scrollbar { display: none; }
 
-/* КАРТОЧКА И ПОДЛОЖКА */
-.post-container { margin-bottom: 30px; position: relative; transition: 0.5s var(--spring); }
+/* КОНТЕЙНЕР ПОСТА */
+.post-wrapper { margin-bottom: 45px; position: relative; animation: slideIn 0.5s var(--spring); }
 
-/* Основная карточка */
+/* ПОДЛОЖКА (PLATE) */
+.portal-substrate {
+    position: absolute; inset: -2px -2px -15px -2px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+    backdrop-filter: blur(10px); border: 1px solid var(--glass-border);
+    border-radius: 32px; z-index: 1;
+}
+
+/* КАРТОЧКА */
 .card { 
-    background: var(--glass); backdrop-filter: blur(40px) saturate(180%); -webkit-backdrop-filter: blur(40px);
-    border: 1px solid var(--glass-border); border-radius: 30px; padding: 24px; position: relative; z-index: 2;
+    background: rgba(15, 15, 15, 0.8); backdrop-filter: blur(50px) saturate(200%);
+    border: 1px solid var(--glass-border); border-radius: 30px; padding: 20px;
+    position: relative; z-index: 2; overflow: hidden;
+    transition: transform 0.3s var(--spring);
 }
 
-/* ТА САМАЯ ПОДЛОЖКА (ПЛАШКА ПОД ПОСТОМ) */
-.substrate {
-    position: absolute; bottom: -12px; left: 15px; right: 15px; height: 40px;
-    background: rgba(255,255,255,0.03); backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.08); border-top: none;
-    border-radius: 0 0 25px 25px; z-index: 1;
-    display: flex; align-items: flex-end; padding: 0 20px 8px;
-    font-size: 9px; font-weight: 800; color: rgba(255,255,255,0.2); letter-spacing: 1px;
+/* ДИЗАЙН ДЛЯ @sqwozzpapp */
+.is-master .portal-substrate {
+    background: linear-gradient(180deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.02) 100%);
+    border-color: rgba(255, 215, 0, 0.3);
+    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.05);
+}
+.is-master .card { border-color: rgba(255, 215, 0, 0.2); }
+.is-master .master-tag { color: var(--gold); text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+
+/* ЭЛЕМЕНТЫ ВНУТРИ */
+.user-info { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.avatar { width: 42px; height: 42px; border-radius: 50%; background: #1a1a1a; border: 1px solid var(--glass-border); object-fit: cover; }
+.username { font-weight: 800; font-size: 16px; letter-spacing: -0.3px; }
+.status-pill { font-size: 9px; font-weight: 900; padding: 2px 8px; border-radius: 100px; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); text-transform: uppercase; }
+
+.content { font-size: 17px; line-height: 1.5; color: rgba(255,255,255,0.95); white-space: pre-wrap; word-break: break-word; }
+.post-img { width: calc(100% + 40px); margin: 20px -20px -20px; display: block; border-radius: 0 0 30px 30px; border-top: 1px solid var(--glass-border); }
+
+/* КНОПКИ УПРАВЛЕНИЯ */
+.actions { position: absolute; top: 20px; right: 20px; display: flex; gap: 15px; z-index: 10; }
+.action-btn { opacity: 0.3; transition: 0.3s; font-size: 18px; }
+
+/* УМНЫЕ ССЫЛКИ */
+.link-stack { margin: 25px 12px 0; display: flex; flex-direction: column; gap: 8px; position: relative; z-index: 5; }
+.glass-link { 
+    background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);
+    border-radius: 18px; padding: 12px; display: flex; align-items: center; gap: 12px;
 }
 
-/* ЗОЛОТОЙ ПРЕМИУМ ДЛЯ @sqwozzpapp */
-.gold-status .card {
-    border: 1px solid rgba(255, 215, 0, 0.3);
-    box-shadow: 0 0 25px rgba(255, 215, 0, 0.08);
-}
-.gold-status .substrate {
-    background: linear-gradient(to bottom, rgba(255, 215, 0, 0.05), rgba(255, 215, 0, 0.1));
-    border-color: rgba(255, 215, 0, 0.2);
-    color: var(--gold);
-}
+/* UI КНОПКИ */
+.nav { position: fixed; bottom: 35px; left: 50%; transform: translateX(-50%); background: rgba(10,10,10,0.7); backdrop-filter: blur(30px); padding: 8px; border-radius: 100px; display: flex; border: 1px solid var(--glass-border); z-index: 1000; }
+.nav-item { width: 55px; height: 45px; display: flex; align-items: center; justify-content: center; opacity: 0.3; }
+.nav-item.active { opacity: 1; background: rgba(255,255,255,0.08); border-radius: 100px; }
+.fab { position: fixed; bottom: 120px; right: 25px; width: 68px; height: 68px; background: #fff; color: #000; border-radius: 50%; border: none; font-size: 32px; font-weight: bold; z-index: 1100; box-shadow: 0 10px 40px rgba(255,255,255,0.3); }
 
-/* Остальные стили (навигация, кнопки и т.д.) */
-.link-stack { margin-top: 15px; padding: 0 12px; display: flex; flex-direction: column; gap: 8px; }
-.glass-link { background: rgba(35, 35, 38, 0.6); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 12px; display: flex; align-items: center; gap: 12px; }
-.nav { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(20,20,20,0.6); backdrop-filter: blur(40px); padding: 8px; border-radius: 100px; display: flex; border: 1px solid var(--glass-border); z-index: 1000; }
-.nav-item { width: 60px; height: 50px; display: flex; align-items: center; justify-content: center; opacity: 0.3; }
-.nav-item.active { opacity: 1; background: rgba(255,255,255,0.1); border-radius: 30px; }
-.fab { position: fixed; bottom: 115px; right: 25px; width: 64px; height: 64px; background: #fff; border-radius: 50%; border: none; font-size: 32px; z-index: 1100; }
-
-/* MODAL */
-.modal { display: none; position: fixed; inset: 0; align-items: flex-end; z-index: 5000; background: rgba(0,0,0,0.6); }
-.sheet { width: 100%; background: #121214; border-radius: 30px 30px 0 0; padding: 20px 24px 50px; transform: translateY(100%); transition: 0.5s var(--spring); }
-.modal.open { display: flex; }
-.modal.open .sheet { transform: translateY(0); }
-.inp { width: 100%; background: #1c1c1e; border: 1px solid var(--glass-border); border-radius: 18px; padding: 15px; color: #fff; margin-bottom: 10px; }
+/* АНИМАЦИИ */
+@keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 </head>
-<body id="body">
+<body>
 
 <div id="app">
-    <div id="header" style="padding: 60px 0 20px; font-size: 40px; font-weight: 900; letter-spacing: -2px;">ECHO</div>
+    <div id="header" style="padding: 60px 0 30px; font-size: 48px; font-weight: 900; letter-spacing: -3px; color: #fff;">ECHO</div>
     <div id="feed"></div>
 </div>
 
@@ -81,12 +97,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-se
     <button class="fab" onclick="openM()">+</button>
 </div>
 
-<div id="modal" class="modal" onclick="if(event.target==this) closeM()">
-    <div class="sheet">
-        <textarea id="txt" class="inp" placeholder="О чем вы думаете?" style="min-height:140px;resize:none;"></textarea>
-        <input id="linkInp" class="inp" placeholder="Ссылка">
-        <input id="srcInp" class="inp" placeholder="Источник">
-        <button id="sendBtn" style="width:100%; padding:20px; border-radius:18px; border:none; background:#fff; font-weight:900;" onclick="send()">PUBLISH</button>
+<div id="modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:5000; align-items:flex-end;">
+    <div style="width:100%; background:#111; border-radius:35px 35px 0 0; padding:25px; border-top:1px solid var(--glass-border);">
+        <textarea id="txt" style="width:100%; height:150px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:20px; color:#fff; padding:15px; margin-bottom:15px; font-size:17px; resize:none;" placeholder="Что происходит?"></textarea>
+        <input id="linkInp" style="width:100%; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:15px; color:#fff; padding:12px; margin-bottom:10px;" placeholder="Вставьте ссылку...">
+        <button id="sendBtn" style="width:100%; padding:20px; border-radius:20px; border:none; background:#fff; font-weight:900; font-size:16px;" onclick="send()">ОПУБЛИКОВАТЬ</button>
+        <button style="width:100%; padding:15px; margin-top:10px; background:transparent; color:rgba(255,255,255,0.4); border:none;" onclick="closeM()">Отмена</button>
     </div>
 </div>
 
@@ -96,68 +112,64 @@ const db = supabase.createClient('https://xddulhzvzemmrhrsjfhb.supabase.co', 'sb
 
 const myId = tg.initDataUnsafe?.user?.id?.toString() || 'guest';
 const myName = tg.initDataUnsafe?.user?.username || 'Guest';
+const myAvatar = tg.initDataUnsafe?.user?.photo_url || null;
 
-// ТВОЙ НИК ДЛЯ ЗОЛОТОГО ПРЕМИУМА
 const MASTER_USER = "sqwozzpapp";
 
 async function load() {
-    let { data } = await db.from('posts').select('*').order('created_at', { ascending: false });
+    const { data } = await db.from('posts').select('*').order('created_at', { ascending: false });
     if(data) render(data);
 }
 
 function render(data) {
-    const feed = document.getElementById('feed'); feed.innerHTML = '';
+    const feed = document.getElementById('feed');
+    feed.innerHTML = '';
     
     data.filter(p => !p.parent_id).forEach(p => {
         const isMaster = p.username === MASTER_USER;
         const wrap = document.createElement('div');
-        wrap.className = `post-container ${isMaster ? 'gold-status' : ''}`;
+        wrap.className = `post-wrapper ${isMaster ? 'is-master' : ''}`;
 
-        let txt = p.content.split("||SRC||")[0];
-        
+        let lHtml = p.track_url ? `<div class="glass-link">🔗 <span style="font-size:14px; opacity:0.8;">${p.track_url}</span></div>` : "";
+
         wrap.innerHTML = `
+            <div class="portal-substrate"></div>
             <div class="card" onclick="openM('${p.id}')">
-                <div style="position:absolute; top:24px; right:24px; display:flex; gap:12px;">
-                    ${p.user_id === myId ? `<div onclick="event.stopPropagation(); del('${p.id}')" style="opacity:0.2;">✕</div>` : ''}
+                <div class="actions">
+                    <div class="action-btn" onclick="event.stopPropagation(); copyPortal('${p.id}')">🌀</div>
+                    ${p.user_id === myId ? `<div class="action-btn" onclick="event.stopPropagation(); del('${p.id}')">✕</div>` : ''}
                 </div>
-                <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
-                    <div style="width:40px; height:40px; border-radius:50%; background:#222; border:1px solid var(--glass-border); overflow:hidden;">
-                        ${p.avatar_url ? `<img src="${p.avatar_url}" style="width:100%;height:100%;object-fit:cover;">` : ''}
-                    </div>
+                <div class="user-info">
+                    <img src="${p.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="avatar">
                     <div>
-                        <div style="font-weight:800; color:${isMaster ? 'var(--gold)' : '#fff'}">@${p.username}</div>
-                        <div style="font-size:10px; opacity:0.4;">${isMaster ? 'PREMIUM ACCESS' : 'MEMBER'}</div>
+                        <div class="username master-tag">@${p.username}</div>
+                        <div class="status-pill">${isMaster ? 'Creation Portal' : 'Member'}</div>
                     </div>
                 </div>
-                <div style="font-size:16px; line-height:1.5;">${txt}</div>
-                ${p.image_url ? `<img src="${p.image_url}" style="width:calc(100% + 48px); margin: 20px -24px -24px; border-radius:0 0 30px 30px;">` : ''}
+                <div class="content">${p.content.split('||SRC||')[0]}</div>
+                ${p.image_url ? `<img src="${p.image_url}" class="post-img">` : ''}
             </div>
-            
-            <div class="substrate">
-                ${isMaster ? 'APERTURE GOLD PRIVILEGE' : 'ECHO PROTOCOL'}
-            </div>
-            
-            <div class="link-stack">
-                ${p.track_url ? `<div class="glass-link">🔗 ${p.track_url}</div>` : ''}
-            </div>
+            <div class="link-stack">${lHtml}</div>
         `;
         feed.appendChild(wrap);
     });
 }
 
-function openM(id=null) { document.getElementById('modal').style.display='flex'; setTimeout(()=>document.getElementById('modal').classList.add('open'),10); }
-function closeM() { document.getElementById('modal').classList.remove('open'); setTimeout(()=>document.getElementById('modal').style.display='none',500); }
+// Утилиты
+function openM(id=null) { replyId=id; document.getElementById('modal').style.display='flex'; }
+function closeM() { document.getElementById('modal').style.display='none'; }
 
 async function send() {
-    let t = document.getElementById('txt').value;
-    if(!t) return;
-    await db.from('posts').insert([{ content: t, username: myName, user_id: myId }]);
-    closeM(); load();
+    const b = document.getElementById('sendBtn'); b.disabled = true;
+    const t = document.getElementById('txt').value, l = document.getElementById('linkInp').value;
+    if(!t) { b.disabled=false; return; }
+    await db.from('posts').insert([{ content: t, username: myName, user_id: myId, track_url: l, avatar_url: myAvatar }]);
+    closeM(); load(); b.disabled = false;
+    document.getElementById('txt').value=''; document.getElementById('linkInp').value='';
 }
 
-let curTab = 'all';
-function switchTab(t) { curTab=t; load(); }
-async function del(id) { if(confirm('Удалить?')) { await db.from('posts').delete().eq('id', id); load(); } }
+async function del(id) { if(confirm('Удалить пост?')) { await db.from('posts').delete().eq('id', id); load(); } }
+function copyPortal(id) { navigator.clipboard.writeText(window.location.origin + '?p=' + id); tg.HapticFeedback.notificationOccurred('success'); }
 
 window.onload = () => { tg.expand(); load(); };
 </script>
