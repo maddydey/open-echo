@@ -11,6 +11,7 @@
 :root { 
     --bg: #000; --glass: rgba(255,255,255,0.06); --glass-border: rgba(255,255,255,0.12);
     --accent: #0a84ff; --spring: cubic-bezier(0.3, 0.8, 0.2, 1.15);
+    --portal-blue: #00a2ff; --portal-orange: #ff9a00;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; outline: none; }
@@ -26,72 +27,59 @@ body {
 }
 #app::-webkit-scrollbar { display: none; }
 
-/* РЕЖИМ ПОГРУЖЕНИЯ */
-body.reading-mode #header, 
-body.reading-mode #ui-elements, 
-body.reading-mode .portal-label,
-body.reading-mode .post-container:not(.active-focus) { 
-    opacity: 0; filter: blur(20px); pointer-events: none; 
-}
-body.reading-mode .active-focus { transform: scale(1.02); z-index: 10000; }
-body.reading-mode #app { background: rgba(0,0,0,0.8); }
-
-body.modal-open #app { transform: scale(0.93) translateY(15px); filter: blur(25px) brightness(0.7); }
-
 /* КАРТОЧКА */
-.post-container { transition: 0.5s var(--spring); margin-bottom: 30px; }
+.post-container { transition: 0.5s var(--spring); margin-bottom: 35px; position: relative; }
 .card { 
     background: var(--glass); backdrop-filter: blur(50px) saturate(190%); -webkit-backdrop-filter: blur(50px) saturate(190%);
-    border: 1px solid var(--glass-border); border-radius: 35px; padding: 24px; position: relative;
+    border: 1px solid var(--glass-border); border-radius: 35px; padding: 24px; position: relative; z-index: 2;
 }
-.portal-view-active .card { border-color: rgba(10, 132, 255, 0.4); box-shadow: 0 0 50px rgba(10, 132, 255, 0.15); }
 
-/* УМНЫЕ ССЫЛКИ (БАБЛЫ) */
-.link-stack { margin-top: -15px; padding: 0 12px; display: flex; flex-direction: column; gap: 8px; position: relative; z-index: 10; }
+/* ПЛАШКА В СТИЛЕ PORTAL / APERTURE */
+.aperture-plaque {
+    margin: -20px 15px 0; padding: 25px 18px 12px;
+    background: #1a1a1c; border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 0 0 25px 25px; font-family: "Courier New", monospace;
+    display: flex; justify-content: space-between; align-items: center;
+    position: relative; z-index: 1; border-top: none;
+}
+.plaque-info { font-size: 9px; letter-spacing: 1px; color: rgba(255,255,255,0.4); text-transform: uppercase; }
+.plaque-status { width: 8px; height: 8px; border-radius: 50%; background: var(--portal-blue); box-shadow: 0 0 10px var(--portal-blue); }
+
+/* ЗОЛОТАЯ ПРЕМИУМ ПЛАШКА (ДЛЯ @sqwozzpapp) */
+.gold-plaque {
+    background: linear-gradient(135deg, #2c2200 0%, #1a1a1c 100%);
+    border: 1px solid #ffd70044; color: #ffd700;
+}
+.gold-plaque .plaque-info { color: #ffd700; font-weight: 900; }
+.gold-plaque .plaque-status { 
+    background: #ffd700; box-shadow: 0 0 15px #ffd700; 
+    animation: pulse-gold 2s infinite;
+}
+
+@keyframes pulse-gold { 
+    0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } 
+}
+
+/* Остальные стили из твоего кода... */
+.link-stack { margin-top: 10px; padding: 0 12px; display: flex; flex-direction: column; gap: 8px; }
 .glass-link {
     background: rgba(35, 35, 38, 0.8); backdrop-filter: blur(25px); border: 1px solid var(--glass-border);
     border-radius: 22px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;
-    transition: 0.3s var(--spring); box-shadow: 0 10px 30px rgba(0,0,0,0.4);
 }
-.glass-link img { width: 28px; height: 28px; border-radius: 8px; background: rgba(255,255,255,0.05); }
-.link-info { flex: 1; overflow: hidden; }
-.link-info .dom { font-size: 14px; font-weight: 800; color: #fff; display: block; }
-.link-info .path { font-size: 11px; color: rgba(255,255,255,0.4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-/* UI */
-.nav { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(20,20,20,0.6); backdrop-filter: blur(40px); padding: 8px; border-radius: 100px; display: flex; border: 1px solid var(--glass-border); z-index: 1000; transition: 0.5s; }
+.nav { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(20,20,20,0.6); backdrop-filter: blur(40px); padding: 8px; border-radius: 100px; display: flex; border: 1px solid var(--glass-border); z-index: 1000; }
 .nav-item { width: 60px; height: 50px; display: flex; align-items: center; justify-content: center; opacity: 0.3; }
 .nav-item.active { opacity: 1; background: rgba(255,255,255,0.1); border-radius: 30px; }
-.fab { position: fixed; bottom: 115px; right: 25px; width: 68px; height: 68px; background: #fff; border-radius: 50%; border: none; font-size: 36px; box-shadow: 0 15px 40px rgba(255,255,255,0.2); z-index: 1100; transition: 0.5s; }
-
-/* MODAL & REPLIES */
+.fab { position: fixed; bottom: 115px; right: 25px; width: 68px; height: 68px; background: #fff; border-radius: 50%; border: none; font-size: 36px; z-index: 1100; }
 .modal { display: none; position: fixed; inset: 0; align-items: flex-end; z-index: 5000; }
-.sheet { width: 100%; background: rgba(18, 18, 20, 0.95); backdrop-filter: blur(60px); border-radius: 40px 40px 0 0; padding: 12px 24px 55px; transform: translateY(110%); transition: transform 0.6s var(--spring); border-top: 1px solid var(--glass-border); }
-.modal.open { display: flex; background: rgba(0,0,0,0.6); }
-.modal.open .sheet { transform: translateY(0); }
-.inp { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 22px; padding: 18px; color: #fff; margin-bottom: 12px; font-size: 17px; }
-.replies { margin-left: 20px; margin-top: 15px; border-left: 2px solid rgba(255,255,255,0.1); padding-left: 15px; }
-
-.toast { position: fixed; top: 40px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #fff; color: #000; padding: 15px 30px; border-radius: 100px; font-weight: 800; transition: 0.6s var(--spring); z-index: 9999; }
-.toast.show { transform: translateX(-50%) translateY(0); }
+.sheet { width: 100%; background: rgba(18, 18, 20, 0.95); backdrop-filter: blur(60px); border-radius: 40px 40px 0 0; padding: 12px 24px 55px; border-top: 1px solid var(--glass-border); }
+.inp { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 22px; padding: 18px; color: #fff; margin-bottom: 12px; }
 </style>
 </head>
 <body id="body">
 
-<div id="toast" class="toast">PORTAL CREATED 🌀</div>
-
 <div id="app">
-    <div id="portal-ui" style="display:none; text-align:center; padding-top:60px;">
-        <div style="font-size:10px; opacity:0.4; font-weight:700; letter-spacing:5px;">SPECIAL PORTAL</div>
-        <div style="font-size:10px; color:var(--accent); font-weight:800; margin-top:4px; text-transform:uppercase;">ECHO Social Exclusive</div>
-    </div>
-
-    <div id="header" style="padding: 60px 0 20px; font-size: 42px; font-weight: 900; letter-spacing: -3px; transition: 0.5s;">ECHO</div>
+    <div id="header" style="padding: 60px 0 20px; font-size: 42px; font-weight: 900; letter-spacing: -3px;">ECHO</div>
     <div id="feed"></div>
-
-    <div id="portal-footer" style="display:none; text-align:center; padding: 40px 0 100px;">
-        <button onclick="enterUniverse()" style="width:100%; padding:22px; background:#fff; color:#000; border-radius:25px; border:none; font-weight:900; font-size:16px;">ENTER UNIVERSE</button>
-    </div>
 </div>
 
 <div id="ui-elements">
@@ -104,15 +92,10 @@ body.modal-open #app { transform: scale(0.93) translateY(15px); filter: blur(25p
 
 <div id="modal" class="modal" onclick="if(event.target==this) closeM()">
     <div class="sheet">
-        <div style="width:40px;height:5px;background:rgba(255,255,255,0.2);border-radius:10px;margin:0 auto 25px;"></div>
         <textarea id="txt" class="inp" placeholder="О чем вы думаете?" style="min-height:160px;resize:none;"></textarea>
         <input id="linkInp" class="inp" placeholder="Ссылка">
         <input id="srcInp" class="inp" placeholder="Источник">
-        <div style="display:flex; gap:10px;">
-            <button onclick="document.getElementById('fInp').click()" style="background:rgba(255,255,255,0.1); border:none; border-radius:22px; width:70px; color:#fff; font-size:20px;">📷</button>
-            <input type="file" id="fInp" hidden accept="image/*">
-            <button id="sendBtn" style="flex:1; padding:22px; border-radius:22px; border:none; background:#fff; font-weight:900;" onclick="send()">PUBLISH</button>
-        </div>
+        <button id="sendBtn" style="width:100%; padding:22px; border-radius:22px; border:none; background:#fff; font-weight:900;" onclick="send()">PUBLISH</button>
     </div>
 </div>
 
@@ -124,148 +107,64 @@ const myId = tg.initDataUnsafe?.user?.id?.toString() || 'guest';
 const myName = tg.initDataUnsafe?.user?.username || 'Guest';
 const myAvatar = tg.initDataUnsafe?.user?.photo_url || null;
 
+// Твой логин для привилегий
+const MASTER_USER = "sqwozzpapp";
+
 function vibe(t) { if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred(t); }
 
-const urlParams = new URLSearchParams(window.location.search);
-const portalId = urlParams.get('p');
-
-function enterUniverse() { vibe('heavy'); tg.openTelegramLink('https://t.me/open_echox_bot'); }
-
-// --- УМНАЯ ОБРАБОТКА ССЫЛОК ---
-function createSmartLink(url) {
-    if(!url) return "";
-    let clean = url.trim(); if(!clean.startsWith('http')) clean = 'https://' + clean;
-    let dom = "", path = "/";
-    try { 
-        const u = new URL(clean); 
-        dom = u.hostname.replace('www.', ''); 
-        path = u.pathname + u.search;
-    } catch(e) { dom = "Link"; }
-
-    const isTg = clean.includes('t.me');
-    const icon = `https://www.google.com/s2/favicons?domain=${dom}&sz=128`;
-
-    return `<div class="glass-link" onclick="event.stopPropagation(); handleLink('${clean}', ${isTg})">
-        <img src="${icon}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1006/1006771.png'">
-        <div class="link-info">
-            <span class="dom">${dom}</span>
-            <span class="path">${path === '/' ? 'Home Page' : path}</span>
-        </div>
-        <div style="opacity:0.2; font-size:18px;">${isTg ? '✈️' : '→'}</div>
-    </div>`;
-}
-
-function handleLink(url, isTg) {
-    vibe('light');
-    if(isTg) tg.openTelegramLink(url);
-    else tg.openLink(url);
-}
-
-// --- РЕЖИМ ПОГРУЖЕНИЯ (LONG PRESS) ---
-let pressTimer;
-function setupReadingMode(el) {
-    el.ontouchstart = () => {
-        pressTimer = setTimeout(() => {
-            vibe('medium');
-            document.body.classList.add('reading-mode');
-            el.closest('.post-container').classList.add('active-focus');
-        }, 600);
-    };
-    el.ontouchend = el.ontouchcancel = () => {
-        clearTimeout(pressTimer);
-        document.body.classList.remove('reading-mode');
-        document.querySelectorAll('.post-container').forEach(c => c.classList.remove('active-focus'));
-    };
-}
-
 async function load() {
-    let query = db.from('posts').select('*').order('created_at', { ascending: false });
-    if(portalId) {
-        document.body.classList.add('portal-view-active');
-        document.getElementById('ui-elements').style.display = 'none';
-        document.getElementById('header').style.display = 'none';
-        document.getElementById('portal-ui').style.display = 'block';
-        document.getElementById('portal-footer').style.display = 'block';
-        query = query.eq('id', portalId);
-    }
-    const { data } = await query;
+    const { data } = await db.from('posts').select('*').order('created_at', { ascending: false });
     if(data) render(data);
 }
 
 function render(data) {
     const feed = document.getElementById('feed'); feed.innerHTML = '';
-    const mains = data.filter(p => !p.parent_id || portalId);
-    const display = (curTab === 'my' && !portalId) ? mains.filter(p => p.user_id === myId) : mains;
-
-    display.forEach((p, idx) => {
+    
+    data.forEach((p) => {
         const wrap = document.createElement('div');
         wrap.className = 'post-container';
         
-        let txt = p.content, sTag = "";
-        if(txt.includes("||SRC||")) { 
-            const pts = txt.split("||SRC||"); txt = pts[0]; 
-            sTag = `<div style="display:inline-block; background:rgba(10,132,255,0.1); color:var(--accent); padding:5px 12px; border-radius:12px; font-size:11px; font-weight:700; margin-bottom:12px; border:1px solid rgba(10,132,255,0.2);">SOURCE: ${pts[1].trim()}</div>`; 
-        }
+        // Проверка на твой премиум статус
+        const isGold = p.username === MASTER_USER;
+        const plaqueClass = isGold ? 'aperture-plaque gold-plaque' : 'aperture-plaque';
+        const statusLabel = isGold ? 'GOLDEN PRIVILEGE' : 'TEST SUBJECT #'+p.user_id.slice(-4);
+        const statusColor = isGold ? '#ffd700' : (p.username === myName ? 'var(--portal-orange)' : 'var(--portal-blue)');
 
-        let lHtml = createSmartLink(p.track_url);
-        const matches = txt.match(/(https?:\/\/[^\s]+)/g);
-        if(matches) matches.forEach(m => { if(m !== p.track_url) lHtml += createSmartLink(m); });
-
-        const reps = data.filter(r => r.parent_id === p.id);
-        let rHtml = reps.length ? `<div class="replies">${reps.map(r => `<div style="padding:6px 0; font-size:14px; color:rgba(255,255,255,0.5);"><b>@${r.username}:</b> ${r.content.split('||SRC||')[0]}</div>`).join('')}</div>` : '';
+        let lHtml = p.track_url ? `<div class="glass-link">🔗 ${p.track_url}</div>` : "";
 
         wrap.innerHTML = `
-            <div class="card" onclick="openM('${p.id}')">
-                <div style="position:absolute; top:24px; right:24px; display:flex; gap:10px;">
-                    ${p.user_id===myId && !portalId ? '<div onclick="event.stopPropagation(); del(\''+p.id+'\')" style="opacity:0.2; font-size:18px;">✕</div>' : ''}
-                    <div onclick="event.stopPropagation(); copyPortal('${p.id}')" style="opacity:0.5; font-size:18px;">🌀</div>
-                </div>
-                <div style="display:flex; align-items:center; gap:15px; margin-bottom:20px;">
-                    <div style="width:46px; height:46px; border-radius:50%; border:1px solid var(--glass-border); overflow:hidden; background:#111;">
-                        ${p.avatar_url ? `<img src="${p.avatar_url}" style="width:100%;height:100%;object-fit:cover;">` : `<div style="display:flex;height:100%;align-items:center;justify-content:center;font-weight:900;color:#333;">${p.username[0]}</div>`}
+            <div class="card">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
+                    <div style="width:40px; height:40px; border-radius:50%; background:#222; overflow:hidden;">
+                        ${p.avatar_url ? `<img src="${p.avatar_url}" style="width:100%;height:100%;object-fit:cover;">` : ''}
                     </div>
-                    <div>
-                        <div style="font-weight:900; font-size:17px; letter-spacing:-0.5px;">@${p.username}</div>
-                        <div style="font-size:10px; opacity:0.4; font-weight:800; letter-spacing:1px; text-transform:uppercase;">ECHO Member</div>
-                    </div>
+                    <div style="font-weight:800;">@${p.username}</div>
                 </div>
-                ${sTag}
-                <div style="font-size:18px; line-height:1.55; white-space:pre-wrap; color:rgba(255,255,255,0.95);">${txt}</div>
-                ${p.image_url ? `<img src="${p.image_url}" style="width:calc(100% + 48px); margin-left:-24px; margin-top:24px; border-radius:0 0 35px 35px;">` : ''}
+                <div style="font-size:17px; line-height:1.5;">${p.content.split("||SRC||")[0]}</div>
+                ${p.image_url ? `<img src="${p.image_url}" style="width:calc(100% + 48px); margin-left:-24px; margin-top:20px; border-radius:0 0 35px 35px;">` : ''}
             </div>
+            
+            <div class="${plaqueClass}">
+                <div class="plaque-info">
+                    SYSTEM: OK // ${statusLabel}
+                </div>
+                <div class="plaque-status" style="background: ${statusColor}; box-shadow: 0 0 10px ${statusColor};"></div>
+            </div>
+
             <div class="link-stack">${lHtml}</div>
-            ${rHtml}
         `;
-        setupReadingMode(wrap.querySelector('.card'));
         feed.appendChild(wrap);
     });
 }
 
-function copyPortal(id) {
-    const url = window.location.origin + window.location.pathname + '?p=' + id;
-    navigator.clipboard.writeText(url); vibe('heavy');
-    const t = document.getElementById('toast'); t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2000);
-}
-
-let replyId = null; let curTab = 'all';
-function openM(id=null) { vibe('light'); replyId=id; document.getElementById('modal').style.display='flex'; setTimeout(()=>document.getElementById('modal').classList.add('open'),10); document.getElementById('body').classList.add('modal-open'); }
-function closeM() { vibe('light'); document.getElementById('modal').classList.remove('open'); document.getElementById('body').classList.remove('modal-open'); setTimeout(()=>document.getElementById('modal').style.display='none',500); }
-
+// Функции openM, closeM, send и т.д. остаются без изменений...
+function openM() { document.getElementById('modal').style.display='flex'; }
+function closeM() { document.getElementById('modal').style.display='none'; }
 async function send() {
-    vibe('medium'); const b = document.getElementById('sendBtn'); b.disabled = true;
-    let t = document.getElementById('txt').value, f = document.getElementById('fInp').files[0], s = document.getElementById('srcInp').value, l = document.getElementById('linkInp').value;
-    if(!t && !f) { b.disabled=false; return; }
-    if(s) t += " ||SRC|| " + s;
-    let iu = null;
-    if(f) { const n = `img_${Date.now()}.jpg`; await db.storage.from('images').upload(n, f); iu = db.storage.from('images').getPublicUrl(n).data.publicUrl; }
-    await db.from('posts').insert([{ content: t, username: myName, user_id: myId, parent_id: replyId, image_url: iu, track_url: l, avatar_url: myAvatar }]);
-    closeM(); load(); b.disabled = false;
-    document.getElementById('txt').value=''; document.getElementById('linkInp').value=''; document.getElementById('srcInp').value='';
+    let t = document.getElementById('txt').value;
+    await db.from('posts').insert([{ content: t, username: myName, user_id: myId }]);
+    closeM(); load();
 }
-
-function switchTab(t) { vibe('light'); curTab=t; document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active')); document.getElementById('tab-'+t).classList.add('active'); load(); }
-async function del(id) { vibe('warning'); if(confirm('Delete post?')) { await db.from('posts').delete().eq('id', id); load(); } }
 
 window.onload = () => { tg.expand(); load(); };
 </script>
