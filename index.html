@@ -3,89 +3,100 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ECHO - Portal Edition</title>
+<title>ECHO - Cloudy Portal</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 :root { 
-    --bg: #050505; 
-    --glass: rgba(255, 255, 255, 0.05);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --accent-blue: #00d2ff;
-    --accent-orange: #ff9d00;
-    --gold: #ffd700;
-    --spring: cubic-bezier(0.25, 1, 0.5, 1);
+    --bg: #0a0a0b; 
+    --cloud-bg: rgba(255, 255, 255, 0.07);
+    --cloud-border: rgba(255, 255, 255, 0.12);
+    --gold-sun: #ffd700;
+    --spring: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; background: var(--bg); color: #fff; overflow: hidden; height: 100vh; }
-
-#app { height: 100vh; overflow-y: scroll; padding: 0 16px 220px; scrollbar-width: none; perspective: 1000px; }
-#app::-webkit-scrollbar { display: none; }
-
-/* КОНТЕЙНЕР ПОСТА */
-.post-wrapper { margin-bottom: 45px; position: relative; animation: slideIn 0.5s var(--spring); }
-
-/* ПОДЛОЖКА (PLATE) */
-.portal-substrate {
-    position: absolute; inset: -2px -2px -15px -2px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
-    backdrop-filter: blur(10px); border: 1px solid var(--glass-border);
-    border-radius: 32px; z-index: 1;
+body { 
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; 
+    background: var(--bg); color: #fff; overflow: hidden; height: 100vh;
 }
 
-/* КАРТОЧКА */
+/* Фон с легким градиентом как ночное небо */
+body::before {
+    content: ''; position: fixed; inset: 0;
+    background: radial-gradient(circle at 50% -20%, #1a1a2e 0%, #000 70%);
+    z-index: -1;
+}
+
+#app { height: 100vh; overflow-y: scroll; padding: 0 16px 220px; scrollbar-width: none; }
+#app::-webkit-scrollbar { display: none; }
+
+/* КОНТЕЙНЕР "ОБЛАКО" */
+.post-container { margin-bottom: 40px; position: relative; }
+
+/* НИЖНЯЯ ПОДЛОЖКА (МЯГКАЯ ТЕНЬ/ОСНОВА) */
+.cloud-substrate {
+    position: absolute; bottom: -12px; left: 10%; right: 10%; height: 50px;
+    background: rgba(255, 255, 255, 0.03);
+    filter: blur(15px); border-radius: 50%; z-index: 1;
+}
+
+/* КАРТОЧКА-ОБЛАКО */
 .card { 
-    background: rgba(15, 15, 15, 0.8); backdrop-filter: blur(50px) saturate(200%);
-    border: 1px solid var(--glass-border); border-radius: 30px; padding: 20px;
-    position: relative; z-index: 2; overflow: hidden;
+    background: var(--cloud-bg);
+    backdrop-filter: blur(30px) saturate(150%);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid var(--cloud-border);
+    /* Мягкие "облачные" углы */
+    border-radius: 40px 40px 40px 15px; 
+    padding: 24px; position: relative; z-index: 2;
     transition: transform 0.3s var(--spring);
 }
 
-/* ДИЗАЙН ДЛЯ @sqwozzpapp */
-.is-master .portal-substrate {
-    background: linear-gradient(180deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.02) 100%);
+/* ЗОЛОТОЙ ПРЕМИУМ (СОЛНЕЧНОЕ ОБЛАКО) */
+.is-master .card {
     border-color: rgba(255, 215, 0, 0.3);
-    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.05);
+    background: linear-gradient(135deg, rgba(255,215,0,0.05) 0%, rgba(255,255,255,0.07) 100%);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.1);
 }
-.is-master .card { border-color: rgba(255, 215, 0, 0.2); }
-.is-master .master-tag { color: var(--gold); text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+.is-master .cloud-substrate {
+    background: rgba(255, 215, 0, 0.15);
+    filter: blur(20px);
+}
+.is-master .username { color: var(--gold-sun); text-shadow: 0 0 8px rgba(255,215,0,0.3); }
 
-/* ЭЛЕМЕНТЫ ВНУТРИ */
-.user-info { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-.avatar { width: 42px; height: 42px; border-radius: 50%; background: #1a1a1a; border: 1px solid var(--glass-border); object-fit: cover; }
-.username { font-weight: 800; font-size: 16px; letter-spacing: -0.3px; }
-.status-pill { font-size: 9px; font-weight: 900; padding: 2px 8px; border-radius: 100px; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); text-transform: uppercase; }
+/* ВНУТРЕННИЕ ЭЛЕМЕНТЫ */
+.user-block { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+.avatar { 
+    width: 44px; height: 44px; border-radius: 18px; /* Квадрат со скруглением */
+    background: #222; border: 1px solid var(--cloud-border);
+}
+.username { font-weight: 800; font-size: 17px; }
+.content { font-size: 17px; line-height: 1.6; color: rgba(255,255,255,0.9); }
 
-.content { font-size: 17px; line-height: 1.5; color: rgba(255,255,255,0.95); white-space: pre-wrap; word-break: break-word; }
-.post-img { width: calc(100% + 40px); margin: 20px -20px -20px; display: block; border-radius: 0 0 30px 30px; border-top: 1px solid var(--glass-border); }
+/* КНОПКИ */
+.actions { position: absolute; top: 24px; right: 24px; display: flex; gap: 12px; opacity: 0.4; }
 
-/* КНОПКИ УПРАВЛЕНИЯ */
-.actions { position: absolute; top: 20px; right: 20px; display: flex; gap: 15px; z-index: 10; }
-.action-btn { opacity: 0.3; transition: 0.3s; font-size: 18px; }
-
-/* УМНЫЕ ССЫЛКИ */
-.link-stack { margin: 25px 12px 0; display: flex; flex-direction: column; gap: 8px; position: relative; z-index: 5; }
-.glass-link { 
-    background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);
-    border-radius: 18px; padding: 12px; display: flex; align-items: center; gap: 12px;
+/* УМНЫЕ ССЫЛКИ (БАБЛЫ) */
+.link-stack { margin-top: 10px; padding: 0 10px; display: flex; flex-direction: column; gap: 6px; }
+.cloud-link {
+    background: rgba(255,255,255,0.05); border: 1px solid var(--cloud-border);
+    border-radius: 20px; padding: 12px 18px; font-size: 14px;
+    display: flex; align-items: center; gap: 10px;
 }
 
 /* UI КНОПКИ */
-.nav { position: fixed; bottom: 35px; left: 50%; transform: translateX(-50%); background: rgba(10,10,10,0.7); backdrop-filter: blur(30px); padding: 8px; border-radius: 100px; display: flex; border: 1px solid var(--glass-border); z-index: 1000; }
-.nav-item { width: 55px; height: 45px; display: flex; align-items: center; justify-content: center; opacity: 0.3; }
-.nav-item.active { opacity: 1; background: rgba(255,255,255,0.08); border-radius: 100px; }
-.fab { position: fixed; bottom: 120px; right: 25px; width: 68px; height: 68px; background: #fff; color: #000; border-radius: 50%; border: none; font-size: 32px; font-weight: bold; z-index: 1100; box-shadow: 0 10px 40px rgba(255,255,255,0.3); }
-
-/* АНИМАЦИИ */
-@keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.nav { position: fixed; bottom: 35px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.08); backdrop-filter: blur(25px); padding: 6px; border-radius: 100px; display: flex; border: 1px solid var(--cloud-border); z-index: 1000; }
+.nav-item { width: 55px; height: 45px; display: flex; align-items: center; justify-content: center; opacity: 0.4; font-size: 20px; }
+.nav-item.active { opacity: 1; background: rgba(255,255,255,0.1); border-radius: 100px; }
+.fab { position: fixed; bottom: 120px; right: 25px; width: 64px; height: 64px; background: #fff; color: #000; border-radius: 24px; border: none; font-size: 32px; font-weight: bold; z-index: 1100; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
 </style>
 </head>
 <body>
 
 <div id="app">
-    <div id="header" style="padding: 60px 0 30px; font-size: 48px; font-weight: 900; letter-spacing: -3px; color: #fff;">ECHO</div>
+    <div id="header" style="padding: 60px 0 20px; font-size: 38px; font-weight: 900; letter-spacing: -1.5px; text-align: center;">echo</div>
     <div id="feed"></div>
 </div>
 
@@ -97,12 +108,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-se
     <button class="fab" onclick="openM()">+</button>
 </div>
 
-<div id="modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:5000; align-items:flex-end;">
-    <div style="width:100%; background:#111; border-radius:35px 35px 0 0; padding:25px; border-top:1px solid var(--glass-border);">
-        <textarea id="txt" style="width:100%; height:150px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:20px; color:#fff; padding:15px; margin-bottom:15px; font-size:17px; resize:none;" placeholder="Что происходит?"></textarea>
-        <input id="linkInp" style="width:100%; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:15px; color:#fff; padding:12px; margin-bottom:10px;" placeholder="Вставьте ссылку...">
-        <button id="sendBtn" style="width:100%; padding:20px; border-radius:20px; border:none; background:#fff; font-weight:900; font-size:16px;" onclick="send()">ОПУБЛИКОВАТЬ</button>
-        <button style="width:100%; padding:15px; margin-top:10px; background:transparent; color:rgba(255,255,255,0.4); border:none;" onclick="closeM()">Отмена</button>
+<div id="modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(10px); z-index:5000; align-items:center; justify-content:center; padding:20px;">
+    <div style="width:100%; max-width:400px; background:#1a1a1c; border-radius:40px; padding:30px; border:1px solid var(--cloud-border);">
+        <textarea id="txt" style="width:100%; height:120px; background:transparent; border:none; color:#fff; font-size:18px; resize:none;" placeholder="Напишите что-нибудь..."></textarea>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button id="sendBtn" style="flex:1; padding:18px; border-radius:25px; border:none; background:#fff; font-weight:900;" onclick="send()">Опубликовать</button>
+            <button style="padding:18px; background:rgba(255,255,255,0.1); color:#fff; border:none; border-radius:25px;" onclick="closeM()">✕</button>
+        </div>
     </div>
 </div>
 
@@ -128,48 +140,46 @@ function render(data) {
     data.filter(p => !p.parent_id).forEach(p => {
         const isMaster = p.username === MASTER_USER;
         const wrap = document.createElement('div');
-        wrap.className = `post-wrapper ${isMaster ? 'is-master' : ''}`;
-
-        let lHtml = p.track_url ? `<div class="glass-link">🔗 <span style="font-size:14px; opacity:0.8;">${p.track_url}</span></div>` : "";
+        wrap.className = `post-container ${isMaster ? 'is-master' : ''}`;
 
         wrap.innerHTML = `
-            <div class="portal-substrate"></div>
-            <div class="card" onclick="openM('${p.id}')">
+            <div class="cloud-substrate"></div>
+            <div class="card">
                 <div class="actions">
-                    <div class="action-btn" onclick="event.stopPropagation(); copyPortal('${p.id}')">🌀</div>
-                    ${p.user_id === myId ? `<div class="action-btn" onclick="event.stopPropagation(); del('${p.id}')">✕</div>` : ''}
+                    <div onclick="event.stopPropagation(); del('${p.id}')">${p.user_id === myId ? '✕' : ''}</div>
                 </div>
-                <div class="user-info">
+                <div class="user-block">
                     <img src="${p.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="avatar">
                     <div>
-                        <div class="username master-tag">@${p.username}</div>
-                        <div class="status-pill">${isMaster ? 'Creation Portal' : 'Member'}</div>
+                        <div class="username">@${p.username}</div>
+                        <div style="font-size:10px; opacity:0.4;">${isMaster ? '⭐ Gold Status' : 'Cloud Member'}</div>
                     </div>
                 </div>
                 <div class="content">${p.content.split('||SRC||')[0]}</div>
-                ${p.image_url ? `<img src="${p.image_url}" class="post-img">` : ''}
+                ${p.image_url ? `<img src="${p.image_url}" style="width:calc(100% + 48px); margin: 20px -24px -24px; border-radius:0 0 40px 15px;">` : ''}
             </div>
-            <div class="link-stack">${lHtml}</div>
+            <div class="link-stack">
+                ${p.track_url ? `<div class="cloud-link">☁️ ${p.track_url}</div>` : ''}
+            </div>
         `;
         feed.appendChild(wrap);
     });
 }
 
-// Утилиты
-function openM(id=null) { replyId=id; document.getElementById('modal').style.display='flex'; }
+function openM() { document.getElementById('modal').style.display='flex'; }
 function closeM() { document.getElementById('modal').style.display='none'; }
 
 async function send() {
-    const b = document.getElementById('sendBtn'); b.disabled = true;
-    const t = document.getElementById('txt').value, l = document.getElementById('linkInp').value;
-    if(!t) { b.disabled=false; return; }
-    await db.from('posts').insert([{ content: t, username: myName, user_id: myId, track_url: l, avatar_url: myAvatar }]);
-    closeM(); load(); b.disabled = false;
-    document.getElementById('txt').value=''; document.getElementById('linkInp').value='';
+    const t = document.getElementById('txt').value;
+    if(!t) return;
+    await db.from('posts').insert([{ content: t, username: myName, user_id: myId, avatar_url: myAvatar }]);
+    closeM(); load();
+    document.getElementById('txt').value = '';
 }
 
-async function del(id) { if(confirm('Удалить пост?')) { await db.from('posts').delete().eq('id', id); load(); } }
-function copyPortal(id) { navigator.clipboard.writeText(window.location.origin + '?p=' + id); tg.HapticFeedback.notificationOccurred('success'); }
+async function del(id) { if(confirm('Удалить?')) { await db.from('posts').delete().eq('id', id); load(); } }
+let curTab = 'all';
+function switchTab(t) { curTab=t; load(); }
 
 window.onload = () => { tg.expand(); load(); };
 </script>
