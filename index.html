@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>ECHO Social - Immersive Portal</title>
+<title>ECHO - Immersive Premium</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -20,82 +20,73 @@ body {
     background: var(--bg); color: #fff; overflow: hidden; height: 100vh;
 }
 
-#app { 
-    height: 100vh; overflow-y: scroll; padding: 0 16px 220px; 
-    transition: transform 0.6s var(--spring), filter 0.8s ease, opacity 0.5s ease;
-    scrollbar-width: none;
-}
+#app { height: 100vh; overflow-y: scroll; padding: 0 16px 220px; transition: 0.6s var(--spring); scrollbar-width: none; }
 #app::-webkit-scrollbar { display: none; }
 
-/* РЕЖИМ ПОГРУЖЕНИЯ */
-body.reading-mode #header, 
-body.reading-mode #ui-elements, 
-body.reading-mode .post-container:not(.active-focus) { 
-    opacity: 0; filter: blur(20px); pointer-events: none; 
+/* READING MODE БАГ-ФИКС */
+body.reading-mode #header, body.reading-mode #ui-elements, body.reading-mode .post-container:not(.active-focus) { 
+    opacity: 0; filter: blur(25px); pointer-events: none; 
 }
-body.reading-mode .active-focus { transform: scale(1.02); z-index: 10000; }
-body.reading-mode #app { background: rgba(0,0,0,0.8); }
+body.reading-mode .active-focus { transform: scale(1.04); z-index: 10000; }
 
-body.modal-open #app { transform: scale(0.93) translateY(15px); filter: blur(25px) brightness(0.7); }
+/* КАРТОЧКА */
+.post-container { transition: 0.5s var(--spring); margin-bottom: 50px; position: relative; }
+.card { 
+    background: var(--glass); backdrop-filter: blur(50px) saturate(190%); -webkit-backdrop-filter: blur(50px);
+    border: 1px solid var(--glass-border); border-radius: 35px; padding: 24px; position: relative; z-index: 5;
+}
 
-/* КОНТЕЙНЕР И ПОДЛОЖКА */
-.post-container { transition: 0.5s var(--spring); margin-bottom: 45px; position: relative; }
+/* СИНЯЯ ОБВОДКА АВАТАРОК */
+.avatar-wrapper {
+    width: 48px; height: 48px; border-radius: 50%; 
+    border: 2px solid var(--accent); 
+    box-shadow: 0 0 15px rgba(10, 132, 255, 0.4);
+    overflow: hidden; background: #111; flex-shrink: 0;
+}
+.avatar-wrapper img { width: 100%; height: 100%; object-fit: cover; }
 
-/* ТА САМАЯ ПЛАШКА (SUBSTRATE) */
+/* ПОДЛОЖКА */
 .substrate {
-    position: absolute; bottom: -15px; left: 15px; right: 15px; height: 50px;
-    background: rgba(255,255,255,0.03); backdrop-filter: blur(15px);
-    border: 1px solid rgba(255,255,255,0.08); border-top: none;
-    border-radius: 0 0 30px 30px; z-index: 1;
-    display: flex; align-items: flex-end; padding: 0 20px 10px;
+    position: absolute; bottom: -18px; left: 18px; right: 18px; height: 50px;
+    background: rgba(255,255,255,0.04); backdrop-filter: blur(15px);
+    border: 1px solid rgba(255,255,255,0.1); border-top: none;
+    border-radius: 0 0 32px 32px; z-index: 1;
+    display: flex; align-items: flex-end; padding: 0 22px 12px;
     font-size: 9px; font-weight: 900; color: rgba(255,255,255,0.2); letter-spacing: 2px;
 }
 
-.card { 
-    background: var(--glass); backdrop-filter: blur(50px) saturate(190%); -webkit-backdrop-filter: blur(50px) saturate(190%);
-    border: 1px solid var(--glass-border); border-radius: 35px; padding: 24px; position: relative; z-index: 2;
-}
-
-/* ЗОЛОТОЙ СТАТУС ДЛЯ @sqwozzpapp */
-.is-master .card { border-color: rgba(255, 215, 0, 0.25); box-shadow: 0 10px 40px rgba(255, 215, 0, 0.05); }
-.is-master .substrate { 
-    background: linear-gradient(to bottom, transparent, rgba(255, 215, 0, 0.08)); 
-    border-color: rgba(255, 215, 0, 0.2); color: var(--gold);
-}
+/* GOLD STATUS */
+.is-master .card { border-color: rgba(255, 215, 0, 0.3); }
+.is-master .substrate { border-color: rgba(255, 215, 0, 0.2); color: var(--gold); background: rgba(255, 215, 0, 0.05); }
 .is-master .username-text { color: var(--gold); }
 
-/* ОСТАЛЬНОЙ UI (УМНЫЕ ССЫЛКИ, НАВБАР И Т.Д.) */
-.link-stack { margin-top: 5px; padding: 0 12px; display: flex; flex-direction: column; gap: 8px; position: relative; z-index: 10; }
+/* УМНЫЕ ССЫЛКИ С ПРЕВЬЮ */
+.link-stack { margin: 8px 15px 0; display: flex; flex-direction: column; gap: 8px; position: relative; z-index: 10; }
 .glass-link {
-    background: rgba(35, 35, 38, 0.8); backdrop-filter: blur(25px); border: 1px solid var(--glass-border);
-    border-radius: 22px; padding: 12px 16px; display: flex; align-items: center; gap: 12px;
+    background: rgba(30, 30, 32, 0.8); backdrop-filter: blur(20px); border: 1px solid var(--glass-border);
+    border-radius: 22px; padding: 10px; display: flex; align-items: center; gap: 12px;
 }
-.glass-link img { width: 28px; height: 28px; border-radius: 8px; }
-.link-info .dom { font-size: 14px; font-weight: 800; color: #fff; display: block; }
-.link-info .path { font-size: 11px; color: rgba(255,255,255,0.4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.link-img { width: 40px; height: 40px; border-radius: 12px; object-fit: cover; background: #222; }
 
-.nav { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(20,20,20,0.6); backdrop-filter: blur(40px); padding: 8px; border-radius: 100px; display: flex; border: 1px solid var(--glass-border); z-index: 1000; }
-.nav-item { width: 60px; height: 50px; display: flex; align-items: center; justify-content: center; opacity: 0.3; }
+/* UI */
+.nav { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(15,15,15,0.7); backdrop-filter: blur(30px); padding: 8px; border-radius: 100px; display: flex; border: 1px solid var(--glass-border); z-index: 1000; }
+.nav-item { width: 60px; height: 50px; display: flex; align-items: center; justify-content: center; opacity: 0.3; font-size: 22px; }
 .nav-item.active { opacity: 1; background: rgba(255,255,255,0.1); border-radius: 30px; }
-.fab { position: fixed; bottom: 115px; right: 25px; width: 68px; height: 68px; background: #fff; border-radius: 50%; border: none; font-size: 36px; box-shadow: 0 15px 40px rgba(255,255,255,0.2); z-index: 1100; }
+.fab { position: fixed; bottom: 110px; right: 25px; width: 66px; height: 66px; background: #fff; border-radius: 50%; border: none; font-size: 32px; font-weight: bold; z-index: 1100; box-shadow: 0 10px 30px rgba(255,255,255,0.2); }
 
 .modal { display: none; position: fixed; inset: 0; align-items: flex-end; z-index: 5000; }
-.sheet { width: 100%; background: rgba(18, 18, 20, 0.95); backdrop-filter: blur(60px); border-radius: 40px 40px 0 0; padding: 12px 24px 55px; transform: translateY(110%); transition: transform 0.6s var(--spring); border-top: 1px solid var(--glass-border); }
-.modal.open { display: flex; background: rgba(0,0,0,0.6); }
+.sheet { width: 100%; background: #121214; border-radius: 40px 40px 0 0; padding: 20px 24px 60px; transform: translateY(110%); transition: 0.5s var(--spring); border-top: 1px solid var(--glass-border); }
+.modal.open { display: flex; background: rgba(0,0,0,0.7); }
 .modal.open .sheet { transform: translateY(0); }
-.inp { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 22px; padding: 18px; color: #fff; margin-bottom: 12px; font-size: 17px; }
-.replies { margin-left: 20px; margin-top: 15px; border-left: 2px solid rgba(255,255,255,0.1); padding-left: 15px; }
+.inp { width: 100%; background: #1c1c1e; border: 1px solid var(--glass-border); border-radius: 20px; padding: 18px; color: #fff; margin-bottom: 12px; font-size: 16px; }
 
-.toast { position: fixed; top: 40px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #fff; color: #000; padding: 15px 30px; border-radius: 100px; font-weight: 800; transition: 0.6s var(--spring); z-index: 9999; }
-.toast.show { transform: translateX(-50%) translateY(0); }
+.replies { margin: 15px 0 0 25px; border-left: 2px solid rgba(255,255,255,0.1); padding-left: 15px; }
 </style>
 </head>
-<body id="body">
-
-<div id="toast" class="toast">PORTAL CREATED 🌀</div>
+<body>
 
 <div id="app">
-    <div id="header" style="padding: 60px 0 20px; font-size: 42px; font-weight: 900; letter-spacing: -3px; transition: 0.5s;">ECHO</div>
+    <div id="header" style="padding: 60px 0 20px; font-size: 42px; font-weight: 900; letter-spacing: -3px; text-align:center;">ECHO</div>
     <div id="feed"></div>
 </div>
 
@@ -109,15 +100,9 @@ body.modal-open #app { transform: scale(0.93) translateY(15px); filter: blur(25p
 
 <div id="modal" class="modal" onclick="if(event.target==this) closeM()">
     <div class="sheet">
-        <div style="width:40px;height:5px;background:rgba(255,255,255,0.2);border-radius:10px;margin:0 auto 25px;"></div>
-        <textarea id="txt" class="inp" placeholder="О чем вы думаете?" style="min-height:160px;resize:none;"></textarea>
-        <input id="linkInp" class="inp" placeholder="Ссылка">
-        <input id="srcInp" class="inp" placeholder="Источник">
-        <div style="display:flex; gap:10px;">
-            <button onclick="document.getElementById('fInp').click()" style="background:rgba(255,255,255,0.1); border:none; border-radius:22px; width:70px; color:#fff; font-size:20px;">📷</button>
-            <input type="file" id="fInp" hidden accept="image/*">
-            <button id="sendBtn" style="flex:1; padding:22px; border-radius:22px; border:none; background:#fff; font-weight:900;" onclick="send()">PUBLISH</button>
-        </div>
+        <textarea id="txt" class="inp" placeholder="О чем вы думаете?" style="min-height:150px;resize:none;"></textarea>
+        <input id="linkInp" class="inp" placeholder="Ссылка (https://...)">
+        <button id="sendBtn" style="width:100%; padding:20px; border-radius:20px; border:none; background:#fff; font-weight:900;" onclick="send()">PUBLISH</button>
     </div>
 </div>
 
@@ -127,23 +112,27 @@ const db = supabase.createClient('https://xddulhzvzemmrhrsjfhb.supabase.co', 'sb
 
 const myId = tg.initDataUnsafe?.user?.id?.toString() || 'guest';
 const myName = tg.initDataUnsafe?.user?.username || 'Guest';
-const myAvatar = tg.initDataUnsafe?.user?.photo_url || null;
+const myAvatar = tg.initDataUnsafe?.user?.photo_url || '';
 
-// ТВОЙ НИК ДЛЯ ФОКУСА
 const MASTER_USER = "sqwozzpapp";
 
 function vibe(t) { if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred(t); }
 
+// Улучшенная функция ссылок (подтягивает Favicon или Preview)
 function createSmartLink(url) {
     if(!url) return "";
     let clean = url.trim(); if(!clean.startsWith('http')) clean = 'https://' + clean;
-    let dom = "Link";
-    try { dom = new URL(clean).hostname.replace('www.', ''); } catch(e) {}
-    const isTg = clean.includes('t.me');
-    const icon = `https://www.google.com/s2/favicons?domain=${dom}&sz=128`;
+    let dom = "Link"; try { dom = new URL(clean).hostname.replace('www.', ''); } catch(e) {}
+    
+    // Используем DuckDuckGo или Google для иконок высокого качества
+    const icon = `https://icons.duckduckgo.com/ip3/${dom}.ico`;
+    
     return `<div class="glass-link" onclick="event.stopPropagation(); tg.openLink('${clean}')">
-        <img src="${icon}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1006/1006771.png'">
-        <div class="link-info"><span class="dom">${dom}</span><span class="path">Open resource</span></div>
+        <img src="${icon}" class="link-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1006/1006771.png'">
+        <div style="flex:1; overflow:hidden;">
+            <span style="font-size:14px; font-weight:800; display:block;">${dom}</span>
+            <span style="font-size:11px; opacity:0.4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${clean}</span>
+        </div>
     </div>`;
 }
 
@@ -154,91 +143,80 @@ async function load() {
 
 function render(data) {
     const feed = document.getElementById('feed'); feed.innerHTML = '';
-    
-    data.filter(p => !p.parent_id).forEach((p) => {
+    const mains = data.filter(p => !p.parent_id);
+    const display = (curTab === 'my') ? mains.filter(p => p.user_id === myId) : mains;
+
+    display.forEach(p => {
         const isMaster = p.username === MASTER_USER;
         const wrap = document.createElement('div');
         wrap.className = `post-container ${isMaster ? 'is-master' : ''}`;
-        
-        let txt = p.content, sTag = "";
-        if(txt.includes("||SRC||")) { 
-            const pts = txt.split("||SRC||"); txt = pts[0]; 
-            sTag = `<div style="color:var(--accent); font-size:11px; font-weight:800; margin-bottom:10px;">SOURCE: ${pts[1].toUpperCase()}</div>`; 
-        }
 
-        let lHtml = createSmartLink(p.track_url);
+        const lHtml = createSmartLink(p.track_url);
         const reps = data.filter(r => r.parent_id === p.id);
-        let rHtml = reps.length ? `<div class="replies">${reps.map(r => `<div style="font-size:14px; opacity:0.5;"><b>@${r.username}:</b> ${r.content.split('||SRC||')[0]}</div>`).join('')}</div>` : '';
+        const rHtml = reps.length ? `<div class="replies">${reps.map(r => `<div style="font-size:14px; margin-bottom:8px; opacity:0.6;"><b>@${r.username}:</b> ${r.content}</div>`).join('')}</div>` : '';
 
         wrap.innerHTML = `
             <div class="card" onclick="openM('${p.id}')">
-                <div style="position:absolute; top:24px; right:24px; display:flex; gap:10px;">
-                    ${p.user_id===myId ? `<div onclick="event.stopPropagation(); del('${p.id}')" style="opacity:0.2;">✕</div>` : ''}
-                    <div onclick="event.stopPropagation(); copyPortal('${p.id}')" style="opacity:0.5;">🌀</div>
+                <div style="position:absolute; top:24px; right:24px; display:flex; gap:12px; z-index:10;">
+                    ${p.user_id === myId ? `<div onclick="event.stopPropagation(); del('${p.id}')" style="opacity:0.2;">✕</div>` : ''}
                 </div>
-                <div style="display:flex; align-items:center; gap:15px; margin-bottom:20px;">
-                    <div style="width:46px; height:46px; border-radius:50%; border:1px solid var(--glass-border); overflow:hidden; background:#111;">
-                        ${p.avatar_url ? `<img src="${p.avatar_url}" style="width:100%;height:100%;object-fit:cover;">` : ''}
+                <div style="display:flex; align-items:center; gap:14px; margin-bottom:18px;">
+                    <div class="avatar-wrapper">
+                        <img src="${p.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}">
                     </div>
                     <div>
                         <div class="username-text" style="font-weight:900; font-size:17px;">@${p.username}</div>
-                        <div style="font-size:10px; opacity:0.4; font-weight:800; text-transform:uppercase;">ECHO Member</div>
+                        <div style="font-size:10px; opacity:0.3; font-weight:800; text-transform:uppercase; letter-spacing:1px;">ECHO Access</div>
                     </div>
                 </div>
-                ${sTag}
-                <div style="font-size:18px; line-height:1.55;">${txt}</div>
-                ${p.image_url ? `<img src="${p.image_url}" style="width:calc(100% + 48px); margin: 24px -24px -24px; border-radius:0 0 35px 35px;">` : ''}
+                <div style="font-size:17px; line-height:1.55; color:rgba(255,255,255,0.95); white-space:pre-wrap;">${p.content}</div>
+                ${p.image_url ? `<img src="${p.image_url}" style="width:calc(100% + 48px); margin: 20px -24px -24px; display:block; border-radius:0 0 35px 35px;">` : ''}
             </div>
-            <div class="substrate">
-                ${isMaster ? 'SECURE MASTER CHANNEL' : 'ECHO CORE LOG'}
-            </div>
+            <div class="substrate">${isMaster ? 'AUTHORIZED MASTER CHANNEL' : 'SECURE ECHO PROTOCOL'}</div>
             <div class="link-stack">${lHtml}</div>
             ${rHtml}
         `;
-        
-        // Навешиваем лонг-пресс из твоего кода
+
+        // LONG PRESS LOGIC
         let pressTimer;
-        const card = wrap.querySelector('.card');
-        card.ontouchstart = () => {
+        const cardEl = wrap.querySelector('.card');
+        cardEl.ontouchstart = () => {
             pressTimer = setTimeout(() => {
-                vibe('medium');
-                document.body.classList.add('reading-mode');
-                wrap.classList.add('active-focus');
+                vibe('medium'); document.body.classList.add('reading-mode'); wrap.classList.add('active-focus');
             }, 600);
         };
-        card.ontouchend = card.ontouchcancel = () => {
-            clearTimeout(pressTimer);
-            document.body.classList.remove('reading-mode');
-            wrap.classList.remove('active-focus');
+        cardEl.ontouchend = cardEl.ontouchcancel = () => {
+            clearTimeout(pressTimer); document.body.classList.remove('reading-mode'); wrap.classList.remove('active-focus');
         };
-        
+
         feed.appendChild(wrap);
     });
 }
 
-function copyPortal(id) {
-    const url = window.location.origin + window.location.pathname + '?p=' + id;
-    navigator.clipboard.writeText(url); vibe('heavy');
-    const t = document.getElementById('toast'); t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2000);
-}
-
-let replyId = null; let curTab = 'all';
-function openM(id=null) { replyId=id; document.getElementById('modal').style.display='flex'; setTimeout(()=>document.getElementById('modal').classList.add('open'),10); document.getElementById('body').classList.add('modal-open'); }
-function closeM() { document.getElementById('modal').classList.remove('open'); document.getElementById('body').classList.remove('modal-open'); setTimeout(()=>document.getElementById('modal').style.display='none',500); }
+let replyId = null;
+function openM(id=null) { replyId=id; document.getElementById('modal').style.display='flex'; setTimeout(()=>document.getElementById('modal').classList.add('open'),10); }
+function closeM() { document.getElementById('modal').classList.remove('open'); setTimeout(()=>document.getElementById('modal').style.display='none',500); }
 
 async function send() {
     vibe('medium'); const b = document.getElementById('sendBtn'); b.disabled = true;
-    let t = document.getElementById('txt').value, f = document.getElementById('fInp').files[0], s = document.getElementById('srcInp').value, l = document.getElementById('linkInp').value;
-    if(!t && !f) { b.disabled=false; return; }
-    if(s) t += " ||SRC|| " + s;
-    let iu = null;
-    if(f) { const n = `img_${Date.now()}.jpg`; await db.storage.from('images').upload(n, f); iu = db.storage.from('images').getPublicUrl(n).data.publicUrl; }
-    await db.from('posts').insert([{ content: t, username: myName, user_id: myId, parent_id: replyId, image_url: iu, track_url: l, avatar_url: myAvatar }]);
+    const t = document.getElementById('txt').value, l = document.getElementById('linkInp').value;
+    if(!t) { b.disabled=false; return; }
+    
+    await db.from('posts').insert([{ 
+        content: t, 
+        username: myName, 
+        user_id: myId, 
+        parent_id: replyId, 
+        track_url: l, 
+        avatar_url: myAvatar 
+    }]);
+    
     closeM(); load(); b.disabled = false;
+    document.getElementById('txt').value=''; document.getElementById('linkInp').value='';
 }
 
-function switchTab(t) { curTab=t; load(); }
+let curTab = 'all';
+function switchTab(t) { curTab=t; document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active')); document.getElementById('tab-'+t).classList.add('active'); load(); }
 async function del(id) { if(confirm('Delete?')) { await db.from('posts').delete().eq('id', id); load(); } }
 
 window.onload = () => { tg.expand(); load(); };
