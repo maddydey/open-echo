@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>OpenEcho Ultra Pro</title>
+<title>OpenEcho Threads Pro</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -11,76 +11,71 @@
   --bg: #000000;
   --card-bg: rgba(28, 28, 30, 0.7);
   --accent: #0a84ff;
-  --accent-glow: rgba(10, 132, 255, 0.3);
   --text: #ffffff;
   --text-dim: #8e8e93;
   --border: rgba(255, 255, 255, 0.1);
 }
 
 * {box-sizing: border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent;}
-body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 20px; padding-bottom: 120px; }
+body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 15px; padding-bottom: 120px; }
 
-#feed { display: flex; flex-direction: column; gap: 20px; }
+#feed { display: flex; flex-direction: column; gap: 25px; }
 
-/* КАРТОЧКА ПОСТА */
+/* КОНТЕЙНЕР ДЛЯ ПОСТА И ЕГО ОТВЕТОВ */
+.thread-container { display: flex; flex-direction: column; gap: 8px; position: relative; }
+
+/* ОСНОВНОЙ ПОСТ */
 .card {
-  background: var(--card-bg); backdrop-filter: blur(40px); border-radius: 32px; padding: 22px; 
-  border: 1px solid var(--border); opacity: 0; transform: translateY(40px) scale(0.96);
-  transition: all 0.7s cubic-bezier(0.15, 1, 0.3, 1.1); position: relative;
+  background: var(--card-bg); backdrop-filter: blur(40px); border-radius: 28px; padding: 20px; 
+  border: 1px solid var(--border); position: relative; z-index: 2;
+  opacity: 0; transform: translateY(20px); transition: 0.5s ease;
 }
-.card.appeared { opacity: 1; transform: translateY(0) scale(1); }
+.card.appeared { opacity: 1; transform: translateY(0); }
 
-/* ФОТО В ПОСТУ */
-.post-img { width: calc(100% + 44px); margin: -22px -22px 18px -22px; display: block; max-height: 400px; object-fit: cover; border-radius: 32px 32px 0 0; }
-
-/* НОВЫЙ ДИЗАЙН ОТВЕТОВ (REPLY) */
-.reply-quote {
-  background: rgba(255, 255, 255, 0.06); border-left: 3px solid var(--accent);
-  border-radius: 12px; padding: 10px 14px; margin-bottom: 16px; 
-  display: flex; flex-direction: column; gap: 2px;
-  position: relative; overflow: hidden;
+/* ДИЗАЙН ОТВЕТА (ПОД ПОСТОМ) */
+.reply-card {
+  margin-left: 10%; /* Смещение вправо */
+  background: rgba(255, 255, 255, 0.05); border-radius: 20px; padding: 15px;
+  border: 1px solid var(--border); position: relative;
+  font-size: 14px; animation: slideIn 0.4s ease forwards;
 }
-.reply-quote::after {
-    content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(90deg, var(--accent-glow) 0%, transparent 100%);
-    opacity: 0.2; pointer-events: none;
-}
-.reply-user { font-weight: 800; font-size: 13px; color: var(--accent); }
-.reply-text { font-size: 13px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@keyframes slideIn { from {opacity: 0; transform: translateX(20px);} to {opacity: 1; transform: translateX(0);} }
 
-/* LINK PREVIEW (БАБЛЫ) */
+/* Линия связи между постом и ответами */
+.thread-line {
+  position: absolute; left: 25px; top: 50px; bottom: 20px;
+  width: 2px; background: linear-gradient(to bottom, var(--accent), transparent);
+  z-index: 1; display: none;
+}
+.thread-container.has-replies .thread-line { display: block; }
+
+/* ФОТО */
+.post-img { width: calc(100% + 40px); margin: -20px -20px 15px -20px; display: block; max-height: 350px; object-fit: cover; border-radius: 28px 28px 0 0; }
+.reply-card .post-img { width: calc(100% + 30px); margin: -15px -15px 10px -15px; border-radius: 20px 20px 0 0; max-height: 200px; }
+
+/* LINK BUBBLE (ВНИЗУ ПОСТА) */
 .link-bubble {
-  margin-top: 15px; background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2);
-  border-radius: 20px; padding: 12px 16px; display: flex; align-items: center; gap: 14px;
-  text-decoration: none; color: inherit;
+  margin-top: 12px; background: rgba(10, 132, 255, 0.1); border: 1px solid rgba(10, 132, 255, 0.2);
+  border-radius: 18px; padding: 10px 14px; display: flex; align-items: center; gap: 12px;
+  text-decoration: none; color: inherit; font-size: 13px;
 }
-.link-logo { width: 40px; height: 40px; background: #fff; border-radius: 10px; padding: 4px; object-fit: contain; }
-.link-title { font-weight: 700; font-size: 14px; color: var(--accent); }
-.link-host { font-size: 12px; color: var(--text-dim); }
+.link-logo { width: 32px; height: 32px; background: #fff; border-radius: 8px; padding: 3px; }
 
-/* ТЕКСТ И АВТОР */
-.author { color: var(--accent); font-weight: 800; font-size: 15px; margin-bottom: 10px; }
-.text { font-size: 17px; line-height: 1.5; color: #f2f2f7; }
+.author { color: var(--accent); font-weight: 800; font-size: 14px; margin-bottom: 6px; }
+.text { line-height: 1.4; color: #f2f2f7; }
 
-/* КНОПКА ДОБАВЛЕНИЯ */
-.add-btn { position: fixed; bottom: 30px; right: 24px; width: 66px; height: 66px; background: var(--accent); border-radius: 50%; border: none; color: white; font-size: 38px; z-index: 999; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(10,132,255,0.4); }
+/* КНОПКИ */
+.add-btn { position: fixed; bottom: 30px; right: 24px; width: 64px; height: 64px; background: var(--accent); border-radius: 50%; border: none; color: white; font-size: 36px; z-index: 999; box-shadow: 0 8px 25px rgba(10,132,255,0.4); }
+.btn-action { color: var(--accent); font-size: 12px; font-weight: 800; cursor: pointer; margin-top: 12px; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px; }
 
 /* МОДАЛКА */
 .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); backdrop-filter: blur(20px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
 .modal.show { display: flex; }
-.modal-content { background: #1c1c1e; border-radius: 35px; padding: 30px; width: 100%; max-width: 420px; border: 1px solid var(--border); }
-textarea { width: 100%; background: transparent; border: none; color: white; font-size: 18px; outline: none; resize: none; min-height: 100px; margin-top: 10px; }
+.modal-content { background: #1c1c1e; border-radius: 30px; padding: 25px; width: 100%; max-width: 400px; border: 1px solid var(--border); }
+textarea { width: 100%; background: transparent; border: none; color: white; font-size: 17px; outline: none; resize: none; min-height: 100px; }
 
-/* ПРЕДПРОСМОТР ФОТО */
-#mediaPreview { display: none; margin-bottom: 15px; position: relative; width: 80px; height: 80px; }
-#previewImg { width: 100%; height: 100%; object-fit: cover; border-radius: 16px; border: 2px solid var(--accent); }
-.close-preview { position: absolute; top: -10px; right: -10px; background: #ff453a; color: white; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; border: 3px solid #1c1c1e; }
-
-.btn-file { background: none; border: none; color: var(--accent); font-weight: 700; cursor: pointer; font-size: 16px; }
-.send-btn { background: var(--accent); color: white; border: none; padding: 14px 30px; border-radius: 18px; font-weight: 700; font-size: 16px; }
-
-.loader { border: 2px solid #fff; border-top: 2px solid transparent; border-radius: 50%; width: 18px; height: 18px; animation: spin 0.7s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
+#mediaPreview { display: none; margin-bottom: 10px; position: relative; width: 60px; height: 60px; }
+#previewImg { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; border: 2px solid var(--accent); }
 </style>
 </head>
 <body>
@@ -90,24 +85,13 @@ textarea { width: 100%; background: transparent; border: none; color: white; fon
 
     <div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
         <div class="modal-content">
-            <div id="replyPreview" style="display:none" class="reply-quote">
-                <div class="reply-user" id="replyAuthor"></div>
-                <div class="reply-text" id="replyText"></div>
-            </div>
-            
-            <div id="mediaPreview">
-                <img id="previewImg" src="">
-                <div class="close-preview" onclick="clearFile()">✕</div>
-            </div>
-
-            <textarea id="txt" placeholder="Напиши что-нибудь..."></textarea>
-            
-            <input type="text" id="target" placeholder="Приватно для @username" style="width:100%; background:rgba(255,255,255,0.05); border:none; border-radius:14px; padding:14px; color:white; margin-bottom:15px; outline:none; font-size:14px;">
-            
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <button class="btn-file" onclick="document.getElementById('fileInput').click()">📷 Фото</button>
+            <div id="replyInfo" style="display:none; color:var(--accent); font-size:12px; margin-bottom:10px; font-weight:700;">Ответ пользователю...</div>
+            <div id="mediaPreview"><img id="previewImg"></div>
+            <textarea id="txt" placeholder="Напишите сообщение..."></textarea>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+                <button onclick="document.getElementById('fileInput').click()" style="background:none; border:none; color:var(--accent); font-weight:700;">📷 Фото</button>
                 <input type="file" id="fileInput" hidden accept="image/*" onchange="handleFile()">
-                <button class="send-btn" id="sendBtn" onclick="send()">Отправить</button>
+                <button onclick="send()" id="sendBtn" style="background:var(--accent); color:white; border:none; padding:12px 25px; border-radius:15px; font-weight:700;">Отправить</button>
             </div>
         </div>
     </div>
@@ -122,63 +106,64 @@ const myId = tg.initDataUnsafe?.user?.id?.toString() || 'guest';
 const myUsername = tg.initDataUnsafe?.user?.username || 'Guest';
 let replyId = null;
 
-// Rich Link Logic
-function getLinkUI(text) {
-    if (!text) return { cleanText: '', bubble: '' };
+// Функция для создания бабла ссылки
+function createLinkBubble(text) {
     const match = text.match(/(https?:\/\/[^\s]+)/g);
-    if (!match) return { cleanText: text, bubble: '' };
+    if (!match) return { cleanText: text, html: '' };
     const url = match[0];
-    const cleanText = text.replace(url, '').trim();
-    try {
-        const domain = new URL(url).hostname.replace('www.', '');
-        const icon = `https://www.google.com/s2/favicons?sz=64&domain=${domain}`;
-        const bubble = `<a href="${url}" target="_blank" class="link-bubble">
-            <img src="${icon}" class="link-logo">
-            <div><div class="link-title">${domain.includes('t.me') ? 'Эксклюзивный канал' : domain.toUpperCase()}</div>
-            <div class="link-host">Нажмите для перехода</div></div></a>`;
-        return { cleanText, bubble };
-    } catch(e) { return { cleanText: text, bubble: '' }; }
+    const domain = new URL(url).hostname.replace('www.', '');
+    const icon = `https://www.google.com/s2/favicons?sz=64&domain=${domain}`;
+    const html = `<a href="${url}" target="_blank" class="link-bubble">
+        <img src="${icon}" class="link-logo">
+        <div><div style="font-weight:700; color:var(--accent)">${domain.toUpperCase()}</div><div style="font-size:11px; opacity:0.6;">Нажмите для перехода</div></div>
+    </a>`;
+    return { cleanText: text.replace(url, ''), html };
 }
 
 async function load() {
-    const { data, error } = await db.from('posts').select('*').order('created_at', { ascending: false });
-    if (error) return;
-    
+    const { data } = await db.from('posts').select('*').order('created_at', { ascending: false });
     const feed = document.getElementById('feed');
     feed.innerHTML = '';
-    
-    data.forEach((post, index) => {
-        const isMy = post.user_id === myId;
-        const isForMe = post.target_username === myUsername;
-        if (post.target_username && !isMy && !isForMe) return;
 
-        const card = document.createElement('div');
-        card.className = 'card';
-        const { cleanText, bubble } = getLinkUI(post.content || '');
+    // Разделяем на главные посты и ответы
+    const mainPosts = data.filter(p => !p.parent_id);
+    const replies = data.filter(p => p.parent_id);
+
+    mainPosts.forEach((post, i) => {
+        const thread = document.createElement('div');
+        thread.className = 'thread-container';
         
-        let replyHtml = '';
-        if (post.parent_id) {
-            const parent = data.find(p => p.id === post.parent_id);
-            if (parent) {
-                replyHtml = `<div class="reply-quote">
-                    <div class="reply-user">@${parent.username}</div>
-                    <div class="reply-text">${parent.content?.substring(0,40) || '🖼 Фото'}</div>
-                </div>`;
-            }
-        }
+        const postReplies = replies.filter(r => r.parent_id === post.id).reverse();
+        if (postReplies.length > 0) thread.classList.add('has-replies');
 
-        card.innerHTML = `
-            ${post.image_url ? `<img src="${post.image_url}" class="post-img" loading="lazy">` : ''}
-            <div class="author">@${post.username} ${post.target_username ? '🔒' : ''}</div>
-            ${replyHtml}
-            <div class="text">${cleanText || (bubble ? '' : '...')}</div>
-            ${bubble}
-            <div style="margin-top:20px; display:flex; gap:25px; font-size:13px; font-weight:800; opacity:0.8;">
-                <span style="color:var(--accent); cursor:pointer;" onclick="setupReply('${post.id}','${post.username}','${(post.content||'').substring(0,25)}')">💬 ОТВЕТИТЬ</span>
-                ${isMy ? `<span style="color:#ff453a; cursor:pointer;" onclick="del('${post.id}')">🗑 УДАЛИТЬ</span>` : ''}
+        const { cleanText, html: linkHtml } = createLinkBubble(post.content || '');
+
+        // Рендерим главный пост
+        thread.innerHTML = `<div class="thread-line"></div>
+            <div class="card" id="post-${post.id}">
+                ${post.image_url ? `<img src="${post.image_url}" class="post-img">` : ''}
+                <div class="author">@${post.username}</div>
+                <div class="text">${cleanText}</div>
+                ${linkHtml}
+                <div class="btn-action" onclick="setupReply('${post.id}')">💬 Ответить</div>
             </div>`;
-        feed.appendChild(card);
-        setTimeout(() => card.classList.add('appeared'), index * 80);
+
+        // Рендерим ответы строго под ним
+        postReplies.forEach(reply => {
+            const { cleanText: rText, html: rLink } = createLinkBubble(reply.content || '');
+            const rCard = document.createElement('div');
+            rCard.className = 'reply-card';
+            rCard.innerHTML = `
+                ${reply.image_url ? `<img src="${reply.image_url}" class="post-img">` : ''}
+                <div class="author">@${reply.username}</div>
+                <div class="text">${rText}</div>
+                ${rLink}
+            `;
+            thread.appendChild(rCard);
+        });
+
+        feed.appendChild(thread);
+        setTimeout(() => thread.querySelector('.card').classList.add('appeared'), i * 100);
     });
 }
 
@@ -194,55 +179,44 @@ function handleFile() {
     }
 }
 
-function clearFile() {
-    document.getElementById('fileInput').value = '';
+function openModal() { document.getElementById('modal').classList.add('show'); }
+function closeModal() { 
+    document.getElementById('modal').classList.remove('show'); 
+    replyId = null; document.getElementById('replyInfo').style.display = 'none';
+    document.getElementById('txt').value = '';
     document.getElementById('mediaPreview').style.display = 'none';
+}
+
+function setupReply(id) {
+    replyId = id;
+    document.getElementById('replyInfo').style.display = 'block';
+    openModal();
 }
 
 async function send() {
     const txt = document.getElementById('txt').value.trim();
     const file = document.getElementById('fileInput').files[0];
-    const target = document.getElementById('target').value.replace('@','').trim();
     if (!txt && !file) return;
 
     const btn = document.getElementById('sendBtn');
-    btn.disabled = true; btn.innerHTML = '<div class="loader"></div>';
+    btn.disabled = true; btn.innerText = '...';
 
-    try {
-        let imageUrl = null;
-        if (file) {
-            const fileName = `${Date.now()}.jpg`;
-            await db.storage.from('images').upload(fileName, file);
-            imageUrl = db.storage.from('images').getPublicUrl(fileName).data.publicUrl;
-        }
+    let imageUrl = null;
+    if (file) {
+        const name = `${Date.now()}.jpg`;
+        await db.storage.from('images').upload(name, file);
+        imageUrl = db.storage.from('images').getPublicUrl(name).data.publicUrl;
+    }
 
-        await db.from('posts').insert([{ 
-            content: txt, username: myUsername, user_id: myId, 
-            target_username: target || null, parent_id: replyId, image_url: imageUrl 
-        }]);
+    await db.from('posts').insert([{ 
+        content: txt, username: myUsername, user_id: myId, 
+        parent_id: replyId, image_url: imageUrl 
+    }]);
 
-        closeModal();
-        load();
-    } catch (e) { tg.showAlert(e.message); } finally { btn.disabled = false; btn.innerText = 'Отправить'; }
+    closeModal();
+    load();
+    btn.disabled = false; btn.innerText = 'Отправить';
 }
-
-function openModal() { document.getElementById('modal').classList.add('show'); }
-function closeModal() { 
-    document.getElementById('modal').classList.remove('show'); 
-    replyId = null; document.getElementById('txt').value = '';
-    document.getElementById('replyPreview').style.display = 'none';
-    clearFile(); 
-}
-
-function setupReply(id, user, text) {
-    replyId = id;
-    document.getElementById('replyAuthor').innerText = '@' + user;
-    document.getElementById('replyText').innerText = text + '...';
-    document.getElementById('replyPreview').style.display = 'flex';
-    openModal();
-}
-
-async function del(id) { if (confirm('Удалить?')) { await db.from('posts').delete().eq('id', id); load(); } }
 
 load();
 db.channel('any').on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, load).subscribe();
