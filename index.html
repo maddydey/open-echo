@@ -2,156 +2,284 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>OpenEcho Base</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenEcho One UI</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
-  --bg: #000000;
-  --card-bg: #1c1c1e;
-  --accent: #0a84ff;
-  --text: #ffffff;
-  --text-dim: #8e8e93;
-  --border: rgba(255, 255, 255, 0.1);
+  --bg: #f5f5f5;
+  --card-bg: rgba(255,255,255,0.7);
+  --text: #1a1a1a;
+  --text-dim: #666;
+  --accent: #1b6ef3;
+  --border: rgba(0,0,0,0.08);
+  --shadow: rgba(0,0,0,0.1);
 }
 
-* {box-sizing: border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent;}
-body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 15px; padding-bottom: 100px; }
-
-#feed { display: flex; flex-direction: column; gap: 16px; }
-
-/* БАЗОВАЯ КАРТОЧКА */
-.card {
-  background: var(--card-bg); border-radius: 20px; padding: 16px; 
-  border: 1px solid var(--border);
+[data-theme="dark"] {
+  --bg: #0a0a0a;
+  --card-bg: rgba(30,30,30,0.7);
+  --text: #e5e5e5;
+  --text-dim: #999;
+  --accent: #5093ff;
+  --border: rgba(255,255,255,0.1);
+  --shadow: rgba(0,0,0,0.5);
 }
 
-/* ФОТО */
-.post-img { width: calc(100% + 32px); margin: -16px -16px 12px -16px; border-radius: 20px 20px 0 0; max-height: 300px; object-fit: cover; }
-
-/* ЦИТАТА ОТВЕТА (REPLY BOX) */
-.reply-box { 
-    background: rgba(255, 255, 255, 0.05); 
-    border-left: 3px solid var(--accent); 
-    padding: 10px; border-radius: 12px; 
-    margin-bottom: 12px; font-size: 13px; 
+* {box-sizing: border-box; margin:0; padding:0;}
+body {
+  font-family: -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  padding:20px;
+  padding-bottom:100px;
+  transition: background 0.3s,color 0.3s;
 }
 
-/* ССЫЛКИ (RICH PREVIEW) */
-.link-preview {
-    margin-top: 12px; background: rgba(10, 132, 255, 0.1); 
-    border-radius: 14px; padding: 10px; display: flex; align-items: center; gap: 10px;
-    text-decoration: none; color: inherit; border: 1px solid rgba(10, 132, 255, 0.2);
-}
-.link-logo { width: 30px; height: 30px; background: #fff; border-radius: 6px; padding: 2px; }
+.header {display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;}
+h2 {font-size:28px; font-weight:700;}
+.theme-btn {width:44px;height:44px;border-radius:50%;background:var(--card-bg);backdrop-filter:blur(20px);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 12px var(--shadow);}
 
-.author { color: var(--accent); font-weight: 700; font-size: 14px; margin-bottom: 4px; }
-.text { font-size: 15px; line-height: 1.4; }
+#feed {display:flex; flex-direction:column; gap:16px;}
+.card {background:var(--card-bg);backdrop-filter:blur(40px);border-radius:24px;padding:20px;border:1px solid var(--border);box-shadow:0 8px 32px var(--shadow);}
+.author {color:var(--accent); font-weight:600; font-size:15px; margin-bottom:10px;}
+.text {color:var(--text); line-height:1.5; margin-bottom:12px; word-wrap:break-word; font-size:15px; max-height:100px; overflow:hidden; text-overflow:ellipsis;}
+.img {width:100%; border-radius:16px; margin-bottom:12px; cursor:pointer;}
+.reply-box {background:var(--card-bg);backdrop-filter:blur(20px);border-left:3px solid var(--accent);padding:10px 12px;border-radius:12px;margin-bottom:12px;font-size:13px;border:1px solid var(--border);}
+.reply-author {font-weight:600;color:var(--accent);margin-bottom:4px;}
+.reply-text {color:var(--text-dim); font-size:13px; max-height:50px; overflow:hidden; text-overflow:ellipsis;}
 
-.add-btn { position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; background: var(--accent); border-radius: 50%; border: none; color: white; font-size: 32px; z-index: 100; }
+.actions {display:flex; gap:20px; font-size:14px; margin-top:12px; padding-top:12px; border-top:1px solid var(--border);}
+.btn {color:var(--accent); cursor:pointer; font-weight:500;}
+.btn-del {color:#ff3b30;}
 
-/* МОДАЛКА */
-.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
-.modal-content { background: #2c2c2e; width: 100%; max-width: 400px; border-radius: 20px; padding: 20px; }
-textarea { width: 100%; background: none; border: none; color: white; font-size: 17px; outline: none; resize: none; min-height: 100px; }
+.add-btn {position:fixed; bottom:24px; right:24px; width:60px; height:60px; background:linear-gradient(135deg,var(--accent) 0%,#9055ff 100%); color:white; border:none; border-radius:50%; font-size:28px; cursor:pointer; box-shadow:0 8px 24px rgba(27,110,243,0.4); z-index:100;}
+
+.modal {display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); backdrop-filter:blur(10px); z-index:200; align-items:center; justify-content:center; padding:20px;}
+.modal.show {display:flex;}
+.modal-content {background:var(--card-bg);backdrop-filter:blur(40px);border-radius:24px;padding:24px;width:100%;max-width:420px;border:1px solid var(--border);box-shadow:0 20px 60px var(--shadow);}
+textarea, input[type=text] {width:100%; border:1px solid var(--border); border-radius:16px; padding:12px; background:var(--card-bg); backdrop-filter:blur(20px); color:var(--text);}
+textarea {font-size:15px; resize:none; margin-bottom:12px;}
+.modal-btns {display:flex; justify-content:space-between; align-items:center; gap:12px;}
+.send-btn {background:linear-gradient(135deg,var(--accent) 0%,#9055ff 100%); color:white; border:none; padding:12px 28px; border-radius:16px; font-weight:600; font-size:15px; cursor:pointer;}
+.send-btn:disabled {opacity:0.5;}
+
+.overlay {display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); backdrop-filter:blur(20px); z-index:300; align-items:center; justify-content:center;}
+.overlay.show {display:flex;}
+.overlay img {max-width:90%; max-height:90%; border-radius:16px;}
 </style>
 </head>
-<body>
+<body data-theme="light">
 
-<div id="feed"></div>
+<div class="header">
+  <h2>OpenEcho 🔥</h2>
+  <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+</div>
+
+<div id="feed">
+  <div class="loading">Загрузка...</div>
+</div>
+
 <button class="add-btn" onclick="openModal()">+</button>
 
 <div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
-    <div class="modal-content">
-        <div id="replyTag" style="display:none; color:var(--accent); font-size:12px; margin-bottom:10px; font-weight:bold;">ОТВЕТ @USER</div>
-        <textarea id="txt" placeholder="Что нового?"></textarea>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;">
-            <button onclick="document.getElementById('fileInput').click()" style="background:none; border:none; color:var(--accent); font-weight:bold;">📷 ФОТО</button>
-            <input type="file" id="fileInput" hidden onchange="handleFile()">
-            <button onclick="send()" style="background:var(--accent); color:white; border:none; padding:10px 20px; border-radius:12px; font-weight:bold;">ОТПРАВИТЬ</button>
-        </div>
+  <div class="modal-content">
+    <div id="replyBox" style="display:none" class="reply-box">
+      <div class="reply-author" id="replyAuthor"></div>
+      <div class="reply-text" id="replyText"></div>
     </div>
+    <textarea id="txt" rows="4" placeholder="Что нового?"></textarea>
+    <div id="preview" class="preview" style="display:none">
+      <img id="previewImg">
+      <div class="preview-close" onclick="clearFile()">×</div>
+    </div>
+    <input type="text" id="target" placeholder="Приватно для @username">
+    <div class="modal-btns">
+      <button class="file-btn" onclick="document.getElementById('file').click()">📷 Фото</button>
+      <input type="file" id="file" hidden accept="image/*" onchange="showPreview()">
+      <button class="send-btn" id="sendBtn" onclick="send()">Отправить</button>
+    </div>
+  </div>
+</div>
+
+<div id="overlay" class="overlay" onclick="closeOverlay()">
+  <img id="overlayImg">
 </div>
 
 <script>
 const tg = window.Telegram.WebApp;
+tg.expand();
+
+// ⚠️ ЗАМЕНИТЕ НА СВОИ ДАННЫЕ
 const SUPABASE_URL = 'https://xddulhzvzemmrhrsjfhb.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_2FIKYuEHEQrYseRnwY58Qg__UIFN59j';
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let db = null, userId=null, username=null, replyId=null;
 
-const myUser = tg.initDataUnsafe?.user?.username || 'Guest';
-let replyId = null;
+// Тема
+function toggleTheme(){const b=document.body,t=document.getElementById('themeBtn');if(b.getAttribute('data-theme')==='light'){b.setAttribute('data-theme','dark');t.textContent='☀️';localStorage.setItem('theme','dark');}else{b.setAttribute('data-theme','light');t.textContent='🌙';localStorage.setItem('theme','light');}}
+document.body.setAttribute('data-theme',localStorage.getItem('theme')||'light');
+if(localStorage.getItem('theme')==='dark')document.getElementById('themeBtn').textContent='☀️';
 
-function getRichLink(text) {
-    const match = text.match(/(https?:\/\/[^\s]+)/g);
-    if (!match) return { clean: text, html: '' };
-    const url = match[0];
-    const host = new URL(url).hostname;
-    const html = `<a href="${url}" target="_blank" class="link-preview">
-        <img src="https://www.google.com/s2/favicons?domain=${host}" class="link-logo">
-        <div style="font-size:13px; font-weight:600;">${host.toUpperCase()}</div>
-    </a>`;
-    return { clean: text.replace(url, ''), html };
+// Инициализация
+async function init(){
+  try{
+    const user=tg.initDataUnsafe?.user;
+    userId=user?user.id.toString():'test123';
+    username=user?user.username||'User'+user.id:'TestUser';
+    if(SUPABASE_URL.includes('your-project'))throw new Error('Укажите SUPABASE_URL и SUPABASE_KEY');
+    db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+    await load();
+    await loadGallery();
+    db.channel('posts-channel')
+      .on('postgres_changes',{event:'*',schema:'public',table:'posts'},()=>{load(); loadGallery();})
+      .subscribe();
+  }catch(e){console.error(e); document.getElementById('feed').innerHTML=`<div class="error">Ошибка: ${e.message}</div>`;}
 }
 
-async function load() {
-    const { data } = await db.from('posts').select('*').order('created_at', { ascending: false });
-    const feed = document.getElementById('feed');
-    feed.innerHTML = '';
+// Экранирование текста
+function esc(str){const d=document.createElement('div');d.textContent=str||'';return d.innerHTML;}
 
-    data.forEach(post => {
-        const { clean, html } = getRichLink(post.content || '');
-        let replyHtml = '';
-        if (post.parent_id) {
-            const parent = data.find(p => p.id === post.parent_id);
-            if (parent) replyHtml = `<div class="reply-box"><b>@${parent.username}</b>: ${parent.content?.substring(0,30)}...</div>`;
+// Загрузка постов
+async function load(){
+  try{
+    const { data,error } = await db.from('posts').select('*').order('created_at',{ascending:false}).limit(30);
+    if(error)throw error;
+    const feed=document.getElementById('feed');
+    if(!data||data.length===0){feed.innerHTML='<div class="empty">📝<br><br>Пока нет постов<br>Будьте первым!</div>';return;}
+    feed.innerHTML='';
+    data.forEach(post=>{
+      const isMy=post.user_id===userId;
+      const isForMe=post.target_username===username;
+      if(post.target_username&&!isMy&&!isForMe)return;
+
+      const card=document.createElement('div'); card.className='card';
+      let html='';
+
+      // Ответ на пост
+      if(post.parent_id){
+        const parent=data.find(p=>p.id===post.parent_id);
+        if(parent){
+          const parentIsMy=parent.user_id===userId;
+          const parentIsForMe=parent.target_username===username;
+          const parentText=(parent.target_username && !parentIsMy && !parentIsForMe)?'🔒 Приватный пост':esc(parent.content||'📷');
+          html+=`<div class="reply-box"><div class="reply-author">@${esc(parent.username)}</div><div class="reply-text">${parentText}</div></div>`;
         }
+      }
 
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-            ${post.image_url ? `<img src="${post.image_url}" class="post-img">` : ''}
-            <div class="author">@${post.username}</div>
-            ${replyHtml}
-            <div class="text">${clean}</div>
-            ${html}
-            <div style="margin-top:12px; color:var(--accent); font-size:13px; font-weight:bold; cursor:pointer;" onclick="setupReply('${post.id}', '${post.username}')">ОТВЕТИТЬ</div>
-        `;
-        feed.appendChild(card);
+      const lock=post.target_username?' 🔒':'';
+      html+=`<div class="author">@${esc(post.username)}${lock}</div>`;
+      if(post.image_url) html+=`<img class="img" src="${post.image_url}" onclick="showImage('${post.image_url}')" loading="lazy">`;
+      if(post.content) html+=`<div class="text">${esc(post.content)}</div>`;
+
+      html+=`<div class="actions">
+        <span class="btn" onclick="reply('${post.id}','${esc(post.username)}','${esc((post.content||'').substring(0,40))}')">💬 Ответить</span>
+        <span class="btn" onclick="sharePost('${post.id}')">🔗 Поделиться</span>`;
+      if(isMy) html+=`<span class="btn btn-del" onclick="del('${post.id}')">🗑 Удалить</span>`;
+      html+='</div>';
+      card.innerHTML=html;
+      feed.appendChild(card);
     });
+  }catch(e){console.error(e); document.getElementById('feed').innerHTML='<div class="error">Ошибка загрузки</div>';}
 }
 
-function openModal() { document.getElementById('modal').style.display = 'flex'; }
-function closeModal() { document.getElementById('modal').style.display = 'none'; replyId = null; document.getElementById('replyTag').style.display = 'none'; document.getElementById('txt').value = ''; }
+// Галерея случайных постов (compact)
+async function loadGallery(){
+  try{
+    const { data,error }=await db.from('posts').select('*').order('random()').limit(10);
+    if(error)throw error;
+    const feed=document.getElementById('feed');
+    data.forEach(post=>{
+      const isMy=post.user_id===userId;
+      const isForMe=post.target_username===username;
+      if(post.target_username&&!isMy&&!isForMe)return;
 
-function setupReply(id, user) {
-    replyId = id;
-    document.getElementById('replyTag').innerText = 'ОТВЕТ @' + user.toUpperCase();
-    document.getElementById('replyTag').style.display = 'block';
-    openModal();
+      const card=document.createElement('div'); card.className='card';
+      let html=`<div class="author">@${esc(post.username)}</div>`;
+      if(post.image_url) html+=`<img class="img" src="${post.image_url}" onclick="showImage('${post.image_url}')" style="max-height:150px;object-fit:cover;">`;
+      if(post.content) html+=`<div class="text" style="max-height:40px;overflow:hidden">${esc(post.content)}</div>`;
+      html+=`<div class="actions">
+        <span class="btn" onclick="reply('${post.id}','${esc(post.username)}','${esc((post.content||'').substring(0,40))}')">💬 Ответить</span>
+        <span class="btn" onclick="sharePost('${post.id}')">🔗 Поделиться</span>`;
+      if(isMy) html+=`<span class="btn btn-del" onclick="del('${post.id}')">🗑 Удалить</span>`;
+      html+='</div>';
+      card.innerHTML=html; feed.appendChild(card);
+    });
+  }catch(e){console.error(e);}
 }
 
-async function send() {
-    const txt = document.getElementById('txt').value.trim();
-    const file = document.getElementById('fileInput').files[0];
-    if (!txt && !file) return;
-
-    let img = null;
-    if (file) {
-        const n = `${Date.now()}.jpg`;
-        await db.storage.from('images').upload(n, file);
-        img = db.storage.from('images').getPublicUrl(n).data.publicUrl;
+// Отправка
+async function send(){
+  const txt=document.getElementById('txt').value.trim();
+  const target=document.getElementById('target').value.replace('@','').trim();
+  const file=document.getElementById('file').files[0];
+  if(!txt&&!file){tg.showAlert('Пост пустой!');return;}
+  const btn=document.getElementById('sendBtn'); btn.disabled=true; btn.textContent='Отправка...';
+  try{
+    let imageUrl=null;
+    if(file){
+      const { data, error } = await db.storage.from('images').upload(`public/${Date.now()}_${file.name}`, file);
+      if(error)throw error;
+      imageUrl=`https://your-project.supabase.co/storage/v1/object/public/images/${data.path}`;
     }
-
-    await db.from('posts').insert([{ content: txt, username: myUser, parent_id: replyId, image_url: img }]);
-    closeModal(); load();
+    const { error } = await db.from('posts').insert([{
+      content:txt, user_id:userId, username:username, image_url:imageUrl,
+      target_username:target||null, parent_id:replyId||null
+    }]);
+    if(error)throw error;
+    closeModal(); load(); loadGallery();
+  }catch(e){console.error(e); tg.showAlert('Ошибка: '+e.message);}
+  finally{btn.disabled=false; btn.textContent='Отправить';}
 }
 
-function handleFile() { if(document.getElementById('fileInput').files[0]) alert('Фото выбрано'); }
+// Удаление
+async function del(id){if(!confirm('Удалить пост?')) return; try{await db.from('posts').delete().eq('id',id);load(); loadGallery();}catch(e){console.error(e);alert('Ошибка удаления');}}
 
-load();
-db.channel('any').on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, load).subscribe();
+// Поделиться
+function sharePost(postId){
+  const url=`${window.location.origin}/?post=${postId}`;
+  if(navigator.share){navigator.share({title:'Смотри этот пост!',url:url}).catch(console.error);}
+  else{navigator.clipboard.writeText(url).then(()=>alert('Ссылка скопирована!')).catch(()=>prompt('Скопируйте ссылку:',url));}
+}
+
+// Ответ на пост
+function reply(id,author,text){replyId=id; document.getElementById('replyBox').style.display='block'; document.getElementById('replyAuthor').textContent='@'+author; document.getElementById('replyText').textContent=text; openModal();}
+
+// Модалка
+function openModal(){document.getElementById('modal').classList.add('show');}
+function closeModal(){document.getElementById('modal').classList.remove('show'); replyId=null; document.getElementById('replyBox').style.display='none'; clearFile();}
+function showImage(url){document.getElementById('overlay').classList.add('show'); document.getElementById('overlayImg').src=url;}
+function closeOverlay(){document.getElementById('overlay').classList.remove('show'); document.getElementById('overlayImg').src='';}
+function showPreview(){const file=document.getElementById('file').files[0];if(!file)return;const reader=new FileReader(); reader.onload=e=>{document.getElementById('previewImg').src=e.target.result; document.getElementById('preview').style.display='block';}; reader.readAsDataURL(file);}
+function clearFile(){document.getElementById('file').value=''; document.getElementById('previewImg').src=''; document.getElementById('preview').style.display='none';}
+
+// Загрузка поста по ссылке
+async function loadSinglePost(postId){
+  try{
+    const { data,error } = await db.from('posts').select('*').eq('id',postId).single();
+    if(error)throw error;
+    const feed=document.getElementById('feed'); feed.innerHTML='';
+    const post=data;
+    const isMy=post.user_id===userId; const isForMe=post.target_username===username;
+    if(post.target_username&&!isMy&&!isForMe){feed.innerHTML='<div class="empty">🔒 Приватный пост</div>'; return;}
+    const card=document.createElement('div'); card.className='card';
+    let html=`<div class="author">@${esc(post.username)}${post.target_username?' 🔒':''}</div>`;
+    if(post.image_url) html+=`<img class="img" src="${post.image_url}" onclick="showImage('${post.image_url}')" loading="lazy">`;
+    if(post.content) html+=`<div class="text">${esc(post.content)}</div>`;
+    html+=`<div class="actions"><span class="btn" onclick="reply('${post.id}','${esc(post.username)}','${esc((post.content||'').substring(0,40))}')">💬 Ответить</span><span class="btn" onclick="sharePost('${post.id}')">🔗 Поделиться</span>`;
+    if(isMy) html+=`<span class="btn btn-del" onclick="del('${post.id}')">🗑 Удалить</span>`;
+    html+='</div>'; card.innerHTML=html; feed.appendChild(card);
+  }catch(e){console.error(e);}
+}
+
+document.addEventListener('DOMContentLoaded',()=>{  init();
+
+  // Если в URL есть ?post=ID, то сразу загрузить конкретный пост
+  const params = new URLSearchParams(window.location.search);
+  const postId = params.get('post');
+  if(postId) loadSinglePost(postId);
+});
 </script>
+
 </body>
 </html>
