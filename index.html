@@ -9,57 +9,78 @@
     <style>
         :root {
             --bg: #0f0f10;
-            --card-bg: rgba(28, 28, 30, 0.7);
+            --card-bg: #1c1c1e;
             --accent: #0a84ff;
             --text-main: #ffffff;
             --text-dim: #8e8e93;
             --link-box: rgba(255, 255, 255, 0.05);
         }
-        body { background: var(--bg); color: var(--text-main); font-family: -apple-system, sans-serif; margin: 0; padding: 20px; padding-bottom: 110px; }
+        body { background: var(--bg); color: var(--text-main); font-family: -apple-system, sans-serif; margin: 0; padding: 20px; padding-bottom: 110px; overflow-x: hidden; }
         
-        #feed { display: flex; flex-direction: column; gap: 16px; }
-        .echo-card { background: var(--card-bg); backdrop-filter: blur(15px); border-radius: 24px; position: relative; border: 1px solid rgba(255, 255, 255, 0.08); overflow: hidden; animation: slideUp 0.4s ease; }
+        #feed { display: flex; flex-direction: column; gap: 24px; }
         
-        /* Цитата ответа */
-        .reply-quote { background: rgba(255, 255, 255, 0.05); border-left: 3px solid var(--accent); padding: 8px 12px; border-radius: 8px; margin-bottom: 12px; font-size: 13px; }
-        .reply-quote-user { color: var(--accent); font-weight: 700; }
-        .reply-quote-text { color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        /* ГРУППА ПОСТА И ОТВЕТОВ */
+        .echo-group { display: flex; flex-direction: column; position: relative; }
+
+        /* ОСНОВНОЙ ПОСТ */
+        .echo-card { 
+            background: var(--card-bg); border-radius: 24px; position: relative; 
+            border: 1px solid rgba(255, 255, 255, 0.08); overflow: hidden; 
+            z-index: 10; box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            animation: slideUp 0.4s ease;
+        }
+
+        /* СТИЛЬ ОТВЕТА (ЗАЛЕЗАЕТ ПОД ПОСТ) */
+        .echo-card.reply-style { 
+            margin-left: 12%; margin-top: -12px; /* Эффект наслоения */
+            z-index: 5; border-radius: 0 0 20px 20px;
+            background: #161618; transform: scale(0.98);
+            border-top: none; padding-top: 10px;
+        }
 
         .card-content { padding: 16px; }
-        .author { font-weight: 700; color: var(--accent); font-size: 14px; margin-bottom: 4px; }
-        .content { font-size: 16px; line-height: 1.4; word-break: break-word; }
-        
-        /* Мини-окошко ссылки */
-        .link-preview-box { margin-top: 12px; background: var(--link-box); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 12px; display: flex; align-items: center; gap: 12px; text-decoration: none; }
-        .link-icon { font-size: 20px; }
-        .link-url-title { color: var(--accent); font-size: 15px; font-weight: 700; display: block; }
-        .link-host { color: var(--text-dim); font-size: 12px; }
 
-        .post-img { width: 100%; display: block; object-fit: cover; max-height: 400px; cursor: pointer; }
+        /* АВАТАРКИ */
+        .author-box { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .avatar { 
+            width: 36px; height: 36px; border-radius: 12px; 
+            background: linear-gradient(135deg, var(--accent), #5e5ce6);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; color: white; text-transform: uppercase; font-size: 14px;
+        }
+
+        .author { font-weight: 700; color: var(--accent); font-size: 14px; }
+        .content { font-size: 15px; line-height: 1.4; word-break: break-word; }
+        
+        /* ССЫЛКИ */
+        .link-preview-box { margin-top: 12px; background: var(--link-box); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 12px; display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .link-url-title { color: var(--accent); font-size: 14px; font-weight: 700; }
+
+        .post-img { width: 100%; display: block; object-fit: cover; max-height: 350px; }
         .card-actions { margin-top: 14px; display: flex; gap: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px; }
-        .action-btn { color: var(--accent); font-size: 13px; font-weight: 600; cursor: pointer; }
+        .action-btn { color: var(--accent); font-size: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase; }
 
         .btn-add { position: fixed; bottom: 30px; right: 24px; width: 64px; height: 64px; background: var(--accent); border-radius: 22px; font-size: 32px; color: white; border: none; box-shadow: 0 10px 30px rgba(10, 132, 255, 0.4); z-index: 100; }
 
-        /* Модалка с новым полем */
-        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); z-index: 1000; justify-content: center; align-items: flex-end; }
-        .modal-content { background: #1c1c1e; width: 100%; padding: 24px; border-radius: 30px 30px 0 0; animation: sheetUp 0.3s ease; box-sizing: border-box; }
-        @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 1000; justify-content: center; align-items: flex-end; }
+        .modal-content { background: #1c1c1e; width: 100%; padding: 24px; border-radius: 30px 30px 0 0; box-sizing: border-box; }
         
-        textarea { width: 100%; background: transparent; border: none; color: white; font-size: 17px; resize: none; outline: none; margin-bottom: 10px; font-family: inherit; }
-        .link-title-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 10px; color: white; font-size: 14px; margin-bottom: 15px; box-sizing: border-box; outline: none; }
-        .link-title-input:focus { border-color: var(--accent); }
+        textarea { width: 100%; background: transparent; border: none; color: white; font-size: 18px; resize: none; outline: none; margin-bottom: 10px; }
+        .link-title-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; color: white; margin-bottom: 15px; outline: none; }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <h2 style="font-weight: 800; letter-spacing: -1px;">OpenEcho</h2>
+    <h2 style="font-weight: 800; letter-spacing: -1px; margin-bottom: 20px;">OpenEcho Elite</h2>
     <div id="feed"></div>
 
     <button class="btn-add" onclick="openModal()">+</button>
 
-    <div id="modal">
+    <div id="modal" onclick="if(event.target==this) closeModal()">
         <div class="modal-content">
+            <div id="replyInfo" style="display:none; color:var(--accent); margin-bottom:10px; font-size:12px; font-weight:bold;">ОТВЕТ @USER</div>
             <textarea id="postText" rows="3" placeholder="Что нового?"></textarea>
             <input type="text" id="linkTitle" class="link-title-input" placeholder="Название ссылки (необязательно)">
             
@@ -67,123 +88,107 @@
             <div id="fileName" style="font-size: 12px; color: var(--accent); margin-bottom: 15px;"></div>
             
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div style="color: var(--accent); font-weight: 600; cursor: pointer; font-size: 15px;" onclick="document.getElementById('fileInput').click()">🖼 Фото</div>
-                <button id="submitBtn" style="background: var(--accent); color: white; padding: 12px 24px; border-radius: 16px; border: none; font-weight: 700;" onclick="sendPost()">Опубликовать</button>
+                <div style="color: var(--accent); font-weight: 600; cursor: pointer;" onclick="document.getElementById('fileInput').click()">🖼 ФОТО</div>
+                <button id="submitBtn" style="background: var(--accent); color: white; padding: 12px 28px; border-radius: 16px; border: none; font-weight: 700;" onclick="sendPost()">Опубликовать</button>
             </div>
-            <button onclick="closeModal()" style="background:none; border:none; color:var(--text-dim); width:100%; margin-top:20px; font-size: 14px;">Отмена</button>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand();
-
         const SUPABASE_URL = 'ТВОЙ_URL';
         const SUPABASE_KEY = 'ТВОЙ_KEY';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         const currentUserId = tg.initDataUnsafe?.user?.id?.toString();
+        const currentUsername = tg.initDataUnsafe?.user?.username || "Guest";
 
         let currentReplyId = null;
-        let currentReplyUsername = null;
 
         function processContent(text, linkTitle) {
             if (!text) return { text: '', extra: '' };
             let extraHtml = '';
             const urlRegex = /(https?:\/\/[^\s]+)/g;
-            const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/;
-            
-            const ytMatch = text.match(youtubeRegex);
-            const allUrls = text.match(urlRegex);
+            const urls = text.match(urlRegex);
 
-            if (ytMatch) {
-                extraHtml += `<div style="margin-top:12px; position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:14px; background:#000;"><iframe style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" src="https://www.youtube.com/embed/${ytMatch[1]}" allowfullscreen></iframe></div>`;
-            }
-
-            if (allUrls && !ytMatch) {
-                const url = allUrls[0];
-                const displayTitle = linkTitle || url.split('/')[2].replace('www.', '');
-                extraHtml += `
+            if (urls) {
+                const url = urls[0];
+                const displayTitle = linkTitle || url.split('/')[2];
+                extraHtml = `
                 <a href="${url}" target="_blank" class="link-preview-box">
-                    <div class="link-icon">🔗</div>
-                    <div class="link-info">
+                    <span style="font-size:20px;">🔗</span>
+                    <div>
                         <span class="link-url-title">${displayTitle}</span>
-                        <span class="link-host">${url.split('/')[2]}</span>
+                        <div style="color:var(--text-dim); font-size:11px;">${url.split('/')[2]}</div>
                     </div>
                 </a>`;
             }
-
-            const linkedText = text.replace(urlRegex, (url) => `<a href="${url}" target="_blank" style="color:var(--accent); text-decoration:none; font-weight:600;">🔗 Ссылка</a>`);
+            const linkedText = text.replace(urlRegex, (url) => `<span style="color:var(--accent); font-weight:600;">ссылка</span>`);
             return { text: linkedText, extra: extraHtml };
         }
 
-        async function compressImage(file) {
-            return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.src = e.target.result;
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        let w = img.width, h = img.height;
-                        if (w > 1200 || h > 1200) { if (w > h) { h *= 1200/w; w = 1200; } else { w *= 1200/h; h = 1200; } }
-                        canvas.width = w; canvas.height = h;
-                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                        canvas.toBlob((b) => resolve(new File([b], file.name, {type:'image/jpeg'})), 'image/jpeg', 0.7);
-                    };
-                };
-            });
+        function createCard(post, isReply = false) {
+            const processed = processContent(post.content, post.link_title);
+            const avatarLetter = (post.username || "A")[0].toUpperCase();
+            
+            return `
+                <div class="echo-card ${isReply ? 'reply-style' : ''}">
+                    ${post.image_url ? `<img src="${post.image_url}" class="post-img">` : ''}
+                    <div class="card-content">
+                        <div class="author-box">
+                            <div class="avatar" style="${isReply ? 'width:28px; height:28px; font-size:12px;' : ''}">${avatarLetter}</div>
+                            <div class="author">@${post.username}</div>
+                        </div>
+                        <div class="content">${processed.text}</div>
+                        ${processed.extra}
+                        ${!isReply ? `
+                        <div class="card-actions">
+                            <div class="action-btn" onclick="openReply('${post.id}', '${post.username}')">💬 Ответить</div>
+                            ${post.user_id === currentUserId ? `<div class="action-btn" style="color:#ff453a" onclick="deletePost('${post.id}')">Удалить</div>` : ''}
+                        </div>` : ''}
+                    </div>
+                </div>`;
         }
-
-        function openModal(replyId = null, replyUser = null) {
-            currentReplyId = replyId;
-            currentReplyUsername = replyUser;
-            document.getElementById('postText').placeholder = replyUser ? `Ответить @${replyUser}...` : "Что нового?";
-            document.getElementById('modal').style.display = 'flex';
-        }
-
-        function closeModal() { 
-            document.getElementById('modal').style.display = 'none';
-            document.getElementById('linkTitle').value = '';
-            document.getElementById('postText').value = '';
-        }
-
-        function updateFileName() { document.getElementById('fileName').innerText = document.getElementById('fileInput').files[0]?.name || ""; }
 
         async function loadEchos() {
             const { data } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
             const feed = document.getElementById('feed');
             if (!data) return;
             feed.innerHTML = '';
-            data.forEach(post => {
-                const isMyPost = post.user_id === currentUserId;
-                const processed = processContent(post.content, post.link_title);
-                
-                let replyQuoteHtml = '';
-                if (post.parent_id) {
-                    const parentPost = data.find(p => p.id === post.parent_id);
-                    if (parentPost) {
-                        replyQuoteHtml = `<div class="reply-quote"><div class="reply-quote-user">@${parentPost.username}</div><div class="reply-quote-text">${parentPost.content || '🖼 Фото'}</div></div>`;
-                    }
-                }
 
-                const card = document.createElement('div');
-                card.className = 'echo-card';
-                card.innerHTML = `
-                    ${isMyPost ? `<button style="position:absolute; top:12px; right:12px; background:rgba(255,69,58,0.2); border:none; border-radius:8px; padding:5px 10px; color:#ff453a; z-index:10;" onclick="deleteEcho('${post.id}')">✕</button>` : ''}
-                    ${post.image_url ? `<img src="${post.image_url}" class="post-img" onclick="window.open('${post.image_url}')">` : ''}
-                    <div class="card-content">
-                        ${replyQuoteHtml}
-                        <div class="author">@${post.username || 'anon'}</div>
-                        <div class="content">${processed.text}</div>
-                        ${processed.extra}
-                        <div class="card-actions">
-                            <div class="action-btn" onclick="openModal('${post.id}', '${post.username}')">💬 Ответить</div>
-                        </div>
-                    </div>`;
-                feed.appendChild(card);
+            const mainPosts = data.filter(p => !p.parent_id);
+            const replies = data.filter(p => p.parent_id);
+
+            mainPosts.forEach(post => {
+                const group = document.createElement('div');
+                group.className = 'echo-group';
+                
+                let groupHtml = createCard(post, false);
+                
+                // Добавляем ответы под основной пост
+                const postReplies = replies.filter(r => r.parent_id === post.id).reverse();
+                postReplies.forEach(reply => {
+                    groupHtml += createCard(reply, true);
+                });
+
+                group.innerHTML = groupHtml;
+                feed.appendChild(group);
             });
         }
+
+        function openModal() { document.getElementById('modal').style.display = 'flex'; }
+        function openReply(id, user) {
+            currentReplyId = id;
+            document.getElementById('replyInfo').innerText = 'ОТВЕТ ДЛЯ @' + user.toUpperCase();
+            document.getElementById('replyInfo').style.display = 'block';
+            openModal();
+        }
+        function closeModal() { 
+            document.getElementById('modal').style.display = 'none'; 
+            currentReplyId = null;
+            document.getElementById('replyInfo').style.display = 'none';
+            document.getElementById('postText').value = '';
+        }
+        function updateFileName() { document.getElementById('fileName').innerText = document.getElementById('fileInput').files[0]?.name || ""; }
 
         async function sendPost() {
             const text = document.getElementById('postText').value;
@@ -195,23 +200,21 @@
 
             let imageUrl = null;
             if (file) {
-                file = await compressImage(file);
                 const name = `${Date.now()}.jpg`;
-                const { data } = await supabaseClient.storage.from('images').upload(name, file);
-                if (data) imageUrl = supabaseClient.storage.from('images').getPublicUrl(name).data.publicUrl;
+                await supabaseClient.storage.from('images').upload(name, file);
+                imageUrl = supabaseClient.storage.from('images').getPublicUrl(name).data.publicUrl;
             }
 
             await supabaseClient.from('posts').insert([{ 
-                username: tg.initDataUnsafe?.user?.username || "Guest", 
-                content: text, user_id: currentUserId, image_url: imageUrl,
-                parent_id: currentReplyId, reply_to_username: currentReplyUsername,
-                link_title: lTitle
+                username: currentUsername, content: text, 
+                user_id: currentUserId, image_url: imageUrl,
+                parent_id: currentReplyId, link_title: lTitle
             }]);
 
-            btn.disabled = false;
-            closeModal();
-            loadEchos();
+            btn.disabled = false; closeModal(); loadEchos();
         }
+
+        async function deletePost(id) { if(confirm('Удалить?')) { await supabaseClient.from('posts').delete().eq('id', id); loadEchos(); } }
 
         loadEchos();
     </script>
