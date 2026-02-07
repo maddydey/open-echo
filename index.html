@@ -3,368 +3,155 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>OpenEcho TG Style</title>
+<title>OpenEcho Base</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-/* --- ТЕМА TELEGRAM DARK --- */
 :root {
-    --tg-bg: #18181a;          /* Основной фон (глубокий черный) */
-    --tg-card: #262628;        /* Фон карточек (чуть светлее) */
-    --tg-blue: #50a8eb;        /* Фирменный синий */
-    --tg-text: #ffffff;        /* Белый текст */
-    --tg-hint: #8e8e93;        /* Серый текст для подсказок */
-    --tg-border: rgba(255,255,255,0.08); /* Тонкие разделители */
-    --tg-radius: 22px;         /* Радиус скругления */
+  --bg: #000000;
+  --card-bg: #1c1c1e;
+  --accent: #0a84ff;
+  --text: #ffffff;
+  --text-dim: #8e8e93;
+  --border: rgba(255, 255, 255, 0.1);
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background: var(--tg-bg); color: var(--tg-text);
-    padding: 16px; padding-bottom: 100px;
-    overflow-x: hidden;
+* {box-sizing: border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent;}
+body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 15px; padding-bottom: 100px; }
+
+#feed { display: flex; flex-direction: column; gap: 16px; }
+
+/* БАЗОВАЯ КАРТОЧКА */
+.card {
+  background: var(--card-bg); border-radius: 20px; padding: 16px; 
+  border: 1px solid var(--border);
 }
 
-/* --- ЛЕНТА И АНИМАЦИИ --- */
-#feed { display: flex; flex-direction: column; gap: 24px; }
+/* ФОТО */
+.post-img { width: calc(100% + 32px); margin: -16px -16px 12px -16px; border-radius: 20px 20px 0 0; max-height: 300px; object-fit: cover; }
 
-/* Базовая анимация появления */
-@keyframes slideUpFade {
-    from { opacity: 0; transform: translateY(30px) scale(0.98); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-}
-.animate-in { animation: slideUpFade 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; }
-
-/* --- КАРТОЧКИ ПОСТОВ --- */
-.post-container { display: flex; flex-direction: column; }
-
-.main-post {
-    background: var(--tg-card); border-radius: var(--tg-radius);
-    padding: 18px; position: relative;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+/* ЦИТАТА ОТВЕТА (REPLY BOX) */
+.reply-box { 
+    background: rgba(255, 255, 255, 0.05); 
+    border-left: 3px solid var(--accent); 
+    padding: 10px; border-radius: 12px; 
+    margin-bottom: 12px; font-size: 13px; 
 }
 
-/* Шапка поста (Аватар + Имя) */
-.post-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-.avatar {
-    width: 42px; height: 42px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--tg-blue), #7b61ff);
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 18px; color: white; text-transform: uppercase;
+/* ССЫЛКИ (RICH PREVIEW) */
+.link-preview {
+    margin-top: 12px; background: rgba(10, 132, 255, 0.1); 
+    border-radius: 14px; padding: 10px; display: flex; align-items: center; gap: 10px;
+    text-decoration: none; color: inherit; border: 1px solid rgba(10, 132, 255, 0.2);
 }
-.username { font-weight: 600; font-size: 16px; color: var(--tg-text); }
-.username span { color: var(--tg-blue); margin-left: 6px; font-size: 14px; } /* Метка PRIVATE */
+.link-logo { width: 30px; height: 30px; background: #fff; border-radius: 6px; padding: 2px; }
 
-/* Контент */
-.post-text { font-size: 16px; line-height: 1.5; color: #e4e4e4; white-space: pre-wrap; }
-.post-img { 
-    width: calc(100% + 36px); margin: -18px -18px 16px -18px; 
-    border-radius: var(--tg-radius) var(--tg-radius) 0 0; 
-    max-height: 350px; object-fit: cover; display: block;
-}
+.author { color: var(--accent); font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+.text { font-size: 15px; line-height: 1.4; }
 
-/* Кнопки действий */
-.post-actions { 
-    display: flex; gap: 20px; margin-top: 16px; padding-top: 16px; 
-    border-top: 1px solid var(--tg-border); font-size: 14px; font-weight: 600; 
-}
-.action-btn { color: var(--tg-blue); cursor: pointer; transition: transform 0.1s; display: flex; align-items: center; gap: 6px;}
-.action-btn:active { transform: scale(0.95); opacity: 0.8; } /* Эффект пружины */
+.add-btn { position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; background: var(--accent); border-radius: 50%; border: none; color: white; font-size: 32px; z-index: 100; }
 
-/* --- ВЕТКА ОТВЕТОВ (THREADS) --- */
-.replies-thread {
-    margin-top: 12px;
-    margin-left: 24px; /* Отступ слева */
-    padding-left: 16px;
-    border-left: 2px solid var(--tg-border); /* Линия связи */
-    display: flex; flex-direction: column; gap: 12px;
-}
-
-.reply-post {
-    background: var(--tg-card); border-radius: 18px; padding: 14px;
-    position: relative;
-}
-/* Маленькая горизонтальная линия к ответу */
-.reply-post::before {
-    content: ''; position: absolute; left: -18px; top: 24px;
-    width: 16px; height: 2px; background: var(--tg-border);
-}
-.reply-post .avatar { width: 34px; height: 34px; font-size: 14px; }
-.reply-post .username { font-size: 14px; }
-.reply-post .post-text { font-size: 14px; }
-.reply-post .post-img { width: calc(100% + 28px); margin: -14px -14px 12px -14px; border-radius: 18px 18px 0 0; max-height: 200px;}
-
-
-/* --- ПЛАВАЮЩАЯ КНОПКА (FAB) --- */
-.fab {
-    position: fixed; bottom: 30px; right: 24px;
-    width: 64px; height: 64px; border-radius: 50%;
-    background: var(--tg-blue); color: white;
-    border: none; font-size: 32px; display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 8px 20px rgba(80, 168, 235, 0.4);
-    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); /* Пружина */
-    z-index: 100;
-}
-.fab:active { transform: scale(0.9) rotate(10deg); }
-
-/* --- МОДАЛЬНОЕ ОКНО (ШТОРКА) --- */
-.modal-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.7); z-index: 1000;
-    opacity: 0; pointer-events: none; transition: opacity 0.3s;
-    display: flex; align-items: flex-end; /* Выезжает снизу */
-}
-.modal-overlay.active { opacity: 1; pointer-events: auto; }
-
-.modal-sheet {
-    background: var(--tg-card); width: 100%;
-    border-radius: 28px 28px 0 0; padding: 24px;
-    transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-.modal-overlay.active .modal-sheet { transform: translateY(0); }
-
-.sheet-header { font-weight: 700; font-size: 20px; margin-bottom: 16px; text-align: center; }
-
-/* Область ответа */
-#replyContext {
-    background: rgba(80, 168, 235, 0.1); border-left: 4px solid var(--tg-blue);
-    padding: 10px 14px; border-radius: 12px; margin-bottom: 16px; display: none;
-}
-.reply-to-user { color: var(--tg-blue); font-weight: 700; font-size: 13px; margin-bottom: 4px; }
-.reply-to-text { color: var(--tg-hint); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-textarea {
-    width: 100%; background: var(--tg-bg); border: none; border-radius: 16px;
-    padding: 14px; color: var(--tg-text); font-size: 16px; resize: none; min-height: 120px; outline: none;
-}
-.input-row { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; }
-.attach-btn { color: var(--tg-blue); font-weight: 600; font-size: 15px; background: none; border: none; padding: 8px; }
-.send-btn {
-    background: var(--tg-blue); color: white; border: none;
-    padding: 12px 28px; border-radius: 16px; font-weight: 700; font-size: 16px;
-    transition: transform 0.1s;
-}
-.send-btn:active { transform: scale(0.96); }
-
-/* Превью фото */
-#mediaPreview { display: none; margin: 10px 0; position: relative; width: 80px; height: 80px; }
-#previewImg { width: 100%; height: 100%; object-fit: cover; border-radius: 16px; }
-.close-media { position: absolute; top: -8px; right: -8px; background: #ff3b30; color: white; border-radius: 50%; width: 24px; height: 24px; text-align: center; line-height: 24px; font-weight: bold; }
+/* МОДАЛКА */
+.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+.modal-content { background: #2c2c2e; width: 100%; max-width: 400px; border-radius: 20px; padding: 20px; }
+textarea { width: 100%; background: none; border: none; color: white; font-size: 17px; outline: none; resize: none; min-height: 100px; }
 </style>
 </head>
 <body>
 
-    <div id="feed"></div>
+<div id="feed"></div>
+<button class="add-btn" onclick="openModal()">+</button>
 
-    <button class="fab" onclick="openSheet()">＋</button>
-
-    <div class="modal-overlay" id="modalOverlay" onclick="if(event.target==this) closeSheet()">
-        <div class="modal-sheet">
-            <div class="sheet-header">Новое сообщение</div>
-            
-            <div id="replyContext">
-                <div class="reply-to-user" id="replyAuthor"></div>
-                <div class="reply-to-text" id="replyText"></div>
-            </div>
-            
-            <div id="mediaPreview">
-                <img id="previewImg">
-                <div class="close-media" onclick="clearFile()">✕</div>
-            </div>
-
-            <textarea id="postText" placeholder="Напишите что-нибудь..."></textarea>
-            
-            <div class="input-row">
-                <button class="attach-btn action-btn" onclick="document.getElementById('fileInput').click()">📷 Фото</button>
-                <input type="file" id="fileInput" hidden accept="image/*" onchange="handleFile()">
-                <button class="send-btn" id="sendBtn" onclick="sendPost()">Отправить</button>
-            </div>
+<div id="modal" class="modal" onclick="if(event.target==this) closeModal()">
+    <div class="modal-content">
+        <div id="replyTag" style="display:none; color:var(--accent); font-size:12px; margin-bottom:10px; font-weight:bold;">ОТВЕТ @USER</div>
+        <textarea id="txt" placeholder="Что нового?"></textarea>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;">
+            <button onclick="document.getElementById('fileInput').click()" style="background:none; border:none; color:var(--accent); font-weight:bold;">📷 ФОТО</button>
+            <input type="file" id="fileInput" hidden onchange="handleFile()">
+            <button onclick="send()" style="background:var(--accent); color:white; border:none; padding:10px 20px; border-radius:12px; font-weight:bold;">ОТПРАВИТЬ</button>
         </div>
     </div>
+</div>
 
 <script>
-// --- ИНИЦИАЛИЗАЦИЯ ---
 const tg = window.Telegram.WebApp;
-tg.expand();
-// Настраиваем цвета под тему Telegram (по желанию можно включить)
-// tg.setHeaderColor(tg.themeParams.bg_color || '#18181a');
-// tg.setBackgroundColor(tg.themeParams.bg_color || '#18181a');
-
 const SUPABASE_URL = 'https://xddulhzvzemmrhrsjfhb.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_2FIKYuEHEQrYseRnwY58Qg__UIFN59j';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Данные пользователя (заглушка для теста в браузере)
-const myUser = tg.initDataUnsafe?.user || { id: 'test_id', username: 'Tester', first_name: 'Test' };
-const myUsername = myUser.username || myUser.first_name || 'Anon';
-const myId = myUser.id.toString();
+const myUser = tg.initDataUnsafe?.user?.username || 'Guest';
+let replyId = null;
 
-let currentReplyId = null;
-
-// --- ФУНКЦИИ ИНТЕРФЕЙСА ---
-function openSheet(replyToId = null, author = null, text = null) {
-    if (replyToId) {
-        currentReplyId = replyToId;
-        document.getElementById('replyAuthor').textContent = 'Ответ для @' + author;
-        document.getElementById('replyText').textContent = text;
-        document.getElementById('replyContext').style.display = 'block';
-        document.querySelector('.sheet-header').textContent = 'Ответ на пост';
-    } else {
-        document.querySelector('.sheet-header').textContent = 'Новое сообщение';
-    }
-    document.getElementById('modalOverlay').classList.add('active');
-    // Вибрация при открытии (если поддерживается)
-    if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+function getRichLink(text) {
+    const match = text.match(/(https?:\/\/[^\s]+)/g);
+    if (!match) return { clean: text, html: '' };
+    const url = match[0];
+    const host = new URL(url).hostname;
+    const html = `<a href="${url}" target="_blank" class="link-preview">
+        <img src="https://www.google.com/s2/favicons?domain=${host}" class="link-logo">
+        <div style="font-size:13px; font-weight:600;">${host.toUpperCase()}</div>
+    </a>`;
+    return { clean: text.replace(url, ''), html };
 }
 
-function closeSheet() {
-    document.getElementById('modalOverlay').classList.remove('active');
-    setTimeout(() => {
-        currentReplyId = null;
-        document.getElementById('replyContext').style.display = 'none';
-        document.getElementById('postText').value = '';
-        clearFile();
-    }, 300);
-}
-
-function handleFile() {
-    const file = document.getElementById('fileInput').files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            document.getElementById('previewImg').src = e.target.result;
-            document.getElementById('mediaPreview').style.display = 'block';
-        };
-        reader.readAsDataURL(file);
-    }
-}
-
-function clearFile() {
-    document.getElementById('fileInput').value = '';
-    document.getElementById('mediaPreview').style.display = 'none';
-}
-
-// --- РЕНДЕРИНГ ЛЕНТЫ ---
-function renderPostHTML(post, isReply = false) {
-    const avatarLetter = (post.username || '?')[0].toUpperCase();
-    const replyAttr = isReply ? '' : `onclick="openSheet('${post.id}', '${post.username}', '${(post.content||'').replace(/'/g, "\\'").substring(0,40)}...')"`;
-    
-    return `
-    <div class="${isReply ? 'reply-post' : 'main-post'} animate-in">
-        ${post.image_url ? `<img src="${post.image_url}" class="post-img" loading="lazy">` : ''}
-        <div class="post-header">
-            <div class="avatar">${avatarLetter}</div>
-            <div class="username">@${post.username} ${post.target_username ? '<span>🔒</span>' : ''}</div>
-        </div>
-        <div class="post-text">${post.content || ''}</div>
-        ${!isReply ? `
-        <div class="post-actions">
-            <div class="action-btn" ${replyAttr}>↩ Ответить</div>
-             ${post.user_id === myId ? `<div class="action-btn" style="color:#ff3b30" onclick="deletePost('${post.id}')">🗑 Удалить</div>` : ''}
-        </div>` : ''}
-    </div>`;
-}
-
-async function loadFeed() {
+async function load() {
+    const { data } = await db.from('posts').select('*').order('created_at', { ascending: false });
     const feed = document.getElementById('feed');
-    // Не очищаем feed полностью, чтобы не мигало при обновлениях, лучше использовать умный diff, но для простоты пока так.
-    
-    const { data: posts, error } = await db.from('posts').select('*').order('created_at', { ascending: false });
-    if (error || !posts) return;
-
     feed.innerHTML = '';
 
-    const mainPosts = posts.filter(p => !p.parent_id);
-    const repliesMap = new Map();
-    posts.filter(p => p.parent_id).forEach(r => {
-        if (!repliesMap.has(r.parent_id)) repliesMap.set(r.parent_id, []);
-        repliesMap.get(r.parent_id).push(r);
-    });
-
-    let delayTime = 0;
-
-    mainPosts.forEach((post) => {
-        const container = document.createElement('div');
-        container.className = 'post-container';
-        
-        // Основной пост
-        let html = renderPostHTML(post, false);
-        
-        // Ответы
-        const postReplies = repliesMap.get(post.id);
-        if (postReplies && postReplies.length > 0) {
-            html += '<div class="replies-thread">';
-            // Сортируем ответы от старых к новым, чтобы читать хронологически
-            postReplies.sort((a,b) => new Date(a.created_at) - new Date(b.created_at))
-                .forEach(reply => {
-                html += renderPostHTML(reply, true);
-            });
-            html += '</div>';
+    data.forEach(post => {
+        const { clean, html } = getRichLink(post.content || '');
+        let replyHtml = '';
+        if (post.parent_id) {
+            const parent = data.find(p => p.id === post.parent_id);
+            if (parent) replyHtml = `<div class="reply-box"><b>@${parent.username}</b>: ${parent.content?.substring(0,30)}...</div>`;
         }
 
-        container.innerHTML = html;
-        feed.appendChild(container);
-
-        // Каскадная анимация появления
-        const animatedElements = container.querySelectorAll('.animate-in');
-        animatedElements.forEach(el => {
-            el.style.animationDelay = `${delayTime}ms`;
-            delayTime += 80; // Задержка для следующего элемента
-        });
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+            ${post.image_url ? `<img src="${post.image_url}" class="post-img">` : ''}
+            <div class="author">@${post.username}</div>
+            ${replyHtml}
+            <div class="text">${clean}</div>
+            ${html}
+            <div style="margin-top:12px; color:var(--accent); font-size:13px; font-weight:bold; cursor:pointer;" onclick="setupReply('${post.id}', '${post.username}')">ОТВЕТИТЬ</div>
+        `;
+        feed.appendChild(card);
     });
 }
 
-// --- ОТПРАВКА ДАННЫХ ---
-async function sendPost() {
-    const txt = document.getElementById('postText').value.trim();
+function openModal() { document.getElementById('modal').style.display = 'flex'; }
+function closeModal() { document.getElementById('modal').style.display = 'none'; replyId = null; document.getElementById('replyTag').style.display = 'none'; document.getElementById('txt').value = ''; }
+
+function setupReply(id, user) {
+    replyId = id;
+    document.getElementById('replyTag').innerText = 'ОТВЕТ @' + user.toUpperCase();
+    document.getElementById('replyTag').style.display = 'block';
+    openModal();
+}
+
+async function send() {
+    const txt = document.getElementById('txt').value.trim();
     const file = document.getElementById('fileInput').files[0];
     if (!txt && !file) return;
 
-    const btn = document.getElementById('sendBtn');
-    const originalText = btn.innerText;
-    btn.disabled = true; btn.innerText = 'Отправка...';
-
-    let imageUrl = null;
+    let img = null;
     if (file) {
-        const fileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9]/g, '')}`;
-        const { error: upErr } = await db.storage.from('images').upload(fileName, file);
-        if (!upErr) {
-            imageUrl = db.storage.from('images').getPublicUrl(fileName).data.publicUrl;
-        }
+        const n = `${Date.now()}.jpg`;
+        await db.storage.from('images').upload(n, file);
+        img = db.storage.from('images').getPublicUrl(n).data.publicUrl;
     }
 
-    await db.from('posts').insert([{
-        content: txt,
-        username: myUsername,
-        user_id: myId,
-        parent_id: currentReplyId,
-        image_url: imageUrl
-    }]);
-
-    closeSheet();
-    btn.disabled = false; btn.innerText = originalText;
-    // Вибрация успеха
-    if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+    await db.from('posts').insert([{ content: txt, username: myUser, parent_id: replyId, image_url: img }]);
+    closeModal(); load();
 }
 
-async function deletePost(id) {
-    if(confirm('Удалить пост?')) {
-        await db.from('posts').delete().eq('id', id);
-    }
-}
+function handleFile() { if(document.getElementById('fileInput').files[0]) alert('Фото выбрано'); }
 
-// --- ЗАПУСК ---
-loadFeed();
-// Подписка на обновления в реальном времени
-db.channel('public:posts').on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, (payload) => {
-    // Для простоты перезагружаем ленту. В идеале - добавлять/удалять конкретный элемент.
-    loadFeed();
-    // Если пришел новый пост не от меня - легкая вибрация
-    if(payload.eventType === 'INSERT' && payload.new.user_id !== myId && tg.HapticFeedback) {
-         tg.HapticFeedback.impactOccurred('light');
-    }
-}).subscribe();
+load();
+db.channel('any').on('postgres_changes', { event: '*', schema: 'public', table: 'posts' }, load).subscribe();
 </script>
 </body>
 </html>
