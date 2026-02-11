@@ -3,199 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OpenEcho Elite Fixed</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>OpenEcho Elite</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
     <style>
-        :root {
-            --bg: #0f0f10;
-            --card-bg: #1c1c1e;
-            --accent: #0a84ff;
-            --text-main: #ffffff;
-            --text-dim: #8e8e93;
-        }
-        body { background: var(--bg); color: var(--text-main); font-family: -apple-system, sans-serif; margin: 0; padding: 20px; padding-bottom: 110px; }
+        :root { --bg: #0b0b0c; --card: #1c1c1e; --accent: #0a84ff; --text: #ffffff; }
+        body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; padding: 15px; padding-bottom: 100px; }
         
         #feed { display: flex; flex-direction: column; gap: 20px; }
-        .echo-group { display: flex; flex-direction: column; }
+        .post-group { display: flex; flex-direction: column; }
 
-        .echo-card { 
-            background: var(--card-bg); border-radius: 24px; position: relative; 
-            border: 1px solid rgba(255, 255, 255, 0.08); overflow: hidden; 
-            z-index: 10; box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-            transition: 0.3s;
+        /* ГЛАВНЫЙ ПОСТ */
+        .card { 
+            background: var(--card); border-radius: 22px; padding: 16px; 
+            border: 1px solid rgba(255,255,255,0.08); position: relative; z-index: 2;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
         }
 
-        /* Стиль ответа — задвигаем под пост */
+        /* ОТВЕТ (ЗАЛЕЗАЕТ ПОД ПОСТ) */
         .reply-card { 
-            margin-left: 10%; margin-top: -15px; 
-            z-index: 5; background: #161618; border-radius: 0 0 20px 20px;
-            transform: scale(0.97); border: 1px solid rgba(255, 255, 255, 0.05);
-            border-top: none; padding-top: 20px; padding-bottom: 10px;
+            margin-left: 10%; margin-top: -15px; padding: 25px 16px 16px 16px;
+            background: #161618; border-radius: 0 0 20px 20px;
+            border: 1px solid rgba(255,255,255,0.05); border-top: none;
+            z-index: 1; transform: scale(0.98);
         }
 
-        .card-content { padding: 16px; }
-        .author-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .author-info { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
         .avatar { 
-            width: 34px; height: 34px; border-radius: 10px; 
+            width: 32px; height: 32px; border-radius: 10px; 
             background: linear-gradient(135deg, var(--accent), #5e5ce6);
             display: flex; align-items: center; justify-content: center;
-            font-weight: 800; color: white; font-size: 14px;
+            font-weight: bold; font-size: 14px;
         }
-        .author { font-weight: 700; color: var(--accent); font-size: 14px; }
-        .content { font-size: 15px; line-height: 1.4; word-break: break-word; }
-        .post-img { width: 100%; display: block; object-fit: cover; max-height: 350px; }
-        .action-btn { color: var(--accent); font-size: 12px; font-weight: 800; cursor: pointer; margin-top: 12px; display: inline-block; }
 
-        .btn-add { position: fixed; bottom: 30px; right: 24px; width: 64px; height: 64px; background: var(--accent); border-radius: 22px; font-size: 32px; color: white; border: none; z-index: 100; box-shadow: 0 10px 25px rgba(10,132,255,0.3); }
+        .username { color: var(--accent); font-weight: 700; font-size: 14px; }
+        .content { font-size: 15px; line-height: 1.4; opacity: 0.9; }
+        .btn-reply { color: var(--accent); font-size: 12px; font-weight: 800; cursor: pointer; margin-top: 10px; display: inline-block; }
 
-        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; align-items: flex-end; }
-        .modal-content { background: #1c1c1e; width: 100%; padding: 25px; border-radius: 30px 30px 0 0; box-sizing: border-box; }
-        textarea { width: 100%; background: transparent; border: none; color: white; font-size: 18px; outline: none; min-height: 120px; resize: none; }
+        .fab { position: fixed; bottom: 25px; right: 20px; width: 60px; height: 60px; background: var(--accent); border-radius: 20px; border: none; color: white; font-size: 30px; z-index: 100; box-shadow: 0 8px 20px rgba(10,132,255,0.3); }
+
+        /* МОДАЛКА */
+        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: flex-end; }
+        .modal-box { background: #1c1c1e; width: 100%; padding: 20px; border-radius: 25px 25px 0 0; }
+        textarea { width: 100%; background: transparent; border: none; color: white; font-size: 17px; outline: none; min-height: 100px; resize: none; }
+        .send-btn { background: var(--accent); color: white; border: none; padding: 12px 20px; border-radius: 12px; font-weight: bold; width: 100%; margin-top: 15px; }
     </style>
 </head>
 <body>
 
-    <h2 style="font-weight: 800; margin-bottom: 20px;">OpenEcho Elite</h2>
-    <div id="feed">Загрузка...</div>
+    <h2 style="margin-left: 5px; margin-bottom: 20px;">OpenEcho</h2>
+    <div id="feed">Загрузка данных...</div>
 
-    <button class="btn-add" onclick="openModal()">+</button>
+    <button class="fab" onclick="openModal()">+</button>
 
-    <div id="modal" onclick="if(event.target==this) closeModal()">
-        <div class="modal-content">
-            <div id="replyTo" style="display:none; color:var(--accent); font-size:12px; margin-bottom:10px; font-weight:bold;">ОТВЕТ ДЛЯ @USER</div>
-            <textarea id="postText" placeholder="Что нового?"></textarea>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
-                <button onclick="document.getElementById('fileInput').click()" style="background:none; border:none; color:var(--accent); font-weight:700;">📷 ФОТО</button>
-                <input type="file" id="fileInput" hidden>
-                <button id="submitBtn" style="background:var(--accent); color:white; padding:12px 25px; border-radius:15px; border:none; font-weight:700;" onclick="sendPost()">Опубликовать</button>
-            </div>
+    <div id="modal" onclick="if(event.target==this) closeM()">
+        <div class="modal-box">
+            <div id="replyToTxt" style="color:var(--accent); font-size:12px; margin-bottom:10px; display:none;"></div>
+            <textarea id="msg" placeholder="Что нового?"></textarea>
+            <button class="send-btn" onclick="send()">Опубликовать</button>
         </div>
     </div>
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
+<script>
+    // 1. НАСТРОЙКИ (ВСТАВЬ СВОИ)
+    const S_URL = 'ТВОЙ_URL';
+    const S_KEY = 'ТВОЙ_KEY';
 
-        // ОБЯЗАТЕЛЬНО ЗАМЕНИ ЭТИ ДАННЫЕ
-        const SUPABASE_URL = 'ТВОЙ_URL';
-        const SUPABASE_KEY = 'ТВОЙ_KEY';
+    const supabase = window.supabase.createClient(S_URL, S_KEY);
+    const tg = window.Telegram.WebApp;
+    const user = tg.initDataUnsafe?.user?.username || "Guest";
+    let replyId = null;
 
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        const myUser = tg.initDataUnsafe?.user?.username || "Guest";
-        const myId = tg.initDataUnsafe?.user?.id?.toString() || "0";
+    // 2. ЗАГРУЗКА
+    async function load() {
+        try {
+            const { data, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false });
+            if (error) throw error;
 
-        let currentReplyId = null;
+            const feed = document.getElementById('feed');
+            feed.innerHTML = '';
 
-        async function loadEchos() {
-            try {
-                const { data, error } = await supabaseClient.from('posts').select('*').order('created_at', { ascending: false });
+            if (!data || data.length === 0) {
+                feed.innerHTML = "<center style='opacity:0.5'>Тут пока пусто</center>";
+                return;
+            }
+
+            const mainPosts = data.filter(p => !p.parent_id);
+            const replies = data.filter(p => p.parent_id);
+
+            mainPosts.forEach(post => {
+                const group = document.createElement('div');
+                group.className = 'post-group';
                 
-                if (error) {
-                    console.error(error);
-                    document.getElementById('feed').innerHTML = `<div style="color:red; padding:20px;">Ошибка Supabase: ${error.message}</div>`;
-                    return;
-                }
+                // Рендер главного поста
+                group.innerHTML = renderPost(post, false);
 
-                const feed = document.getElementById('feed');
-                feed.innerHTML = '';
-
-                if (!data || data.length === 0) {
-                    feed.innerHTML = '<div style="text-align:center; color:gray; padding:40px;">Лента пуста. Стань первым!</div>';
-                    return;
-                }
-
-                // Логика группировки: сначала основные посты (без parent_id)
-                const mainPosts = data.filter(p => !p.parent_id);
-                const replies = data.filter(p => p.parent_id);
-
-                mainPosts.forEach(post => {
-                    const group = document.createElement('div');
-                    group.className = 'echo-group';
-                    
-                    // Добавляем карточку основного поста
-                    group.innerHTML = renderCardHTML(post, false);
-                    
-                    // Находим и добавляем ответы под него
-                    const postReplies = replies.filter(r => r.parent_id === post.id).reverse();
-                    postReplies.forEach(reply => {
-                        group.innerHTML += renderCardHTML(reply, true);
-                    });
-
-                    feed.appendChild(group);
+                // Рендер ответов (залезающих под него)
+                const postReplies = replies.filter(r => r.parent_id === post.id).reverse();
+                postReplies.forEach(r => {
+                    group.innerHTML += renderPost(r, true);
                 });
-            } catch (err) {
-                document.getElementById('feed').innerHTML = `<div style="color:red; padding:20px;">Ошибка JS: ${err.message}</div>`;
-            }
+
+                feed.appendChild(group);
+            });
+        } catch (e) {
+            document.getElementById('feed').innerHTML = `<div style="color:red">Ошибка: ${e.message}</div>`;
         }
+    }
 
-        function renderCardHTML(post, isReply) {
-            const letter = (post.username || "G")[0].toUpperCase();
-            return `
-                <div class="echo-card ${isReply ? 'reply-card' : ''}">
-                    ${post.image_url ? `<img src="${post.image_url}" class="post-img">` : ''}
-                    <div class="card-content">
-                        <div class="author-row">
-                            <div class="avatar" style="${isReply ? 'width:28px; height:28px; font-size:12px;' : ''}">${letter}</div>
-                            <div class="author">@${post.username || 'anon'}</div>
-                        </div>
-                        <div class="content">${post.content || ''}</div>
-                        ${!isReply ? `<div class="action-btn" onclick="openReply('${post.id}', '${post.username}')">💬 Ответить</div>` : ''}
-                    </div>
-                </div>`;
-        }
+    function renderPost(p, isReply) {
+        const letter = (p.username || "G")[0].toUpperCase();
+        return `
+            <div class="${isReply ? 'reply-card' : 'card'}">
+                <div class="author-info">
+                    <div class="avatar" style="${isReply ? 'width:24px; height:24px; font-size:11px' : ''}">${letter}</div>
+                    <div class="username">@${p.username}</div>
+                </div>
+                <div class="content">${p.content}</div>
+                ${!isReply ? `<div class="btn-reply" onclick="setupReply('${p.id}', '${p.username}')">ОТВЕТИТЬ</div>` : ''}
+            </div>`;
+    }
 
-        function openModal() { document.getElementById('modal').style.display = 'flex'; }
-        function closeModal() { 
-            document.getElementById('modal').style.display = 'none'; 
-            currentReplyId = null; 
-            document.getElementById('replyTo').style.display = 'none';
-            document.getElementById('postText').value = '';
-        }
+    // 3. ФУНКЦИИ
+    function openModal() { document.getElementById('modal').style.display = 'flex'; }
+    function closeM() { 
+        document.getElementById('modal').style.display = 'none'; 
+        replyId = null; 
+        document.getElementById('msg').value = '';
+        document.getElementById('replyToTxt').style.display = 'none';
+    }
 
-        function openReply(id, user) {
-            currentReplyId = id;
-            document.getElementById('replyTo').innerText = 'ОТВЕТ ДЛЯ @' + user.toUpperCase();
-            document.getElementById('replyTo').style.display = 'block';
-            openModal();
-        }
+    function setupReply(id, name) {
+        replyId = id;
+        document.getElementById('replyToTxt').innerText = 'ОТВЕТ ДЛЯ @' + name.toUpperCase();
+        document.getElementById('replyToTxt').style.display = 'block';
+        openModal();
+    }
 
-        async function sendPost() {
-            const text = document.getElementById('postText').value.trim();
-            const file = document.getElementById('fileInput').files[0];
-            if (!text && !file) return;
+    async function send() {
+        const text = document.getElementById('msg').value.trim();
+        if (!text) return;
 
-            const btn = document.getElementById('submitBtn');
-            btn.disabled = true;
+        const { error } = await supabase.from('posts').insert([{
+            content: text,
+            username: user,
+            parent_id: replyId
+        }]);
 
-            try {
-                let imageUrl = null;
-                if (file) {
-                    const name = `${Date.now()}.jpg`;
-                    const { data: upData, error: upErr } = await supabaseClient.storage.from('images').upload(name, file);
-                    if (upErr) throw upErr;
-                    imageUrl = supabaseClient.storage.from('images').getPublicUrl(name).data.publicUrl;
-                }
+        if (error) alert(error.message);
+        else { closeM(); load(); }
+    }
 
-                const { error: insErr } = await supabaseClient.from('posts').insert([{ 
-                    username: myUser, 
-                    content: text, 
-                    user_id: myId,
-                    parent_id: currentReplyId
-                }]);
-                if (insErr) throw insErr;
-
-                closeModal();
-                loadEchos();
-            } catch (err) {
-                alert("Ошибка: " + err.message);
-            } finally {
-                btn.disabled = false;
-            }
-        }
-
-        // Запуск
-        loadEchos();
-    </script>
+    load();
+</script>
 </body>
 </html>
